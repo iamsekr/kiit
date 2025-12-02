@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lesson Plan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --primary: #0052cc;
+      --primary-light: #e6f0ff;
+      --bg: #f7f7fb;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --shadow-soft: 0 14px 35px rgba(15, 23, 42, 0.14);
+
+      /* TWO module colors only */
+      --module-color-a: #2563eb;  /* blue */
+      --module-color-b: #16a34a;  /* green */
+
+      --special-bg: #ecfeff;
+      --special-border: #0d9488;
+      --exam-bg: #fef2f2;
+      --exam-border: #b91c1c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 16px;
+    }
+
+    .page { max-width: 900px; margin: 0 auto; }
+
+    /* ===== HEADER ===== */
+
+    .header-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 18px 14px;
+      margin-bottom: 14px;
+      border-top: 5px solid var(--primary);
+    }
+
+    .institution {
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .school-line {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .course-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .course-meta {
+      font-size: 0.86rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+    }
+
+    .badge {
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* ===== SUMMARY ===== */
+
+    .summary-bar {
+      margin-bottom: 10px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .summary-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+    }
+
+    /* ===== LESSON LIST ===== */
+
+    .card {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 10px 10px 6px;
+    }
+
+    .card-title {
+      font-weight: 650;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .header-row {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      gap: 6px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .lesson-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    .lesson-row {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: center;
+      background: #ffffff;   /* no banding */
+    }
+
+    .lesson-index {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .lesson-module {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .module-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    /* only TWO base color classes */
+    .module-a { background: var(--module-color-a); }
+    .module-b { background: var(--module-color-b); }
+
+    .special-tag {
+      background: var(--special-bg);
+      color: var(--special-border);
+      border: 1px solid var(--special-border);
+    }
+
+    .lesson-notes {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .lesson-date {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .lesson-row.special {
+      border-color: var(--special-border);
+      background: var(--special-bg);
+    }
+
+    .lesson-row.exam {
+      border-color: var(--exam-border);
+      background: var(--exam-bg);
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+    }
+
+    .exam-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .exam-range {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .exam-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: #fee2e2;
+      color: var(--exam-border);
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    @media (max-width: 600px) {
+      .header-row { font-size: 0.7rem; }
+      .lesson-row { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- HEADER -->
+    <header class="header-card">
+      <div class="institution" id="instName"></div>
+      <div class="school-line" id="schoolLine"></div>
+      <div class="course-title" id="courseTitle"></div>
+      <div class="course-meta">
+        <span class="badge" id="courseCode"></span>
+        <span class="badge" id="semester"></span>
+        <span class="badge" id="faculty"></span>
+        <span class="pill" id="planLabel"></span>
+      </div>
+    </header>
+
+    <!-- SUMMARY -->
+    <section class="summary-bar" id="summaryBar"></section>
+
+    <!-- LESSONS -->
+    <main class="card">
+      <div class="card-title">Lesson Plan (Schedule View)</div>
+      <div class="header-row">
+        <div>#</div>
+        <div>Module / Notes</div>
+        <div style="text-align:right;">Date</div>
+      </div>
+      <ul class="lesson-list" id="lessonList"></ul>
+    </main>
+
+    <div class="footer-note">
+      Contact the concerned faculty for further clarifications.
+    </div>
+  </div>
+
+  <script>
+    /* ========== 1. CONFIG – EDIT THIS BLOCK ONLY ========== */
+
+    const config = {
+      instituteName: "Kalinga Institute of Industrial Technology, Bhubaneswar",
+      schoolLine: "(Deemed to be University)",
+      courseTitle: "Basic Electrical Engineering",
+      courseCode: "EE10002",
+      semester: "Spring Sem 2025–2026",
+      faculty: "Prof.Thotakura NSC Sekhar",
+      planLabel: "Lesson Plan",
+
+      holidays: [
+        // DD-MM-YYYY
+        "26-12-2025",
+        "09-01-2026"
+      ],
+
+      // All these dates are in DD-MM-YYYY
+      startDate: "03-12-2025",
+      classDays: ["Thu", "Fri"], // "Mon","Tue","Wed","Thu","Fri","Sat","Sun"
+
+      midSem: {
+        title: "Mid Semester Examination",
+        start: "02-02-2026",
+        end:   "07-02-2026"
+      },
+      endSem: {
+        title: "End Semester Examination",
+        start: "13-04-2026",
+        end:   "20-04-2026"
+      },
+
+
+      // Module display names (order here defines A/B/A/B coloring)
+      modules: {
+        M1: "M1 – DC Circuits",
+        M2: "M2 – AC Circuits",
+        M3: "M3 – Electromagnetic Circuits",
+        M4: "M4 – Scope & Safety"
+      },
+
+      // type: "class" | "special" | "exam_mid" | "exam_end"
+      lessons: [
+        {
+          type: "special",
+          label: "Introduction to Course"
+        },
+        {
+          type: "class",
+          module: "M1",
+          notes: "Basic terminology: circuit, network, active/passive, linear/nonlinear, bilateral/unilateral, sources."
+        },
+        {
+          type: "class",
+          module: "M1",
+          notes: "Series/parallel combinations, current & voltage division"
+        },
+        {
+          type: "class",
+          module: "M1",
+          notes: "KCL & KVL with numericals."
+        },
+        {
+          type: "class",
+          module: "M1",
+          notes: "Source transformation with basic numerical problems."
+        },
+        {
+          type: "class",
+          module: "M1",
+          notes: "Star–Delta transformation with numericals. (Derivation of star-delta transformation is not required)"
+        },
+
+        {
+          type: "special",
+          label: "Doubt Clearing Session"
+        },
+
+        {
+          type: "class",
+          module: "M1",
+          notes: "Mesh analysis with independent voltage source (no super-mesh), numericals."
+        },
+        {
+          type: "class",
+          module: "M1",
+          notes: "Nodal analysis with independent sources (no super-node), numericals."
+        },
+        {
+          type: "class",
+          module: "M2",
+          notes: "AC Basics: Amplitude, Time Period, Frequency, Phase, Phase difference; average value (full & half cycle Derivations)."
+        },
+        {
+          type: "class",
+          module: "M2",
+          notes: "RMS value (Derivations), form factor & peak factor."
+        },
+        {
+          type: "class",
+          module: "M2",
+          notes: "Problems on AC fundamentals."
+        },
+
+        {
+          type: "special",
+          label: "Doubt Clearing Session"
+        },
+        {
+          type: "special",
+          label: "Discussion of previous year mid-sem questions"
+        },
+
+        { type: "exam_mid" },
+
+        {
+          type: "class",
+          module: "M2",
+          notes: "Phasor representation of AC, Phasor Algebra both Polar & Rectangular."
+        },
+        {
+          type: "class",
+          module: "M2",
+          notes: "AC through R, L, C Circuit Analysis"
+        },
+        {
+          type: "class",
+          module: "M2",
+          notes: "Probs on AC through R, L, C Circuit"
+        },
+        {
+          type: "class",
+          module: "M2",
+          notes: "AC Series RL, RC, RLC circuit Analysis"
+        },
+        {
+          type: "class",
+          module: "M2",
+          notes: "Probs on AC Series RL, RC, RLC circuit Analysis"
+        },
+        {
+          type: "class",
+          module: "M2",
+          notes: "3-Phase AC System(Star-Delta), 3-Phase Power equations & Probs"
+        },
+        {
+          type: "class",
+          module: "M2",
+          notes: "Single-phase vs three-phase systems"
+        },
+        {
+          type: "special",
+          label: "Doubt Session & Revision"
+        },
+        {
+          type: "class",
+          module: "M3",
+          notes: "Basic terminology, Analogy between Electric and Magnetic Circuits."
+        },
+        {
+          type: "class",
+          module: "M3",
+          notes: "Analysis of Series Magnetic circuits with Probs."
+        },
+        {
+          type: "class",
+          module: "M3",
+          notes: "B–H curve and hysteresis loop concepts."
+        },
+        {
+          type: "class",
+          module: "M4",
+          notes: "Indian Electricity till date, 1-ph transformer principle & applications"
+        },
+        {
+          type: "class",
+          module: "M4",
+          notes: "3-ph, 1-ph Induction motor principle & applications"
+        },
+        {
+          type: "class",
+          module: "M4",
+          notes: "Power ratings of air conditioners, PCs, laptops, printers, refrigerator, washing machine, different lamps, electricity tariff, calculation of electricity bill for domestic consumers (with numerical problems). "
+        },
+        {
+          type: "class",
+          module: "M4",
+          notes: "Personal safety measures: Electric Shock, Earthing and its types, Safety Precautions to avoid shock. ."
+        },
+        {
+          type: "class",
+          module: "M4",
+          notes: "Equipment Safety measures: Working principle of Fuse and Miniature circuit breaker (MCB), Residual Current Circuit Breaker (RCCB)"
+        },
+
+        {
+          type: "special",
+          label: "Final Doubt Session & Revision"
+        },
+
+        { type: "exam_end" }
+      ]
+    };
+
+    /* ========== 2. UTILITIES ========== */
+
+    const dayMapShortToNum = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+    function parseDDMMYYYY(str) {
+      const [dd, mm, yyyy] = str.split("-");
+      const day = parseInt(dd, 10);
+      const monthIndex = parseInt(mm, 10) - 1;
+      const year = parseInt(yyyy, 10);
+      return new Date(year, monthIndex, day);
+    }
+
+    function formatDateDDMMMYYYY(date) {
+      const d = String(date.getDate()).padStart(2, "0");
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const m = months[date.getMonth()];
+      const y = date.getFullYear();
+      return `${d}-${m}-${y}`;
+    }
+
+    function inRange(d, start, end) {
+      return d.getTime() >= start.getTime() && d.getTime() <= end.getTime();
+    }
+
+    function makeHolidaySet(holidays) {
+      const set = new Set();
+      holidays.forEach(h => {
+        const d = parseDDMMYYYY(h);
+        set.add(d.toISOString().slice(0, 10));
+      });
+      return set;
+    }
+
+    /* Build module → color class map with A/B/A/B pattern */
+    function buildModuleColorMap(modulesObj) {
+      const keys = Object.keys(modulesObj);
+      const map = {};
+      keys.forEach((key, idx) => {
+        map[key] = (idx % 2 === 0) ? "module-a" : "module-b";
+      });
+      return map;
+    }
+
+    /* ========== 3. SCHEDULE GENERATION ========== */
+
+    function generateSchedule(cfg) {
+      const lessonsOut = [];
+      const startDate = parseDDMMYYYY(cfg.startDate);
+      const classDays = cfg.classDays.map(d => dayMapShortToNum[d]);
+
+      const midStart = cfg.midSem?.start ? parseDDMMYYYY(cfg.midSem.start) : null;
+      const midEnd   = cfg.midSem?.end   ? parseDDMMYYYY(cfg.midSem.end)   : null;
+      const endStart = cfg.endSem?.start ? parseDDMMYYYY(cfg.endSem.start) : null;
+      const endEnd   = cfg.endSem?.end   ? parseDDMMYYYY(cfg.endSem.end)   : null;
+
+      const holidaysSet = makeHolidaySet(cfg.holidays || []);
+
+      let currentDate = new Date(startDate);
+      let idxLesson = 0;
+      let classNumber = 0;
+      let midInserted = false;
+      let endInserted = false;
+
+      function isHoliday(date) {
+        const iso = date.toISOString().slice(0, 10);
+        return holidaysSet.has(iso);
+      }
+
+      function nextValidClassDate(date) {
+        const d = new Date(date);
+        while (true) {
+          const dayNum = d.getDay();
+          const isClassDay = classDays.includes(dayNum);
+          const insideMid = midStart && midEnd && inRange(d, midStart, midEnd);
+          const insideEnd = endStart && endEnd && inRange(d, endStart, endEnd);
+          if (isClassDay && !insideMid && !insideEnd && !isHoliday(d)) {
+            return d;
+          }
+          d.setDate(d.getDate() + 1);
+        }
+      }
+
+      while (idxLesson < cfg.lessons.length && idxLesson < 400) {
+        const base = cfg.lessons[idxLesson];
+
+        if (base.type === "exam_mid" && midStart && midEnd && !midInserted) {
+          lessonsOut.push({
+            type: "exam_mid",
+            title: cfg.midSem.title,
+            start: midStart,
+            end: midEnd
+          });
+          midInserted = true;
+          currentDate = new Date(midEnd);
+          currentDate.setDate(currentDate.getDate() + 1);
+          idxLesson++;
+          continue;
+        }
+
+        if (base.type === "exam_end" && endStart && endEnd && !endInserted) {
+          lessonsOut.push({
+            type: "exam_end",
+            title: cfg.endSem.title,
+            start: endStart,
+            end: endEnd
+          });
+          endInserted = true;
+          currentDate = new Date(endEnd);
+          currentDate.setDate(currentDate.getDate() + 1);
+          idxLesson++;
+          continue;
+        }
+
+        if (base.type === "class" || base.type === "special") {
+          const nextDate = nextValidClassDate(currentDate);
+          classNumber++;
+
+          lessonsOut.push({
+            type: base.type,
+            classNo: classNumber,
+            module: base.module || null,
+            label: base.label || null,
+            notes: base.notes || "",
+            date: nextDate
+          });
+
+          currentDate = new Date(nextDate);
+          currentDate.setDate(currentDate.getDate() + 1);
+          idxLesson++;
+          continue;
+        }
+
+        idxLesson++;
+      }
+
+      return lessonsOut;
+    }
+
+    /* ========== 4. RENDERING ========== */
+
+    function render(cfg) {
+      document.getElementById("instName").textContent = cfg.instituteName;
+      document.getElementById("schoolLine").textContent = cfg.schoolLine;
+      document.getElementById("courseTitle").textContent = cfg.courseTitle;
+      document.getElementById("courseCode").textContent = cfg.courseCode;
+      document.getElementById("semester").textContent = cfg.semester;
+      document.getElementById("faculty").textContent = cfg.faculty;
+      document.getElementById("planLabel").textContent = cfg.planLabel;
+
+      const schedule = generateSchedule(cfg);
+      const moduleColorMap = buildModuleColorMap(cfg.modules);
+
+      const totalClasses = schedule.filter(s => s.type === "class" || s.type === "special").length;
+      const specialCount = schedule.filter(s => s.type === "special").length;
+
+      const summaryBar = document.getElementById("summaryBar");
+      summaryBar.innerHTML = `
+        <span class="summary-item"><strong>${totalClasses-specialCount}</strong> Regular classes</span>
+        <span class="summary-item"><strong>${specialCount}</strong> Special classes</span>
+        <span class="summary-item">Start: <strong>${cfg.startDate}</strong></span>
+        <span class="summary-item">Days: <strong>${cfg.classDays.join(", ")}</strong></span>
+      `;
+
+      const list = document.getElementById("lessonList");
+      list.innerHTML = "";
+
+      schedule.forEach(item => {
+        const li = document.createElement("li");
+        li.classList.add("lesson-row");
+
+        const colIndex = document.createElement("div");
+        colIndex.className = "lesson-index";
+
+        const colModule = document.createElement("div");
+        colModule.className = "lesson-module";
+
+        const colDate = document.createElement("div");
+        colDate.className = "lesson-date";
+
+        if (item.type === "exam_mid" || item.type === "exam_end") {
+          li.classList.add("exam");
+          colIndex.textContent = "—";
+
+          const title = document.createElement("div");
+          title.className = "exam-title";
+          title.textContent = item.title;
+
+          const range = document.createElement("div");
+          range.className = "exam-range";
+          range.textContent = `${formatDateDDMMMYYYY(item.start)} – ${formatDateDDMMMYYYY(item.end)}`;
+
+          colModule.appendChild(title);
+          colModule.appendChild(range);
+
+          const badge = document.createElement("span");
+          badge.className = "exam-badge";
+          badge.textContent = "EXAM";
+          colDate.appendChild(badge);
+
+          li.appendChild(colIndex);
+          li.appendChild(colModule);
+          li.appendChild(colDate);
+          list.appendChild(li);
+          return;
+        }
+
+        // class or special
+        if (item.type === "special") {
+          li.classList.add("special");
+        }
+
+        colIndex.textContent = item.classNo;
+
+        const tag = document.createElement("span");
+        tag.className = "module-tag";
+
+        if (item.module && cfg.modules[item.module]) {
+          const colorClass = moduleColorMap[item.module] || "module-a";
+          tag.classList.add(colorClass);
+          tag.textContent = cfg.modules[item.module];
+        } else {
+          tag.classList.add("special-tag");
+          tag.textContent = item.label || "Special Class";
+        }
+
+        if (item.type === "special") {
+          if (item.module && cfg.modules[item.module]) {
+            tag.textContent = `${cfg.modules[item.module]} · ${item.label || "Special"}`;
+          } else if (item.label) {
+            tag.textContent = item.label;
+          }
+        }
+
+        colModule.appendChild(tag);
+
+        if (item.notes) {
+          const notesDiv = document.createElement("div");
+          notesDiv.className = "lesson-notes";
+          notesDiv.textContent = item.notes;
+          colModule.appendChild(notesDiv);
+        }
+
+        colDate.textContent = formatDateDDMMMYYYY(item.date);
+
+        li.appendChild(colIndex);
+        li.appendChild(colModule);
+        li.appendChild(colDate);
+        list.appendChild(li);
+      });
+    }
+
+    render(config);
+  </script>
+</body>
+</html>
