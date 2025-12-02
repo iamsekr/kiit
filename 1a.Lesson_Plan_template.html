@@ -295,18 +295,17 @@
       color: var(--text);
     }
 
-    .outcomes-view h3 {
-      font-size: 1rem;
-      margin-bottom: 6px;
-      margin-top: 8px;
-    }
-
     .outcomes-view p {
       font-size: 0.9rem;
       margin-bottom: 6px;
     }
 
     .outcomes-view ul {
+      padding-left: 18px;
+      margin-bottom: 8px;
+    }
+
+    .outcomes-view ol {
       padding-left: 18px;
       margin-bottom: 8px;
     }
@@ -438,31 +437,13 @@
       <div class="course-title" id="courseTitle"></div>
 
       <div class="course-meta">
-        <!-- course code clickable -->
-        <span class="badge" id="courseCode">
-          <a
-            href="https://my.e-kard.in/tnsc"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="course-link"
-          >
-            EE10002
-          </a>
-        </span>
+        <!-- course code badge (single source: config) -->
+        <span class="badge" id="courseCode"></span>
 
         <span class="badge" id="semester"></span>
 
         <!-- faculty clickable -->
-        <span class="badge" id="faculty">
-          <a
-            href="https://my.e-kard.in/tnsc"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="faculty-link"
-          >
-            Prof.Thotakura NSC Sekhar
-          </a>
-        </span><br>
+        <span class="badge" id="faculty"></span><br>
 
         <!-- TABS -->
         <span class="pill pill-active" id="tabLessonPlan">Lesson Plan</span>
@@ -488,182 +469,45 @@
         <ul class="lesson-list" id="lessonList"></ul>
       </div>
 
-      <!-- OUTCOMES VIEW -->
+      <!-- OUTCOMES VIEW (auto-generated from config) -->
       <div id="outcomesView" class="outcomes-view">
-        <!-- <div class="card-title">Objective & Outcomes</div> -->
-
         <section class="outcomes-section">
           <div class="outcomes-section-title">Course Objective</div>
-          <p>
-            To provide a comprehensive idea about circuit analysis, working principles of electrical machines,
-            a brief idea about magnetic circuits, and to understand the basics of the protection system.
-          </p>
+          <p id="courseObjective"></p>
         </section>
 
         <section class="outcomes-section">
           <div class="outcomes-section-title">Course Outcomes (COs)</div>
           <p>Upon completion of the course, the students will be able to:</p>
-          <ul>
-            <li><span class="outcomes-highlight">CO1:</span> Analyze the concept of DC circuit.</li>
-            <li><span class="outcomes-highlight">CO2:</span> Understand the concepts of AC circuits.</li>
-            <li><span class="outcomes-highlight">CO3:</span> Analyze the three-phase AC circuit.</li>
-            <li><span class="outcomes-highlight">CO4:</span> Interpret the behavior of magnetic circuits.</li>
-            <li><span class="outcomes-highlight">CO5:</span> Remember the principles and operation of electrical machines.</li>
-            <li><span class="outcomes-highlight">CO6:</span> Know the concepts of electrical safety and protection systems.</li>
-          </ul>
+          <ul id="courseOutcomesList"></ul>
         </section>
 
         <section class="outcomes-section">
           <div class="outcomes-section-title">Programme Outcomes</div>
-          <ol>
-            <li>
-              <strong>Engineering knowledge:</strong>
-              Apply the knowledge of mathematics, science, engineering fundamentals, and an
-              engineering specialization to the solution of complex engineering problems.
-            </li>
-            <li>
-              <strong>Problem analysis:</strong>
-              Identify, formulate, review research literature, and analyze complex engineering
-              problems reaching substantiated conclusions using first principles of mathematics,
-              natural sciences, and engineering sciences.
-            </li>
-            <li>
-              <strong>Design/development of solutions:</strong>
-              Design solutions for complex engineering problems and design system components or
-              processes that meet the specified needs with appropriate consideration for the
-              public health and safety, and the cultural, societal, and environmental
-              considerations.
-            </li>
-            <li>
-              <strong>Conduct investigations of complex problems:</strong>
-              Use research-based knowledge and research methods including design of experiments,
-              analysis and interpretation of data, and synthesis of the information to provide
-              valid conclusions.
-            </li>
-            <li>
-              <strong>Modern tool usage:</strong>
-              Create, select, and apply appropriate techniques, resources, and modern engineering
-              and IT tools including prediction and modeling to complex engineering activities
-              with an understanding of the limitations.
-            </li>
-            <li>
-              <strong>The engineer and society:</strong>
-              Apply reasoning informed by the contextual knowledge to assess societal, health,
-              safety, legal and cultural issues and the consequent responsibilities relevant to
-              the professional engineering practice.
-            </li>
-            <li>
-              <strong>Environment and sustainability:</strong>
-              Understand the impact of the professional engineering solutions in societal and
-              environmental contexts, and demonstrate the knowledge of, and need for sustainable
-              development.
-            </li>
-            <li>
-              <strong>Ethics:</strong>
-              Apply ethical principles and commit to professional ethics and responsibilities and
-              norms of the engineering practice.
-            </li>
-            <li>
-              <strong>Individual and team work:</strong>
-              Function effectively as an individual, and as a member or leader in diverse teams,
-              and in multidisciplinary settings.
-            </li>
-            <li>
-              <strong>Communication:</strong>
-              Communicate effectively on complex engineering activities with the engineering
-              community and with society at large, such as, being able to comprehend and write
-              effective reports and design documentation, make effective presentations, and give
-              and receive clear instructions.
-            </li>
-            <li>
-              <strong>Project management and finance:</strong>
-              Demonstrate knowledge and understanding of the engineering and management
-              principles and apply these to one’s own work, as a member and leader in a team, to
-              manage projects and in multidisciplinary environments.
-            </li>
-            <li>
-              <strong>Life-long learning:</strong>
-              Recognize the need for, and have the preparation and ability to engage in
-              independent and life-long learning in the broadest context of technological
-              change.
-            </li>
-            <li>
-              <strong>Demonstrate knowledge and hands-on competence</strong>
-              in the area of characteristics, operations, analysis, design of Electrical
-              Machines and their applications in industry and other fields.
-            </li>
-            <li>
-              <strong>Demonstrate knowledge of analysis, design and implementation</strong>
-              of electrical circuits, electronic circuits, power electronic circuits,
-              measurements, control systems in different electrical systems.
-            </li>
-            <li>
-              <strong>Enhance the knowledge in generation, transmission, distribution,</strong>
-              protection of electric power, installation, operation and maintenance of power
-              system components with respect to competitive tariff for economic project
-              viability and climate change issues and to understand the need for renewable
-              energy systems for developing clean energy and sustainable technologies.
-            </li>
-          </ol>
+          <ol id="programmeOutcomesList"></ol>
         </section>
       </div>
 
-      <!-- SYLLABUS VIEW (demo syllabus derived from modules) -->
+      <!-- SYLLABUS VIEW (auto-generated from config) -->
       <div id="syllabusView" class="syllabus-view">
-        
         <section class="syllabus-section">
           <div class="syllabus-section-title">Course Details</div>
-          <ul>
-            <li>Credits: 2</li>
-            <li>L-T-P:   2-0-0</li>
-            <li>Pre-requisite: Nil</li>
-          </ul>
+          <ul id="courseDetailsList"></ul>
         </section>
 
         <br><div class="card-title">Syllabus</div>
-
-        <section class="syllabus-section">
-          <div class="syllabus-tag">M1 – DC Circuits</div><br>
-            Kirchhoff’s law, Source transformation, Star-delta transformation and equivalent resistance of the circuits, Mesh and Nodal analysis, Superposition theorem.
-        </section>
-
-        <section class="syllabus-section">
-          <div class="syllabus-tag">M2 – AC Circuits</div><br>
-            Peak, average, R.M.S. values of sinusoidal quantities, Peak factor, Form factor, Phase difference, Phasor representation, AC through R, L, C, AC Series Circuit (RL, RC, RLC), Three-phase AC circuits: Voltage, current and power in star and delta connections.
-        </section>
-
-        <section class="syllabus-section">
-          <div class="syllabus-tag">M3 – Electromagnetic Circuits</div><br>
-            Magnetizing Force, Reluctance, Permeance, Magnetic field, Magnetic permeability, Analogy between Electric Circuits and Magnetic Circuits. Series magnetic circuit, BH curve.
-        </section>
-
-        <section class="syllabus-section">
-          <div class="syllabus-tag">M4 – Scope & Safety</div><br>
-            Electrical Energy Scenario in India, Application of Transformer, Three-phase and single-phase induction Motors, Power ratings of air conditioners, PCs, laptops, printers, refrigerator, washing machine, different lamps, electricity tariff, calculation of electricity bill for domestic consumer.<br><br>
-
-            <strong>Personal Safety Measures:</strong> Electric Shock, Earthing and its types, Safety Precautions to avoid shock.<br><br>
-
-            <strong>Equipment Safety Measures:</strong> Working principles of fuse and miniature circuit breaker (MCB), Residual Current Circuit Breaker (RCCB).
-        </section>
+        <div id="syllabusModulesContainer"></div>
 
         <br>
         <div class="card-title">Books</div>
 
         <section class="syllabus-section">
           <div class="syllabus-section-title">Text Books</div>
-          <ul>
-            <ol>
-            <li>Principles of Electrical Engineering and Electronics- V K Mehta, Rohit Mehta, S Chand and Company, New Delhi (Revised Edition 2013).</li>
-            <li>Basic Electrical Engineering by D.C. Kulshreshtha, Tata Mcgraw publication, 1st Edition 2011.</li>
-            <li>Basic Electrical Engineering, T.K. Nagasarkar and M.S. Sukhija, Oxford University press, 3rd Edition 2017.</li>
-          </ol>
-          </ul>
+          <ul id="textBooksList"></ul>
         </section>
         <section class="syllabus-section">
           <div class="syllabus-section-title">Reference Books</div>
-          <ul>
-            <li>Basics Electrical Engineering Sanjeev Sharma, I.K.International, New Delhi (Third Reprint 2010).</li>
-          </ul>
+          <ul id="refBooksList"></ul>
         </section>
       </div>
 
@@ -718,14 +562,43 @@
     /* ========== 1. CONFIG – EDIT THIS BLOCK ONLY ========== */
 
     const config = {
+      // ===== BASIC COURSE DETAILS =====
       instituteName: "Kalinga Institute of Industrial Technology, Bhubaneswar",
       schoolLine: "(Deemed to be University)",
+      planLabel: "Lesson Plan",
+      semester: "Spring Sem 2025–2026",
+
+      faculty: "Prof.Thotakura NSC Sekhar",
+      facultylink: "https://my.e-kard.in/sekhar",
+
+
       courseTitle: "Basic Electrical Engineering",
       courseCode: "EE10002",
-      semester: "Spring Sem 2025–2026",
-      faculty: "Prof.Thotakura NSC Sekhar",
-      planLabel: "Lesson Plan",
+      courselink: "",
 
+
+      // Course meta
+      courseMeta: {
+        credits: 2,
+        ltp: "2-0-0",
+        prereq: "Nil"
+      },
+
+      // Course objective & outcomes
+      courseObjective:
+        "To provide a comprehensive idea about circuit analysis, working principles of electrical machines, " +
+        "a brief idea about magnetic circuits, and to understand the basics of the protection system.",
+
+      courseOutcomes: [
+        { id: "CO1", text: "Analyze the concept of DC circuit." },
+        { id: "CO2", text: "Understand the concepts of AC circuits." },
+        { id: "CO3", text: "Analyze the three-phase AC circuit." },
+        { id: "CO4", text: "Interpret the behavior of magnetic circuits." },
+        { id: "CO5", text: "Remember the principles and operation of electrical machines." },
+        { id: "CO6", text: "Know the concepts of electrical safety and protection systems." }
+      ],
+
+      // Holidays, dates, etc.
       holidays: [
         "25-12-2025",
         "01-04-2026"
@@ -745,13 +618,47 @@
         end:   "20-04-2026"
       },
 
-      modules: {
-        M1: "M1 – DC Circuits",
-        M2: "M2 – AC Circuits",
-        M3: "M3 – Electromagnetic Circuits",
-        M4: "M4 – Scope & Safety"
+      // ===== SYLLABUS (single source for modules) =====
+      syllabus: {
+        modules: [
+          {
+            id: "M1",
+            tag: "M1 – DC Circuits",
+            description:
+              "Kirchhoff’s law, Source transformation, Star-delta transformation and equivalent resistance of the circuits, Mesh and Nodal analysis, Superposition theorem."
+          },
+          {
+            id: "M2",
+            tag: "M2 – AC Circuits",
+            description:
+              "Peak, average, R.M.S. values of sinusoidal quantities, Peak factor, Form factor, Phase difference, Phasor representation, AC through R, L, C, AC Series Circuit (RL, RC, RLC), Three-phase AC circuits: Voltage, current and power in star and delta connections."
+          },
+          {
+            id: "M3",
+            tag: "M3 – Electromagnetic Circuits",
+            description:
+              "Magnetizing Force, Reluctance, Permeance, Magnetic field, Magnetic permeability, Analogy between Electric Circuits and Magnetic Circuits. Series magnetic circuit, BH curve."
+          },
+          {
+            id: "M4",
+            tag: "M4 – Scope & Safety",
+            description:
+              "Electrical Energy Scenario in India, Application of Transformer, Three-phase and single-phase induction Motors, Power ratings of air conditioners, PCs, laptops, printers, refrigerator, washing machine, different lamps, electricity tariff, calculation of electricity bill for domestic consumer.<br><br>" +
+              "<strong>Personal Safety Measures:</strong> Electric Shock, Earthing and its types, Safety Precautions to avoid shock.<br><br>" +
+              "<strong>Equipment Safety Measures:</strong> Working principles of fuse and miniature circuit breaker (MCB), Residual Current Circuit Breaker (RCCB)."
+          }
+        ],
+        textBooks: [
+          "Principles of Electrical Engineering and Electronics- V K Mehta, Rohit Mehta, S Chand and Company, New Delhi (Revised Edition 2013).",
+          "Basic Electrical Engineering by D.C. Kulshreshtha, Tata Mcgraw publication, 1st Edition 2011.",
+          "Basic Electrical Engineering, T.K. Nagasarkar and M.S. Sukhija, Oxford University press, 3rd Edition 2017."
+        ],
+        referenceBooks: [
+          "Basics Electrical Engineering Sanjeev Sharma, I.K.International, New Delhi (Third Reprint 2010)."
+        ]
       },
 
+      // ===== LESSONS (use module IDs only) =====
       lessons: [
         { type: "special", label: "Introduction to Course" },
         { type: "class", module: "M1", notes: "Basic terminology: circuit/network, active/passive, linear/nonlinear, bilateral/unilateral, voltage, current sources." },
@@ -793,6 +700,70 @@
         { type: "special", label: "Final Doubt Session & Revision" },
 
         { type: "exam_end" }
+      ],
+
+
+      programmeOutcomes: [
+        {
+          title: "Engineering knowledge:",
+          text: "Apply the knowledge of mathematics, science, engineering fundamentals, and an engineering specialization to the solution of complex engineering problems."
+        },
+        {
+          title: "Problem analysis:",
+          text: "Identify, formulate, review research literature, and analyze complex engineering problems reaching substantiated conclusions using first principles of mathematics, natural sciences, and engineering sciences."
+        },
+        {
+          title: "Design/development of solutions:",
+          text: "Design solutions for complex engineering problems and design system components or processes that meet the specified needs with appropriate consideration for the public health and safety, and the cultural, societal, and environmental considerations."
+        },
+        {
+          title: "Conduct investigations of complex problems:",
+          text: "Use research-based knowledge and research methods including design of experiments, analysis and interpretation of data, and synthesis of the information to provide valid conclusions."
+        },
+        {
+          title: "Modern tool usage:",
+          text: "Create, select, and apply appropriate techniques, resources, and modern engineering and IT tools including prediction and modeling to complex engineering activities with an understanding of the limitations."
+        },
+        {
+          title: "The engineer and society:",
+          text: "Apply reasoning informed by the contextual knowledge to assess societal, health, safety, legal and cultural issues and the consequent responsibilities relevant to the professional engineering practice."
+        },
+        {
+          title: "Environment and sustainability:",
+          text: "Understand the impact of the professional engineering solutions in societal and environmental contexts, and demonstrate the knowledge of, and need for sustainable development."
+        },
+        {
+          title: "Ethics:",
+          text: "Apply ethical principles and commit to professional ethics and responsibilities and norms of the engineering practice."
+        },
+        {
+          title: "Individual and team work:",
+          text: "Function effectively as an individual, and as a member or leader in diverse teams, and in multidisciplinary settings."
+        },
+        {
+          title: "Communication:",
+          text: "Communicate effectively on complex engineering activities with the engineering community and with society at large, such as, being able to comprehend and write effective reports and design documentation, make effective presentations, and give and receive clear instructions."
+        },
+        {
+          title: "Project management and finance:",
+          text: "Demonstrate knowledge and understanding of the engineering and management principles and apply these to one’s own work, as a member and leader in a team, to manage projects and in multidisciplinary environments."
+        },
+        {
+          title: "Life-long learning:",
+          text: "Recognize the need for, and have the preparation and ability to engage in independent and life-long learning in the broadest context of technological change."
+        },
+        {
+          title: "Demonstrate knowledge and hands-on competence",
+          text: "in the area of characteristics, operations, analysis, design of Electrical Machines and their applications in industry and other fields."
+        },
+        {
+          title: "Demonstrate knowledge of analysis, design and implementation",
+          text: "of electrical circuits, electronic circuits, power electronic circuits, measurements, control systems in different electrical systems."
+        },
+        {
+          title: "Enhance the knowledge in generation, transmission, distribution,",
+          text: "protection of electric power, installation, operation and maintenance of power system components with respect to competitive tariff for economic project viability and climate change issues and to understand the need for renewable energy systems for developing clean energy and sustainable technologies."
+        }
       ]
     };
 
@@ -826,11 +797,19 @@
       return set;
     }
 
-    function buildModuleColorMap(modulesObj) {
-      const keys = Object.keys(modulesObj);
+    function buildModuleColorMap(modulesMap) {
+      const keys = Object.keys(modulesMap);
       const map = {};
       keys.forEach((key, idx) => {
         map[key] = (idx % 2 === 0) ? "module-a" : "module-b";
+      });
+      return map;
+    }
+
+    function buildModulesFromSyllabus(cfg) {
+      const map = {};
+      (cfg.syllabus.modules || []).forEach(m => {
+        map[m.id] = m.tag;
       });
       return map;
     }
@@ -930,7 +909,7 @@
       return lessonsOut;
     }
 
-    /* ========== 4. RENDERING + TABS ========== */
+    /* ========== 4. RENDERING: LESSON PLAN ========= */
 
     function renderLessonPlan(cfg) {
       document.getElementById("instName").textContent = cfg.instituteName;
@@ -938,8 +917,39 @@
       document.getElementById("courseTitle").textContent = cfg.courseTitle;
       document.getElementById("semester").textContent = cfg.semester;
 
+      // course code (single source with link from config)
+      const codeEl = document.getElementById("courseCode");
+      const codeHref = cfg.courselink || "#";
+      codeEl.innerHTML = `
+        <a
+          href="${codeHref}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="course-link"
+        >
+          ${cfg.courseCode}
+        </a>
+      `;
+
+      // faculty from config (name + link)
+      const facultyEl = document.getElementById("faculty");
+      const facultyHref = cfg.facultylink || "#";
+      facultyEl.innerHTML = `
+        <a
+          href="${facultyHref}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="faculty-link"
+        >
+          ${cfg.faculty}
+        </a>
+      `;
+
       const schedule = generateSchedule(cfg);
-      const moduleColorMap = buildModuleColorMap(cfg.modules);
+
+      // build modules map from syllabus
+      const modulesMap = buildModulesFromSyllabus(cfg);
+      const moduleColorMap = buildModuleColorMap(modulesMap);
 
       const totalClasses = schedule.filter(s => s.type === "class" || s.type === "special").length;
       const specialCount = schedule.filter(s => s.type === "special").length;
@@ -1004,18 +1014,18 @@
         const tag = document.createElement("span");
         tag.className = "module-tag";
 
-        if (item.module && cfg.modules[item.module]) {
+        if (item.module && modulesMap[item.module]) {
           const colorClass = moduleColorMap[item.module] || "module-a";
           tag.classList.add(colorClass);
-          tag.textContent = cfg.modules[item.module];
+          tag.textContent = modulesMap[item.module];
         } else {
           tag.classList.add("special-tag");
           tag.textContent = item.label || "Special Class";
         }
 
         if (item.type === "special") {
-          if (item.module && cfg.modules[item.module]) {
-            tag.textContent = `${cfg.modules[item.module]} · ${item.label || "Special"}`;
+          if (item.module && modulesMap[item.module]) {
+            tag.textContent = `${modulesMap[item.module]} · ${item.label || "Special"}`;
           } else if (item.label) {
             tag.textContent = item.label;
           }
@@ -1038,6 +1048,79 @@
         list.appendChild(li);
       });
     }
+
+    /* ========== 5. RENDERING: SYLLABUS ========= */
+
+    function renderSyllabus(cfg) {
+      // course details
+      const detailsEl = document.getElementById("courseDetailsList");
+      detailsEl.innerHTML = `
+        <li>Credits: ${cfg.courseMeta.credits}</li>
+        <li>L-T-P: ${cfg.courseMeta.ltp}</li>
+        <li>Pre-requisite: ${cfg.courseMeta.prereq}</li>
+      `;
+
+      // modules / syllabus tags from config.syllabus.modules
+      const modulesContainer = document.getElementById("syllabusModulesContainer");
+      modulesContainer.innerHTML = "";
+      (cfg.syllabus.modules || []).forEach(m => {
+        const sec = document.createElement("section");
+        sec.className = "syllabus-section";
+        sec.innerHTML = `
+          <div class="syllabus-tag">${m.tag}</div><br>
+          ${m.description}
+        `;
+        modulesContainer.appendChild(sec);
+      });
+
+      // books
+      const textList = document.getElementById("textBooksList");
+      textList.innerHTML = "";
+      (cfg.syllabus.textBooks || []).forEach(b => {
+        const li = document.createElement("li");
+        li.textContent = b;
+        textList.appendChild(li);
+      });
+
+      const refList = document.getElementById("refBooksList");
+      refList.innerHTML = "";
+      (cfg.syllabus.referenceBooks || []).forEach(b => {
+        const li = document.createElement("li");
+        li.textContent = b;
+        refList.appendChild(li);
+      });
+    }
+
+    /* ========== 6. RENDERING: OUTCOMES (Course + Programme) ========= */
+
+    function renderOutcomes(cfg) {
+      // Course objective
+      document.getElementById("courseObjective").textContent = cfg.courseObjective;
+
+      // Course outcomes
+      const coList = document.getElementById("courseOutcomesList");
+      coList.innerHTML = "";
+      (cfg.courseOutcomes || []).forEach(co => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="outcomes-highlight">${co.id}:</span> ${co.text}`;
+        coList.appendChild(li);
+      });
+
+      // Programme outcomes
+      const poList = document.getElementById("programmeOutcomesList");
+      poList.innerHTML = "";
+      (cfg.programmeOutcomes || []).forEach(po => {
+        const li = document.createElement("li");
+        if (po.title) {
+          li.innerHTML = `<strong>${po.title}</strong> ${po.text}`;
+        } else {
+          li.textContent = po.text;
+        }
+        poList.appendChild(li);
+      });
+    }
+
+    /* ========== 7. TABS ========= */
 
     function initTabs() {
       const tabLessonPlan = document.getElementById("tabLessonPlan");
@@ -1081,7 +1164,11 @@
       activateTab(tabLessonPlan, lessonPlanView, true);
     }
 
+    /* ========== 8. INIT ========= */
+
     renderLessonPlan(config);
+    renderSyllabus(config);
+    renderOutcomes(config);
     initTabs();
   </script>
 </body>
