@@ -20,8 +20,10 @@
       --module-color-a: #2563eb;  /* blue */
       --module-color-b: #16a34a;  /* green */
 
-      --special-bg: #ecfeff;
-      --special-border: #0d9488;
+      /* SPECIAL: yellow themed */
+      --special-bg: #fef9c3;      /* light yellow */
+      --special-border: #eab308;  /* amber/yellow border */
+
       --exam-bg: #fef2f2;
       --exam-border: #b91c1c;
     }
@@ -95,6 +97,19 @@
       color: var(--primary);
       font-size: 0.75rem;
       font-weight: 600;
+    }
+
+    /* Links in header badges */
+    .faculty-link,
+    .course-link {
+      color: inherit;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .faculty-link:hover,
+    .course-link:hover {
+      text-decoration: underline;
     }
 
     /* ===== SUMMARY ===== */
@@ -197,9 +212,10 @@
     .module-a { background: var(--module-color-a); }
     .module-b { background: var(--module-color-b); }
 
+    /* Special tag now yellow */
     .special-tag {
       background: var(--special-bg);
-      color: var(--special-border);
+      color: #854d0e; /* dark amber text */
       border: 1px solid var(--special-border);
     }
 
@@ -215,6 +231,7 @@
       white-space: nowrap;
     }
 
+    /* Special lesson row now yellow themed */
     .lesson-row.special {
       border-color: var(--special-border);
       background: var(--special-bg);
@@ -268,9 +285,34 @@
       <div class="school-line" id="schoolLine"></div>
       <div class="course-title" id="courseTitle"></div>
       <div class="course-meta">
-        <span class="badge" id="courseCode"></span>
+
+
+        <!-- course code now clickable -->
+        <span class="badge" id="courseCode">
+          <a
+            href="https://my.e-kard.in/tnsc"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="course-link"
+          >
+            EE10002
+          </a>
+        </span>
+
         <span class="badge" id="semester"></span>
-        <span class="badge" id="faculty"></span>
+
+        <!-- faculty clickable -->
+        <span class="badge" id="faculty">
+          <a
+            href="https://my.e-kard.in/tnsc"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="faculty-link"
+          >
+            Prof.Thotakura NSC Sekhar
+          </a>
+        </span>
+
         <span class="pill" id="planLabel"></span>
       </div>
     </header>
@@ -280,10 +322,10 @@
 
     <!-- LESSONS -->
     <main class="card">
-      <div class="card-title">Lesson Plan (Schedule View)</div>
+      <div class="card-title">Detailed Lesson Plan</div>
       <div class="header-row">
-        <div>#</div>
-        <div>Module / Notes</div>
+        <div></div>
+        <div>Topic Covered</div>
         <div style="text-align:right;">Date</div>
       </div>
       <ul class="lesson-list" id="lessonList"></ul>
@@ -308,13 +350,13 @@
 
       holidays: [
         // DD-MM-YYYY
-        "26-12-2025",
-        "09-01-2026"
+        "25-12-2025",
+        "01-04-2026"
       ],
 
       // All these dates are in DD-MM-YYYY
       startDate: "03-12-2025",
-      classDays: ["Thu", "Fri"], // "Mon","Tue","Wed","Thu","Fri","Sat","Sun"
+      classDays: ["Mon", "Fri"], // "Mon","Tue","Wed","Thu","Fri","Sat","Sun"
 
       midSem: {
         title: "Mid Semester Examination",
@@ -326,7 +368,6 @@
         start: "13-04-2026",
         end:   "20-04-2026"
       },
-
 
       // Module display names (order here defines A/B/A/B coloring)
       modules: {
@@ -345,12 +386,12 @@
         {
           type: "class",
           module: "M1",
-          notes: "Basic terminology: circuit, network, active/passive, linear/nonlinear, bilateral/unilateral, sources."
+          notes: "Basic terminology: circuit/network, active/passive, linear/nonlinear, bilateral/unilateral, voltage, current sources."
         },
         {
           type: "class",
           module: "M1",
-          notes: "Series/parallel combinations, current & voltage division"
+          notes: "Series/parallel combination of resistances, current & voltage division"
         },
         {
           type: "class",
@@ -376,12 +417,12 @@
         {
           type: "class",
           module: "M1",
-          notes: "Mesh analysis with independent voltage source (no super-mesh), numericals."
+          notes: "Mesh analysis with independent source only (no super-mesh), numericals."
         },
         {
           type: "class",
           module: "M1",
-          notes: "Nodal analysis with independent sources (no super-node), numericals."
+          notes: "Nodal analysis with independent sources only (no super-node), numericals."
         },
         {
           type: "class",
@@ -643,9 +684,12 @@
       document.getElementById("instName").textContent = cfg.instituteName;
       document.getElementById("schoolLine").textContent = cfg.schoolLine;
       document.getElementById("courseTitle").textContent = cfg.courseTitle;
-      document.getElementById("courseCode").textContent = cfg.courseCode;
+
+      // courseCode badge already has link + text; if you want to drive the text
+      // from config, uncomment this line and only update the innerText of the link.
+      // document.querySelector("#courseCode a").innerText = cfg.courseCode;
+
       document.getElementById("semester").textContent = cfg.semester;
-      document.getElementById("faculty").textContent = cfg.faculty;
       document.getElementById("planLabel").textContent = cfg.planLabel;
 
       const schedule = generateSchedule(cfg);
