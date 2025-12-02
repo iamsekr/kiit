@@ -16,13 +16,12 @@
       --radius-md: 10px;
       --shadow-soft: 0 14px 35px rgba(15, 23, 42, 0.14);
 
-      /* TWO module colors only */
-      --module-color-a: #2563eb;  /* blue */
-      --module-color-b: #16a34a;  /* green */
+      --module-color-a: #2563eb;
+      --module-color-b: #16a34a;
 
-      /* SPECIAL: yellow themed */
-      --special-bg: #fef9c3;      /* light yellow */
-      --special-border: #eab308;  /* amber/yellow border */
+      /* Special (yellow) */
+      --special-bg: #fef9c3;
+      --special-border: #eab308;
 
       --exam-bg: #fef2f2;
       --exam-border: #b91c1c;
@@ -78,6 +77,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px 10px;
+      align-items: center;
     }
 
     .badge {
@@ -97,6 +97,23 @@
       color: var(--primary);
       font-size: 0.75rem;
       font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .pill-outline {
+      background: #ffffff;
+      border: 1px solid var(--primary-light);
+      color: var(--primary);
+    }
+
+    .pill-active {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .pill + .pill {
+      margin-left: 6px;
     }
 
     /* Links in header badges */
@@ -112,7 +129,7 @@
       text-decoration: underline;
     }
 
-    /* ===== SUMMARY ===== */
+    /* ===== SUMMARY (for Lesson Plan tab) ===== */
 
     .summary-bar {
       margin-bottom: 10px;
@@ -134,13 +151,13 @@
       border: 1px solid var(--border);
     }
 
-    /* ===== LESSON LIST ===== */
+    /* ===== GENERIC CARD ===== */
 
     .card {
       background: white;
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-soft);
-      padding: 10px 10px 6px;
+      padding: 10px 10px 10px;
     }
 
     .card-title {
@@ -148,6 +165,8 @@
       font-size: 1rem;
       margin-bottom: 8px;
     }
+
+    /* ===== LESSON PLAN VIEW ===== */
 
     .header-row {
       display: grid;
@@ -178,7 +197,7 @@
       grid-template-columns: 48px minmax(0, 1fr) auto;
       gap: 6px;
       align-items: center;
-      background: #ffffff;   /* no banding */
+      background: #ffffff;
     }
 
     .lesson-index {
@@ -208,14 +227,12 @@
       max-width: 100%;
     }
 
-    /* only TWO base color classes */
     .module-a { background: var(--module-color-a); }
     .module-b { background: var(--module-color-b); }
 
-    /* Special tag now yellow */
     .special-tag {
       background: var(--special-bg);
-      color: #854d0e; /* dark amber text */
+      color: #854d0e;
       border: 1px solid var(--special-border);
     }
 
@@ -231,7 +248,6 @@
       white-space: nowrap;
     }
 
-    /* Special lesson row now yellow themed */
     .lesson-row.special {
       border-color: var(--special-border);
       background: var(--special-bg);
@@ -271,9 +287,145 @@
       text-align: right;
     }
 
+    /* ===== OUTCOMES VIEW ===== */
+
+    .outcomes-view {
+      display: none;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .outcomes-view h3 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+      margin-top: 8px;
+    }
+
+    .outcomes-view p {
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .outcomes-view ul {
+      padding-left: 18px;
+      margin-bottom: 8px;
+    }
+
+    .outcomes-section {
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      margin-bottom: 8px;
+    }
+
+    .outcomes-section-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .outcomes-highlight {
+      font-weight: 600;
+    }
+
+    /* ===== SYLLABUS VIEW ===== */
+
+    .syllabus-view {
+      display: none;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .syllabus-section {
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      margin-bottom: 8px;
+    }
+
+    .syllabus-section-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .syllabus-view ul {
+      padding-left: 18px;
+      margin-bottom: 6px;
+    }
+
+    .syllabus-tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: #e0f2fe;
+      color: #075985;
+      margin-bottom: 4px;
+    }
+
+    /* ===== EVALUATION VIEW ===== */
+
+    .evaluation-view {
+      display: none;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .evaluation-table-wrapper {
+      overflow-x: auto;
+      margin-top: 6px;
+    }
+
+    table.evaluation-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    table.evaluation-table th,
+    table.evaluation-table td {
+      border: 1px solid #d1d5db;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    table.evaluation-table th {
+      background: #0ea5e9;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    table.evaluation-table th[colspan] {
+      background: #0284c7;
+    }
+
+    table.evaluation-table td {
+      background: #f9fafb;
+    }
+
+    table.evaluation-table tr:nth-child(even) td {
+      background: #e5f3fb;
+    }
+
+    .eval-title {
+      text-align: center;
+      font-weight: 700;
+      color: #1d4ed8;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .eval-note {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
     @media (max-width: 600px) {
       .header-row { font-size: 0.7rem; }
       .lesson-row { font-size: 0.85rem; }
+      .course-meta { gap: 4px 6px; }
     }
   </style>
 </head>
@@ -284,10 +436,9 @@
       <div class="institution" id="instName"></div>
       <div class="school-line" id="schoolLine"></div>
       <div class="course-title" id="courseTitle"></div>
+
       <div class="course-meta">
-
-
-        <!-- course code now clickable -->
+        <!-- course code clickable -->
         <span class="badge" id="courseCode">
           <a
             href="https://my.e-kard.in/tnsc"
@@ -311,24 +462,251 @@
           >
             Prof.Thotakura NSC Sekhar
           </a>
-        </span>
+        </span><br>
 
-        <span class="pill" id="planLabel"></span>
+        <!-- TABS -->
+        <span class="pill pill-active" id="tabLessonPlan">Lesson Plan</span>
+        <span class="pill pill-outline" id="tabSyllabus">Syllabus</span>
+        <span class="pill pill-outline" id="tabOutcomes">Outcomes</span>
+        <span class="pill pill-outline" id="tabEvaluation">Evaluation</span>
       </div>
     </header>
 
-    <!-- SUMMARY -->
+    <!-- SUMMARY (only for Lesson Plan) -->
     <section class="summary-bar" id="summaryBar"></section>
 
-    <!-- LESSONS -->
+    <!-- MAIN CARD WITH VIEWS -->
     <main class="card">
-      <div class="card-title">Detailed Lesson Plan</div>
-      <div class="header-row">
-        <div></div>
-        <div>Topic Covered</div>
-        <div style="text-align:right;">Date</div>
+      <!-- LESSON PLAN VIEW -->
+      <div id="lessonPlanView">
+        <div class="card-title">Detailed Lesson Plan</div>
+        <div class="header-row">
+          <div></div>
+          <div>Topic Covered</div>
+          <div style="text-align:right;">Date</div>
+        </div>
+        <ul class="lesson-list" id="lessonList"></ul>
       </div>
-      <ul class="lesson-list" id="lessonList"></ul>
+
+      <!-- OUTCOMES VIEW -->
+      <div id="outcomesView" class="outcomes-view">
+        <!-- <div class="card-title">Objective & Outcomes</div> -->
+
+        <section class="outcomes-section">
+          <div class="outcomes-section-title">Course Objective</div>
+          <p>
+            To provide a comprehensive idea about circuit analysis, working principles of electrical machines,
+            a brief idea about magnetic circuits, and to understand the basics of the protection system.
+          </p>
+        </section>
+
+        <section class="outcomes-section">
+          <div class="outcomes-section-title">Course Outcomes (COs)</div>
+          <p>Upon completion of the course, the students will be able to:</p>
+          <ul>
+            <li><span class="outcomes-highlight">CO1:</span> Analyze the concept of DC circuit.</li>
+            <li><span class="outcomes-highlight">CO2:</span> Understand the concepts of AC circuits.</li>
+            <li><span class="outcomes-highlight">CO3:</span> Analyze the three-phase AC circuit.</li>
+            <li><span class="outcomes-highlight">CO4:</span> Interpret the behavior of magnetic circuits.</li>
+            <li><span class="outcomes-highlight">CO5:</span> Remember the principles and operation of electrical machines.</li>
+            <li><span class="outcomes-highlight">CO6:</span> Know the concepts of electrical safety and protection systems.</li>
+          </ul>
+        </section>
+
+        <section class="outcomes-section">
+          <div class="outcomes-section-title">Programme Outcomes</div>
+          <ol>
+            <li>
+              <strong>Engineering knowledge:</strong>
+              Apply the knowledge of mathematics, science, engineering fundamentals, and an
+              engineering specialization to the solution of complex engineering problems.
+            </li>
+            <li>
+              <strong>Problem analysis:</strong>
+              Identify, formulate, review research literature, and analyze complex engineering
+              problems reaching substantiated conclusions using first principles of mathematics,
+              natural sciences, and engineering sciences.
+            </li>
+            <li>
+              <strong>Design/development of solutions:</strong>
+              Design solutions for complex engineering problems and design system components or
+              processes that meet the specified needs with appropriate consideration for the
+              public health and safety, and the cultural, societal, and environmental
+              considerations.
+            </li>
+            <li>
+              <strong>Conduct investigations of complex problems:</strong>
+              Use research-based knowledge and research methods including design of experiments,
+              analysis and interpretation of data, and synthesis of the information to provide
+              valid conclusions.
+            </li>
+            <li>
+              <strong>Modern tool usage:</strong>
+              Create, select, and apply appropriate techniques, resources, and modern engineering
+              and IT tools including prediction and modeling to complex engineering activities
+              with an understanding of the limitations.
+            </li>
+            <li>
+              <strong>The engineer and society:</strong>
+              Apply reasoning informed by the contextual knowledge to assess societal, health,
+              safety, legal and cultural issues and the consequent responsibilities relevant to
+              the professional engineering practice.
+            </li>
+            <li>
+              <strong>Environment and sustainability:</strong>
+              Understand the impact of the professional engineering solutions in societal and
+              environmental contexts, and demonstrate the knowledge of, and need for sustainable
+              development.
+            </li>
+            <li>
+              <strong>Ethics:</strong>
+              Apply ethical principles and commit to professional ethics and responsibilities and
+              norms of the engineering practice.
+            </li>
+            <li>
+              <strong>Individual and team work:</strong>
+              Function effectively as an individual, and as a member or leader in diverse teams,
+              and in multidisciplinary settings.
+            </li>
+            <li>
+              <strong>Communication:</strong>
+              Communicate effectively on complex engineering activities with the engineering
+              community and with society at large, such as, being able to comprehend and write
+              effective reports and design documentation, make effective presentations, and give
+              and receive clear instructions.
+            </li>
+            <li>
+              <strong>Project management and finance:</strong>
+              Demonstrate knowledge and understanding of the engineering and management
+              principles and apply these to one’s own work, as a member and leader in a team, to
+              manage projects and in multidisciplinary environments.
+            </li>
+            <li>
+              <strong>Life-long learning:</strong>
+              Recognize the need for, and have the preparation and ability to engage in
+              independent and life-long learning in the broadest context of technological
+              change.
+            </li>
+            <li>
+              <strong>Demonstrate knowledge and hands-on competence</strong>
+              in the area of characteristics, operations, analysis, design of Electrical
+              Machines and their applications in industry and other fields.
+            </li>
+            <li>
+              <strong>Demonstrate knowledge of analysis, design and implementation</strong>
+              of electrical circuits, electronic circuits, power electronic circuits,
+              measurements, control systems in different electrical systems.
+            </li>
+            <li>
+              <strong>Enhance the knowledge in generation, transmission, distribution,</strong>
+              protection of electric power, installation, operation and maintenance of power
+              system components with respect to competitive tariff for economic project
+              viability and climate change issues and to understand the need for renewable
+              energy systems for developing clean energy and sustainable technologies.
+            </li>
+          </ol>
+        </section>
+      </div>
+
+      <!-- SYLLABUS VIEW (demo syllabus derived from modules) -->
+      <div id="syllabusView" class="syllabus-view">
+        
+        <section class="syllabus-section">
+          <div class="syllabus-section-title">Course Details</div>
+          <ul>
+            <li>Credits: 2</li>
+            <li>L-T-P:   2-0-0</li>
+            <li>Pre-requisite: Nil</li>
+          </ul>
+        </section>
+
+        <br><div class="card-title">Syllabus</div>
+
+        <section class="syllabus-section">
+          <div class="syllabus-tag">M1 – DC Circuits</div><br>
+            Kirchhoff’s law, Source transformation, Star-delta transformation and equivalent resistance of the circuits, Mesh and Nodal analysis, Superposition theorem.
+        </section>
+
+        <section class="syllabus-section">
+          <div class="syllabus-tag">M2 – AC Circuits</div><br>
+            Peak, average, R.M.S. values of sinusoidal quantities, Peak factor, Form factor, Phase difference, Phasor representation, AC through R, L, C, AC Series Circuit (RL, RC, RLC), Three-phase AC circuits: Voltage, current and power in star and delta connections.
+        </section>
+
+        <section class="syllabus-section">
+          <div class="syllabus-tag">M3 – Electromagnetic Circuits</div><br>
+            Magnetizing Force, Reluctance, Permeance, Magnetic field, Magnetic permeability, Analogy between Electric Circuits and Magnetic Circuits. Series magnetic circuit, BH curve.
+        </section>
+
+        <section class="syllabus-section">
+          <div class="syllabus-tag">M4 – Scope & Safety</div><br>
+            Electrical Energy Scenario in India, Application of Transformer, Three-phase and single-phase induction Motors, Power ratings of air conditioners, PCs, laptops, printers, refrigerator, washing machine, different lamps, electricity tariff, calculation of electricity bill for domestic consumer.<br><br>
+
+            <strong>Personal Safety Measures:</strong> Electric Shock, Earthing and its types, Safety Precautions to avoid shock.<br><br>
+
+            <strong>Equipment Safety Measures:</strong> Working principles of fuse and miniature circuit breaker (MCB), Residual Current Circuit Breaker (RCCB).
+        </section>
+
+        <br>
+        <div class="card-title">Books</div>
+
+        <section class="syllabus-section">
+          <div class="syllabus-section-title">Text Books</div>
+          <ul>
+            <ol>
+            <li>Principles of Electrical Engineering and Electronics- V K Mehta, Rohit Mehta, S Chand and Company, New Delhi (Revised Edition 2013).</li>
+            <li>Basic Electrical Engineering by D.C. Kulshreshtha, Tata Mcgraw publication, 1st Edition 2011.</li>
+            <li>Basic Electrical Engineering, T.K. Nagasarkar and M.S. Sukhija, Oxford University press, 3rd Edition 2017.</li>
+          </ol>
+          </ul>
+        </section>
+        <section class="syllabus-section">
+          <div class="syllabus-section-title">Reference Books</div>
+          <ul>
+            <li>Basics Electrical Engineering Sanjeev Sharma, I.K.International, New Delhi (Third Reprint 2010).</li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- EVALUATION VIEW -->
+      <div id="evaluationView" class="evaluation-view">
+        <div class="eval-title">Evaluation Plan</div>
+        <div class="evaluation-table-wrapper">
+          <table class="evaluation-table">
+            <thead>
+              <tr>
+                <th rowspan="2">S.No</th>
+                <th rowspan="2">Evaluation Component</th>
+                <th rowspan="2">Course Module</th>
+                <th rowspan="2">Course Lecture No.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Activity Based Learning<br>(30 Marks)</td>
+                <td>M1 to M4</td>
+                <td>1 to 26</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Mid Sem Examination<br>(20 Marks)</td>
+                <td>M1 to M2</td>
+                <td>1 to 12</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>End Sem Examination<br>(50 Marks)</td>
+                <td>M1 to M4</td>
+                <td>1 to 26</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="eval-note">
+          Note: The above evaluation structure indicates how marks are distributed across activity based learning,
+          mid-semester and end-semester examinations, and the corresponding coverage of course modules and lecture numbers.
+        </p>
+      </div>
     </main>
 
     <div class="footer-note">
@@ -349,14 +727,12 @@
       planLabel: "Lesson Plan",
 
       holidays: [
-        // DD-MM-YYYY
         "25-12-2025",
         "01-04-2026"
       ],
 
-      // All these dates are in DD-MM-YYYY
       startDate: "03-12-2025",
-      classDays: ["Mon", "Fri"], // "Mon","Tue","Wed","Thu","Fri","Sat","Sun"
+      classDays: ["Mon", "Fri"],
 
       midSem: {
         title: "Mid Semester Examination",
@@ -369,7 +745,6 @@
         end:   "20-04-2026"
       },
 
-      // Module display names (order here defines A/B/A/B coloring)
       modules: {
         M1: "M1 – DC Circuits",
         M2: "M2 – AC Circuits",
@@ -377,164 +752,45 @@
         M4: "M4 – Scope & Safety"
       },
 
-      // type: "class" | "special" | "exam_mid" | "exam_end"
       lessons: [
-        {
-          type: "special",
-          label: "Introduction to Course"
-        },
-        {
-          type: "class",
-          module: "M1",
-          notes: "Basic terminology: circuit/network, active/passive, linear/nonlinear, bilateral/unilateral, voltage, current sources."
-        },
-        {
-          type: "class",
-          module: "M1",
-          notes: "Series/parallel combination of resistances, current & voltage division"
-        },
-        {
-          type: "class",
-          module: "M1",
-          notes: "KCL & KVL with numericals."
-        },
-        {
-          type: "class",
-          module: "M1",
-          notes: "Source transformation with basic numerical problems."
-        },
-        {
-          type: "class",
-          module: "M1",
-          notes: "Star–Delta transformation with numericals. (Derivation of star-delta transformation is not required)"
-        },
+        { type: "special", label: "Introduction to Course" },
+        { type: "class", module: "M1", notes: "Basic terminology: circuit/network, active/passive, linear/nonlinear, bilateral/unilateral, voltage, current sources." },
+        { type: "class", module: "M1", notes: "Series/parallel combination of resistances, current & voltage division rules" },
+        { type: "class", module: "M1", notes: "KCL & KVL with numericals." },
+        { type: "class", module: "M1", notes: "Source transformation with basic numerical problems." },
+        { type: "class", module: "M1", notes: "Star–Delta transformation with numericals. (Derivations are not required)" },
 
-        {
-          type: "special",
-          label: "Doubt Clearing Session"
-        },
+        { type: "special", label: "Doubt Clearing Session" },
 
-        {
-          type: "class",
-          module: "M1",
-          notes: "Mesh analysis with independent source only (no super-mesh), numericals."
-        },
-        {
-          type: "class",
-          module: "M1",
-          notes: "Nodal analysis with independent sources only (no super-node), numericals."
-        },
-        {
-          type: "class",
-          module: "M2",
-          notes: "AC Basics: Amplitude, Time Period, Frequency, Phase, Phase difference; average value (full & half cycle Derivations)."
-        },
-        {
-          type: "class",
-          module: "M2",
-          notes: "RMS value (Derivations), form factor & peak factor."
-        },
-        {
-          type: "class",
-          module: "M2",
-          notes: "Problems on AC fundamentals."
-        },
+        { type: "class", module: "M1", notes: "Mesh analysis with independent voltage source (no super-mesh), numericals." },
+        { type: "class", module: "M1", notes: "Nodal analysis with independent sources (no super-node), numericals." },
+        { type: "class", module: "M2", notes: "AC Basics: Amplitude, Time Period, Frequency, Phase, Phase difference; average value (full & half cycle Derivations)." },
+        { type: "class", module: "M2", notes: "RMS value (Derivations), form factor & peak factor." },
+        { type: "class", module: "M2", notes: "Problems on AC fundamentals." },
 
-        {
-          type: "special",
-          label: "Doubt Clearing Session"
-        },
-        {
-          type: "special",
-          label: "Discussion of previous year mid-sem questions"
-        },
+        { type: "special", label: "Doubt Clearing Session" },
+        { type: "special", label: "Discussion of previous year mid-sem questions" },
 
         { type: "exam_mid" },
 
-        {
-          type: "class",
-          module: "M2",
-          notes: "Phasor representation of AC, Phasor Algebra both Polar & Rectangular."
-        },
-        {
-          type: "class",
-          module: "M2",
-          notes: "AC through R, L, C Circuit Analysis"
-        },
-        {
-          type: "class",
-          module: "M2",
-          notes: "Probs on AC through R, L, C Circuit"
-        },
-        {
-          type: "class",
-          module: "M2",
-          notes: "AC Series RL, RC, RLC circuit Analysis"
-        },
-        {
-          type: "class",
-          module: "M2",
-          notes: "Probs on AC Series RL, RC, RLC circuit Analysis"
-        },
-        {
-          type: "class",
-          module: "M2",
-          notes: "3-Phase AC System(Star-Delta), 3-Phase Power equations & Probs"
-        },
-        {
-          type: "class",
-          module: "M2",
-          notes: "Single-phase vs three-phase systems"
-        },
-        {
-          type: "special",
-          label: "Doubt Session & Revision"
-        },
-        {
-          type: "class",
-          module: "M3",
-          notes: "Basic terminology, Analogy between Electric and Magnetic Circuits."
-        },
-        {
-          type: "class",
-          module: "M3",
-          notes: "Analysis of Series Magnetic circuits with Probs."
-        },
-        {
-          type: "class",
-          module: "M3",
-          notes: "B–H curve and hysteresis loop concepts."
-        },
-        {
-          type: "class",
-          module: "M4",
-          notes: "Indian Electricity till date, 1-ph transformer principle & applications"
-        },
-        {
-          type: "class",
-          module: "M4",
-          notes: "3-ph, 1-ph Induction motor principle & applications"
-        },
-        {
-          type: "class",
-          module: "M4",
-          notes: "Power ratings of air conditioners, PCs, laptops, printers, refrigerator, washing machine, different lamps, electricity tariff, calculation of electricity bill for domestic consumers (with numerical problems). "
-        },
-        {
-          type: "class",
-          module: "M4",
-          notes: "Personal safety measures: Electric Shock, Earthing and its types, Safety Precautions to avoid shock. ."
-        },
-        {
-          type: "class",
-          module: "M4",
-          notes: "Equipment Safety measures: Working principle of Fuse and Miniature circuit breaker (MCB), Residual Current Circuit Breaker (RCCB)"
-        },
+        { type: "class", module: "M2", notes: "Phasor representation of AC, Phasor Algebra both Polar & Rectangular." },
+        { type: "class", module: "M2", notes: "AC through R, L, C Circuit Analysis" },
+        { type: "class", module: "M2", notes: "Probs on AC through R, L, C Circuit" },
+        { type: "class", module: "M2", notes: "AC Series RL, RC, RLC circuit Analysis" },
+        { type: "class", module: "M2", notes: "Probs on AC Series RL, RC, RLC circuit Analysis" },
+        { type: "class", module: "M2", notes: "3-Phase AC System(Star-Delta), 3-Phase Power equations & Probs" },
+        { type: "class", module: "M2", notes: "Single-phase vs three-phase systems" },
+        { type: "special", label: "Doubt Session & Revision" },
+        { type: "class", module: "M3", notes: "Basic terminology, Analogy between Electric and Magnetic Circuits." },
+        { type: "class", module: "M3", notes: "Analysis of Series Magnetic circuits with Probs." },
+        { type: "class", module: "M3", notes: "B–H curve and hysteresis loop concepts." },
+        { type: "class", module: "M4", notes: "Indian Electricity till date, 1-ph transformer principle & applications" },
+        { type: "class", module: "M4", notes: "3-ph, 1-ph Induction motor principle & applications" },
+        { type: "class", module: "M4", notes: "Power ratings of air conditioners, PCs, laptops, printers, refrigerator, washing machine, different lamps, electricity tariff, calculation of electricity bill for domestic consumers (with numerical problems)." },
+        { type: "class", module: "M4", notes: "Personal safety measures: Electric Shock, Earthing and its types, Safety Precautions to avoid shock." },
+        { type: "class", module: "M4", notes: "Equipment Safety measures: Working principle of Fuse and Miniature circuit breaker (MCB), Residual Current Circuit Breaker (RCCB)" },
 
-        {
-          type: "special",
-          label: "Final Doubt Session & Revision"
-        },
+        { type: "special", label: "Final Doubt Session & Revision" },
 
         { type: "exam_end" }
       ]
@@ -546,10 +802,7 @@
 
     function parseDDMMYYYY(str) {
       const [dd, mm, yyyy] = str.split("-");
-      const day = parseInt(dd, 10);
-      const monthIndex = parseInt(mm, 10) - 1;
-      const year = parseInt(yyyy, 10);
-      return new Date(year, monthIndex, day);
+      return new Date(parseInt(yyyy, 10), parseInt(mm, 10) - 1, parseInt(dd, 10));
     }
 
     function formatDateDDMMMYYYY(date) {
@@ -573,7 +826,6 @@
       return set;
     }
 
-    /* Build module → color class map with A/B/A/B pattern */
     function buildModuleColorMap(modulesObj) {
       const keys = Object.keys(modulesObj);
       const map = {};
@@ -678,19 +930,13 @@
       return lessonsOut;
     }
 
-    /* ========== 4. RENDERING ========== */
+    /* ========== 4. RENDERING + TABS ========== */
 
-    function render(cfg) {
+    function renderLessonPlan(cfg) {
       document.getElementById("instName").textContent = cfg.instituteName;
       document.getElementById("schoolLine").textContent = cfg.schoolLine;
       document.getElementById("courseTitle").textContent = cfg.courseTitle;
-
-      // courseCode badge already has link + text; if you want to drive the text
-      // from config, uncomment this line and only update the innerText of the link.
-      // document.querySelector("#courseCode a").innerText = cfg.courseCode;
-
       document.getElementById("semester").textContent = cfg.semester;
-      document.getElementById("planLabel").textContent = cfg.planLabel;
 
       const schedule = generateSchedule(cfg);
       const moduleColorMap = buildModuleColorMap(cfg.modules);
@@ -700,7 +946,7 @@
 
       const summaryBar = document.getElementById("summaryBar");
       summaryBar.innerHTML = `
-        <span class="summary-item"><strong>${totalClasses-specialCount}</strong> Regular classes</span>
+        <span class="summary-item"><strong>${totalClasses - specialCount}</strong> Regular classes</span>
         <span class="summary-item"><strong>${specialCount}</strong> Special classes</span>
         <span class="summary-item">Start: <strong>${cfg.startDate}</strong></span>
         <span class="summary-item">Days: <strong>${cfg.classDays.join(", ")}</strong></span>
@@ -749,7 +995,6 @@
           return;
         }
 
-        // class or special
         if (item.type === "special") {
           li.classList.add("special");
         }
@@ -794,7 +1039,50 @@
       });
     }
 
-    render(config);
+    function initTabs() {
+      const tabLessonPlan = document.getElementById("tabLessonPlan");
+      const tabOutcomes   = document.getElementById("tabOutcomes");
+      const tabSyllabus   = document.getElementById("tabSyllabus");
+      const tabEvaluation = document.getElementById("tabEvaluation");
+
+      const lessonPlanView = document.getElementById("lessonPlanView");
+      const outcomesView   = document.getElementById("outcomesView");
+      const syllabusView   = document.getElementById("syllabusView");
+      const evaluationView = document.getElementById("evaluationView");
+      const summaryBar     = document.getElementById("summaryBar");
+
+      const allTabs  = [tabLessonPlan, tabOutcomes, tabSyllabus, tabEvaluation];
+      const allViews = [lessonPlanView, outcomesView, syllabusView, evaluationView];
+
+      function activateTab(tab, view, showSummary) {
+        allTabs.forEach(t => {
+          t.classList.remove("pill-active");
+          t.classList.add("pill-outline");
+        });
+        tab.classList.add("pill-active");
+        tab.classList.remove("pill-outline");
+
+        allViews.forEach(v => v.style.display = "none");
+        view.style.display = "block";
+
+        summaryBar.style.display = showSummary ? "flex" : "none";
+      }
+
+      tabLessonPlan.addEventListener("click", () =>
+        activateTab(tabLessonPlan, lessonPlanView, true));
+      tabOutcomes.addEventListener("click", () =>
+        activateTab(tabOutcomes, outcomesView, false));
+      tabSyllabus.addEventListener("click", () =>
+        activateTab(tabSyllabus, syllabusView, false));
+      tabEvaluation.addEventListener("click", () =>
+        activateTab(tabEvaluation, evaluationView, false));
+
+      // Default
+      activateTab(tabLessonPlan, lessonPlanView, true);
+    }
+
+    renderLessonPlan(config);
+    initTabs();
   </script>
 </body>
 </html>
