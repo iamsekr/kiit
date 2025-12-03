@@ -170,7 +170,7 @@
 
     .header-row {
       display: grid;
-      grid-template-columns: 48px minmax(0, 1fr) auto;
+      grid-template-columns: 48px minmax(0, 1fr) 110px;
       gap: 6px;
       padding: 4px 10px;
       font-size: 0.78rem;
@@ -194,7 +194,7 @@
       border: 1px solid var(--border);
       padding: 6px 10px;
       display: grid;
-      grid-template-columns: 48px minmax(0, 1fr) auto;
+      grid-template-columns: 48px minmax(0, 1fr) 110px;
       gap: 6px;
       align-items: center;
       background: #ffffff;
@@ -246,6 +246,15 @@
       color: var(--muted);
       text-align: right;
       white-space: nowrap;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .lesson-time {
+      font-size: 0.75rem;
+      color: var(--muted);
     }
 
     .lesson-row.special {
@@ -256,7 +265,7 @@
     .lesson-row.exam {
       border-color: var(--exam-border);
       background: var(--exam-bg);
-      grid-template-columns: 48px minmax(0, 1fr) auto;
+      grid-template-columns: 48px minmax(0, 1fr) 110px;
     }
 
     .exam-title {
@@ -423,7 +432,9 @@
 
     @media (max-width: 600px) {
       .header-row { font-size: 0.7rem; }
-      .lesson-row { font-size: 0.85rem; }
+      .lesson-row { font-size: 0.85rem; grid-template-columns: 40px minmax(0,1fr) 90px; }
+      .lesson-date { font-size: 0.72rem; }
+      .lesson-time { font-size: 0.7rem; }
       .course-meta { gap: 4px 6px; }
     }
   </style>
@@ -528,20 +539,20 @@
               <tr>
                 <td>1</td>
                 <td>Activity Based Learning<br>(30 Marks)</td>
-                <td>M1 to M4</td>
-                <td>1 to 26</td>
+                <td>M1 to M6</td>
+                <td>1 to 38</td>
               </tr>
               <tr>
                 <td>2</td>
                 <td>Mid Sem Examination<br>(20 Marks)</td>
-                <td>M1 to M2</td>
-                <td>1 to 12</td>
+                <td>M1 to M3</td>
+                <td>1 to 14</td>
               </tr>
               <tr>
                 <td>3</td>
                 <td>End Sem Examination<br>(50 Marks)</td>
-                <td>M1 to M4</td>
-                <td>1 to 26</td>
+                <td>M1 to M6</td>
+                <td>1 to 38</td>
               </tr>
             </tbody>
           </table>
@@ -571,31 +582,28 @@
       faculty: "Prof.Thotakura NSC Sekhar",
       facultylink: "https://my.e-kard.in/sekhar",
 
-
-      courseTitle: "Basic Electrical Engineering",
-      courseCode: "EE10002",
+      courseTitle: "Semiconductor Fabrication Design and Technology",
+      courseCode: "EE30021",
       courselink: "",
-
 
       // Course meta
       courseMeta: {
-        credits: 2,
-        ltp: "2-0-0",
+        credits: 3,
+        ltp: "3-0-0",
         prereq: "Nil"
       },
 
       // Course objective & outcomes
       courseObjective:
-        "To provide a comprehensive idea about circuit analysis, working principles of electrical machines, " +
-        "a brief idea about magnetic circuits, and to understand the basics of the protection system.",
+        "The Objective of this course is to equip participants with a comprehensive understanding of the Semiconductor manufacturing ecosystem, spanning from design concepts to final product realization",
 
       courseOutcomes: [
-        { id: "CO1", text: "Analyze the concept of DC circuit." },
-        { id: "CO2", text: "Understand the concepts of AC circuits." },
-        { id: "CO3", text: "Analyze the three-phase AC circuit." },
-        { id: "CO4", text: "Interpret the behavior of magnetic circuits." },
-        { id: "CO5", text: "Remember the principles and operation of electrical machines." },
-        { id: "CO6", text: "Know the concepts of electrical safety and protection systems." }
+        { id: "CO1", text: "Understand the ecosystem of semiconductor and its manufacturing from design to product." },
+        { id: "CO2", text: "Know difference between design, fabrication, packaging, system manufacturing and product." },
+        { id: "CO3", text: "Learn microfabrication advantages, scaling effects, and their impact on device design." },
+        { id: "CO4", text: "Develop familiarity with advanced FinFET process integration and module-level decisions." },
+        { id: "CO5", text: "Gain working knowledge of process simulation using SEMulator3D." },
+        { id: "CO6", text: "Apply statistical tools for process control and optimization in semiconductor fabrication." }
       ],
 
       // Holidays, dates, etc.
@@ -604,8 +612,17 @@
         "01-04-2026"
       ],
 
-      startDate: "03-12-2025",
-      classDays: ["Mon", "Fri"],
+      startDate: "04-12-2025",
+
+      /*
+        NEW: classDaysWithTime
+        Format per entry: "Wed 4:30–6:00", "Fri 11:00–12:00"
+        Day abbreviation must be first token (Mon/Tue/Wed/Thu/Fri/Sat/Sun).
+      */
+      classDaysWithTime: [
+        "Wed 4:30–6pm",
+        "Fri 4:30–6pm"
+      ],
 
       midSem: {
         title: "Mid Semester Examination",
@@ -623,85 +640,93 @@
         modules: [
           {
             id: "M1",
-            tag: "M1 – DC Circuits",
+            tag: "M1 – Semiconductor Fundamentals (6Hrs)",
             description:
-              "Kirchhoff’s law, Source transformation, Star-delta transformation and equivalent resistance of the circuits, Mesh and Nodal analysis, Superposition theorem."
+              "Energy bands in solids (insulators, semiconductors, metals), Intrinsic and extrinsic semiconductors, doping (n-type, p-type), Carrier concentration, drift and diffusion currents, mobility, resistivity, Generation and recombination of carriers, PN junction (equilibrium, forward/reverse bias characteristics), Introduction to semiconductor materials (Si, Ge, GaAs, SiC, GaN). Crystal structures, Miller indices."
           },
           {
             id: "M2",
-            tag: "M2 – AC Circuits",
+            tag: "M2 – Introduction to Semiconductor Manufacturing Ecosystem (5Hrs)",
             description:
-              "Peak, average, R.M.S. values of sinusoidal quantities, Peak factor, Form factor, Phase difference, Phasor representation, AC through R, L, C, AC Series Circuit (RL, RC, RLC), Three-phase AC circuits: Voltage, current and power in star and delta connections."
+              "Semiconductor value chain: design, fabrication, packaging, system, product, Foundry vs IDM vs Fabless, Microfabrication and Moore’s law, Circuit abstraction to layout and cross-section, Benefits and implications of scaling."
           },
           {
             id: "M3",
-            tag: "M3 – Electromagnetic Circuits",
+            tag: "M3 – Lithography and Unit Process Fundamentals (6Hrs)",
             description:
-              "Magnetizing Force, Reluctance, Permeance, Magnetic field, Magnetic permeability, Analogy between Electric Circuits and Magnetic Circuits. Series magnetic circuit, BH curve."
+              "Lithography: Resolution, i-line to EUV, SADP & SAQP; Unit processes: - Wafer properties and oxidation, Doping, diffusion, implantation, Deposition: APCVD, LPCVD, PECVD, MOCVD, ALD, PVD, Etching: wet/dry, isotropic/anisotropic, Cleaning and CMP."
           },
           {
             id: "M4",
-            tag: "M4 – Scope & Safety",
+            tag: "M4 – Advanced CMOS FinFET Process Integration (9Hrs)",
             description:
-              "Electrical Energy Scenario in India, Application of Transformer, Three-phase and single-phase induction Motors, Power ratings of air conditioners, PCs, laptops, printers, refrigerator, washing machine, different lamps, electricity tariff, calculation of electricity bill for domestic consumer.<br><br>" +
-              "<strong>Personal Safety Measures:</strong> Electric Shock, Earthing and its types, Safety Precautions to avoid shock.<br><br>" +
-              "<strong>Equipment Safety Measures:</strong> Working principles of fuse and miniature circuit breaker (MCB), Residual Current Circuit Breaker (RCCB)."
+              "Isolation: STI vs LOCOS, Device Architecture: Planar to FinFET, strain, SiGe; Gate Stack: High-k dielectrics, metal gates, gate-first vs gate-last; Junction and Implantation: Well, source-drain, LDD; Contact: Metal-silicon contact, silicides (Ti/Co/Ni), salicidation; Interconnect: Cu vs Al, RC delay, electromigration, Damascene; ILD: Low-k dielectrics, integration challenges."
+          },
+          {
+            id: "M5",
+            tag: "M5 – Tool Introduction: Process Simulation using SEMulator3D (6Hrs)",
+            description:
+              "SEMulator3D overview, Layout import and creation, FinFET process flow simulation, Extraction of cross-sections, Geometric and overlay analysis."
+          },
+          {
+            id: "M6",
+            tag: "M6 – Statistical Process Control and Emerging Topics: (6Hrs)",
+            description:
+              "Statistical Process Control (SPC): distributions, z-test, t-test; ANOVA, DOE: screening, RSM, full/ fractional factorial; Test structures and design rules; Optional: 3D NAND process flow, semiconductor device physics basics."
           }
         ],
         textBooks: [
-          "Principles of Electrical Engineering and Electronics- V K Mehta, Rohit Mehta, S Chand and Company, New Delhi (Revised Edition 2013).",
-          "Basic Electrical Engineering by D.C. Kulshreshtha, Tata Mcgraw publication, 1st Edition 2011.",
-          "Basic Electrical Engineering, T.K. Nagasarkar and M.S. Sukhija, Oxford University press, 3rd Edition 2017."
+          "S. M. Sze & Kwok K. Ng, Physics of Semiconductor Devices, 3rd Edition, Wiley.",
+          "Marc Madou, Fundamentals of Microfabrication and Nanotechnology, 3rd Edition, CRC Press."
         ],
         referenceBooks: [
-          "Basics Electrical Engineering Sanjeev Sharma, I.K.International, New Delhi (Third Reprint 2010)."
+          "Refer to IEEE Papers"
         ]
       },
 
       // ===== LESSONS (use module IDs only) =====
       lessons: [
-        { type: "special", label: "Introduction to Course" },
-        { type: "class", module: "M1", notes: "Basic terminology: circuit/network, active/passive, linear/nonlinear, bilateral/unilateral, voltage, current sources." },
-        { type: "class", module: "M1", notes: "Series/parallel combination of resistances, current & voltage division rules" },
-        { type: "class", module: "M1", notes: "KCL & KVL with numericals." },
-        { type: "class", module: "M1", notes: "Source transformation with basic numerical problems." },
-        { type: "class", module: "M1", notes: "Star–Delta transformation with numericals. (Derivations are not required)" },
+        { type: "special", label: "Introduction to the Course" },
+        { type: "class", module: "M1", notes: "Energy bands in solids (insulators, semiconductors, metals), Intrinsic and extrinsic semiconductors, doping (n-type, p-type)" },
+        { type: "class", module: "M1", notes: "Carrier concentration, drift and diffusion currents, mobility, resistivity, Generation and recombination of carriers" },
+        { type: "class", module: "M1", notes: "PN junction (equilibrium, forward/reverse bias characteristics), Introduction to semiconductor materials (Si, Ge, GaAs, SiC, GaN)" },
+        { type: "class", module: "M1", notes: "Crystal structures, Miller indices." },
 
         { type: "special", label: "Doubt Clearing Session" },
 
-        { type: "class", module: "M1", notes: "Mesh analysis with independent voltage source (no super-mesh), numericals." },
-        { type: "class", module: "M1", notes: "Nodal analysis with independent sources (no super-node), numericals." },
-        { type: "class", module: "M2", notes: "AC Basics: Amplitude, Time Period, Frequency, Phase, Phase difference; average value (full & half cycle Derivations)." },
-        { type: "class", module: "M2", notes: "RMS value (Derivations), form factor & peak factor." },
-        { type: "class", module: "M2", notes: "Problems on AC fundamentals." },
+        { type: "class", module: "M2", notes: "Semiconductor value chain: design, fabrication, packaging system, product, Foundry vs IDM vs Fabless" },
+        { type: "class", module: "M2", notes: "Microfabrication and Moore’s law" },
+        { type: "class", module: "M2", notes: "Circuit abstraction to layout and cross-section" },
+        { type: "class", module: "M2", notes: "Benefits and implications of scaling." },
+
+        { type: "class", module: "M3", notes: "Lithography: Resolution, i-line to EUV, SADP & SAQP;" },
+        { type: "class", module: "M3", notes: "Unit processes: - Wafer properties and oxidation, Doping, diffusion, implantation" },
+        { type: "class", module: "M3", notes: "Deposition: APCVD, LPCVD, PECVD, MOCVD, ALD, PVD" },
+        { type: "class", module: "M3", notes: "Etching: wet/dry, isotropic/anisotropic, Cleaning and CMP" },
 
         { type: "special", label: "Doubt Clearing Session" },
-        { type: "special", label: "Discussion of previous year mid-sem questions" },
 
         { type: "exam_mid" },
 
-        { type: "class", module: "M2", notes: "Phasor representation of AC, Phasor Algebra both Polar & Rectangular." },
-        { type: "class", module: "M2", notes: "AC through R, L, C Circuit Analysis" },
-        { type: "class", module: "M2", notes: "Probs on AC through R, L, C Circuit" },
-        { type: "class", module: "M2", notes: "AC Series RL, RC, RLC circuit Analysis" },
-        { type: "class", module: "M2", notes: "Probs on AC Series RL, RC, RLC circuit Analysis" },
-        { type: "class", module: "M2", notes: "3-Phase AC System(Star-Delta), 3-Phase Power equations & Probs" },
-        { type: "class", module: "M2", notes: "Single-phase vs three-phase systems" },
-        { type: "special", label: "Doubt Session & Revision" },
-        { type: "class", module: "M3", notes: "Basic terminology, Analogy between Electric and Magnetic Circuits." },
-        { type: "class", module: "M3", notes: "Analysis of Series Magnetic circuits with Probs." },
-        { type: "class", module: "M3", notes: "B–H curve and hysteresis loop concepts." },
-        { type: "class", module: "M4", notes: "Indian Electricity till date, 1-ph transformer principle & applications" },
-        { type: "class", module: "M4", notes: "3-ph, 1-ph Induction motor principle & applications" },
-        { type: "class", module: "M4", notes: "Power ratings of air conditioners, PCs, laptops, printers, refrigerator, washing machine, different lamps, electricity tariff, calculation of electricity bill for domestic consumers (with numerical problems)." },
-        { type: "class", module: "M4", notes: "Personal safety measures: Electric Shock, Earthing and its types, Safety Precautions to avoid shock." },
-        { type: "class", module: "M4", notes: "Equipment Safety measures: Working principle of Fuse and Miniature circuit breaker (MCB), Residual Current Circuit Breaker (RCCB)" },
+        { type: "class", module: "M4", notes: "Isolation: STI vs LOCOS, Device Architecture: Planar to FinFET, strain, SiGe;" },
+        { type: "class", module: "M4", notes: "Gate Stack: High-k dielectrics, metal gates, gate-first vs gate-last" },
+        { type: "class", module: "M4", notes: "Junction and Implantation: Well, source-drain, LDD" },
+        { type: "class", module: "M4", notes: "Contact: Metal-silicon contact, silicides (Ti/Co/Ni), salicidation" },
+        { type: "class", module: "M4", notes: "Interconnect: Cu vs Al, RC delay, electromigration, Damascene;" },
+        { type: "class", module: "M4", notes: "ILD: Low-k dielectrics, integration challenges" },
+
+        { type: "class", module: "M5", notes: "SEMulator3D overview, Layout import and creation" },
+        { type: "class", module: "M5", notes: "FinFET process flow simulation" },
+        { type: "class", module: "M5", notes: "Extraction of cross-sections, Geometric and overlay analysis" },
+
+        { type: "class", module: "M6", notes: "Statistical Process Control (SPC): distributions, z-test, t-test" },
+        { type: "class", module: "M6", notes: "ANOVA, DOE: screening, RSM, full/ fractional factorial;" },
+        { type: "class", module: "M6", notes: "Test structures and design rules; Optional: 3D NAND process flow, semiconductor device physics basics." },
 
         { type: "special", label: "Final Doubt Session & Revision" },
 
         { type: "exam_end" }
       ],
-
 
       programmeOutcomes: [
         {
@@ -814,12 +839,42 @@
       return map;
     }
 
+    /*
+      Parse classDaysWithTime into:
+      - classDays: array of numeric week days
+      - dayTimeMap: { [weekdayNumber]: "Wed 4:30–6:00" }
+      Expected string format: "Wed 4:30–6:00", "Fri 11–12", etc.
+    */
+    function parseClassDaysWithTime(list) {
+      const classDays = [];
+      const dayTimeMap = {};
+      if (!Array.isArray(list)) return { classDays, dayTimeMap };
+
+      list.forEach(entry => {
+        if (typeof entry !== "string") return;
+        const parts = entry.trim().split(/\s+/);
+        if (!parts.length) return;
+        const dayShort = parts[0];
+        const dayNum = dayMapShortToNum[dayShort];
+        if (dayNum == null) return;
+        classDays.push(dayNum);
+        const timeStr = entry.slice(dayShort.length).trim();
+        const label = timeStr ? `${dayShort} ${timeStr}` : dayShort;
+        dayTimeMap[dayNum] = label;
+      });
+
+      return { classDays, dayTimeMap };
+    }
+
     /* ========== 3. SCHEDULE GENERATION ========== */
 
     function generateSchedule(cfg) {
       const lessonsOut = [];
       const startDate = parseDDMMYYYY(cfg.startDate);
-      const classDays = cfg.classDays.map(d => dayMapShortToNum[d]);
+
+      const parsed = parseClassDaysWithTime(cfg.classDaysWithTime || []);
+      const classDays = parsed.classDays;          // numeric weekdays
+      const dayTimeMap = parsed.dayTimeMap;       // weekday -> "Wed 4:30–6"
 
       const midStart = cfg.midSem?.start ? parseDDMMYYYY(cfg.midSem.start) : null;
       const midEnd   = cfg.midSem?.end   ? parseDDMMYYYY(cfg.midSem.end)   : null;
@@ -888,13 +943,17 @@
           const nextDate = nextValidClassDate(currentDate);
           classNumber++;
 
+          const weekdayNum = nextDate.getDay();
+          const timeLabel = dayTimeMap[weekdayNum] || "";
+
           lessonsOut.push({
             type: base.type,
             classNo: classNumber,
             module: base.module || null,
             label: base.label || null,
             notes: base.notes || "",
-            date: nextDate
+            date: nextDate,
+            timeLabel
           });
 
           currentDate = new Date(nextDate);
@@ -906,7 +965,7 @@
         idxLesson++;
       }
 
-      return lessonsOut;
+      return { schedule: lessonsOut, dayTimeMap };
     }
 
     /* ========== 4. RENDERING: LESSON PLAN ========= */
@@ -945,7 +1004,7 @@
         </a>
       `;
 
-      const schedule = generateSchedule(cfg);
+      const { schedule, dayTimeMap } = generateSchedule(cfg);
 
       // build modules map from syllabus
       const modulesMap = buildModulesFromSyllabus(cfg);
@@ -955,11 +1014,18 @@
       const specialCount = schedule.filter(s => s.type === "special").length;
 
       const summaryBar = document.getElementById("summaryBar");
+
+      // Build a neat summary of day+time
+      const dayTimeStrings = Object.values(dayTimeMap);
+      const dayTimeSummary = dayTimeStrings.length
+        ? dayTimeStrings.join(", ")
+        : "See timetable";
+
       summaryBar.innerHTML = `
         <span class="summary-item"><strong>${totalClasses - specialCount}</strong> Regular classes</span>
         <span class="summary-item"><strong>${specialCount}</strong> Special classes</span>
         <span class="summary-item">Start: <strong>${cfg.startDate}</strong></span>
-        <span class="summary-item">Days: <strong>${cfg.classDays.join(", ")}</strong></span>
+        <span class="summary-item">Schedule: <strong>${dayTimeSummary}</strong></span>
       `;
 
       const list = document.getElementById("lessonList");
@@ -1040,7 +1106,20 @@
           colModule.appendChild(notesDiv);
         }
 
-        colDate.textContent = formatDateDDMMMYYYY(item.date);
+        const dateStr = formatDateDDMMMYYYY(item.date);
+        colDate.textContent = "";
+
+        const dateSpan = document.createElement("div");
+        dateSpan.textContent = dateStr;
+
+        colDate.appendChild(dateSpan);
+
+        if (item.timeLabel) {
+          const timeSpan = document.createElement("div");
+          timeSpan.className = "lesson-time";
+          timeSpan.textContent = item.timeLabel;
+          colDate.appendChild(timeSpan);
+        }
 
         li.appendChild(colIndex);
         li.appendChild(colModule);
@@ -1164,7 +1243,7 @@
       activateTab(tabLessonPlan, lessonPlanView, true);
     }
 
-    /* ========== 8. INIT ========= */
+    /* ========== 8. INIT ========== */
 
     renderLessonPlan(config);
     renderSyllabus(config);
