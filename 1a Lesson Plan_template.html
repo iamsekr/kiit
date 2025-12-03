@@ -1022,10 +1022,9 @@
         : "See timetable";
 
       summaryBar.innerHTML = `
-        <span class="summary-item"><strong>${totalClasses - specialCount}</strong> Regular classes</span>
-        <span class="summary-item"><strong>${specialCount}</strong> Special classes</span>
+        <span class="summary-item"><strong>${totalClasses - specialCount}</strong> Regular + <strong>${specialCount}</strong> Special classes</span>
         <span class="summary-item">Start: <strong>${cfg.startDate}</strong></span>
-        <span class="summary-item">Schedule: <strong>${dayTimeSummary}</strong></span>
+        <span class="summary-item">${dayTimeSummary}</span>
       `;
 
       const list = document.getElementById("lessonList");
