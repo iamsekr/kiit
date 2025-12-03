@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Lesson Plan</title>
+  <title>Course Information</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -170,14 +170,15 @@
 
     .header-row {
       display: grid;
-      grid-template-columns: 48px minmax(0, 1fr) 110px;
-      gap: 6px;
+      grid-template-columns: 90px minmax(0, 1fr);
+      gap: 4px; /* reduced gap between columns */
       padding: 4px 10px;
       font-size: 0.78rem;
       color: var(--muted);
       border-bottom: 1px solid var(--border);
       text-transform: uppercase;
       letter-spacing: 0.06em;
+      text-align: center;
     }
 
     .lesson-list {
@@ -194,23 +195,58 @@
       border: 1px solid var(--border);
       padding: 6px 10px;
       display: grid;
-      grid-template-columns: 48px minmax(0, 1fr) 110px;
-      gap: 6px;
+      grid-template-columns: 90px minmax(0, 1fr); /* narrower index column, minimal gap */
+      gap: 4px;
       align-items: center;
       background: #ffffff;
     }
 
+    .lesson-index-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* center align class number and meta under it */
+      gap: 2px;
+      text-align: center;
+    }
+
     .lesson-index {
       font-weight: 600;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: var(--muted);
-      text-align: center;
+      min-width: 24px;
+      min-height: 24px;
+      padding: 2px;
+      border: 1px solid var(--border);
+      border-radius: 4px;      /* use 0 for a perfect square corner */
+      display: flex;
+      align-items: center;
+      justify-content: center; /* centers the number inside the box */
+      box-sizing: border-box;
+      background: #ffffff;
+    }
+
+    .lesson-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      font-size: 0.68rem; /* reduced by ~2pt equivalent from ~0.8rem */
+      color: var(--muted);
+      line-height: 1.1;
+    }
+
+    .lesson-meta-date {
+      font-weight: 500;
+    }
+
+    .lesson-meta-time {
+      font-style: italic;
     }
 
     .lesson-module {
       display: flex;
       flex-direction: column;
       gap: 2px;
+      min-width: 0; /* allow flex children to shrink and ellipsis */
     }
 
     .module-tag {
@@ -223,8 +259,9 @@
       font-weight: 600;
       color: #ffffff;
       white-space: nowrap;
-      width: fit-content;
       max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis; /* trim module name if it crosses container */
     }
 
     .module-a { background: var(--module-color-a); }
@@ -241,22 +278,6 @@
       color: var(--muted);
     }
 
-    .lesson-date {
-      font-size: 0.78rem;
-      color: var(--muted);
-      text-align: right;
-      white-space: nowrap;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 2px;
-    }
-
-    .lesson-time {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
     .lesson-row.special {
       border-color: var(--special-border);
       background: var(--special-bg);
@@ -265,7 +286,6 @@
     .lesson-row.exam {
       border-color: var(--exam-border);
       background: var(--exam-bg);
-      grid-template-columns: 48px minmax(0, 1fr) 110px;
     }
 
     .exam-title {
@@ -287,6 +307,7 @@
       font-weight: 600;
       background: #fee2e2;
       color: var(--exam-border);
+      margin-top: 4px;
     }
 
     .footer-note {
@@ -431,10 +452,10 @@
     }
 
     @media (max-width: 600px) {
-      .header-row { font-size: 0.7rem; }
-      .lesson-row { font-size: 0.85rem; grid-template-columns: 40px minmax(0,1fr) 90px; }
-      .lesson-date { font-size: 0.72rem; }
-      .lesson-time { font-size: 0.7rem; }
+      .header-row { font-size: 0.7rem; grid-template-columns: 80px minmax(0, 1fr); }
+      .lesson-row { font-size: 0.85rem; grid-template-columns: 80px minmax(0,1fr); }
+      .lesson-index { font-size: 0.85rem; }
+      .lesson-meta { font-size: 0.64rem; }
       .course-meta { gap: 4px 6px; }
     }
   </style>
@@ -445,14 +466,11 @@
     <header class="header-card">
       <div class="institution" id="instName"></div>
       <div class="school-line" id="schoolLine"></div>
+      <span class="badge" id="semester"></span>
+      <span class="badge" id="courseCode"></span>
       <div class="course-title" id="courseTitle"></div>
 
       <div class="course-meta">
-        <!-- course code badge (single source: config) -->
-        <span class="badge" id="courseCode"></span>
-
-        <span class="badge" id="semester"></span>
-
         <!-- faculty clickable -->
         <span class="badge" id="faculty"></span><br>
 
@@ -473,9 +491,8 @@
       <div id="lessonPlanView">
         <div class="card-title">Detailed Lesson Plan</div>
         <div class="header-row">
-          <div></div>
+          <div>Class</div>
           <div>Topic Covered</div>
-          <div style="text-align:right;">Date</div>
         </div>
         <ul class="lesson-list" id="lessonList"></ul>
       </div>
@@ -532,7 +549,7 @@
                 <th rowspan="2">S.No</th>
                 <th rowspan="2">Evaluation Component</th>
                 <th rowspan="2">Course Module</th>
-                <th rowspan="2">Course Lecture No.</th>
+                <th rowspan="2">Lecture No.</th>
               </tr>
             </thead>
             <tbody>
@@ -615,8 +632,8 @@
       startDate: "04-12-2025",
 
       /*
-        NEW: classDaysWithTime
-        Format per entry: "Wed 4:30–6:00", "Fri 11:00–12:00"
+        classDaysWithTime
+        Format per entry: "Wed 4:30–6pm", "Fri 4:30–6pm"
         Day abbreviation must be first token (Mon/Tue/Wed/Thu/Fri/Sat/Sun).
       */
       classDaysWithTime: [
@@ -1021,10 +1038,10 @@
         ? dayTimeStrings.join(", ")
         : "See timetable";
 
+      // Summary: X Regular + Y Special, plus schedule  <span class="summary-item">${dayTimeSummary}</span>
       summaryBar.innerHTML = `
         <span class="summary-item"><strong>${totalClasses - specialCount}</strong> Regular + <strong>${specialCount}</strong> Special classes</span>
-        <span class="summary-item">Start: <strong>${cfg.startDate}</strong></span>
-        <span class="summary-item">${dayTimeSummary}</span>
+        
       `;
 
       const list = document.getElementById("lessonList");
@@ -1034,18 +1051,38 @@
         const li = document.createElement("li");
         li.classList.add("lesson-row");
 
-        const colIndex = document.createElement("div");
-        colIndex.className = "lesson-index";
+        const colIndexWrapper = document.createElement("div");
+        colIndexWrapper.className = "lesson-index-wrapper";
 
         const colModule = document.createElement("div");
         colModule.className = "lesson-module";
 
-        const colDate = document.createElement("div");
-        colDate.className = "lesson-date";
+        const indexDiv = document.createElement("div");
+        indexDiv.className = "lesson-index";
+
+        const metaDiv = document.createElement("div");
+        metaDiv.className = "lesson-meta";
+
+        const metaDate = document.createElement("div");
+        metaDate.className = "lesson-meta-date";
+
+        const metaTime = document.createElement("div");
+        metaTime.className = "lesson-meta-time";
 
         if (item.type === "exam_mid" || item.type === "exam_end") {
           li.classList.add("exam");
-          colIndex.textContent = "—";
+          // Index as em dash
+          indexDiv.textContent = "—";
+
+          // Date range in meta-date, "EXAM" in meta-time
+          metaDate.textContent = `${formatDateDDMMMYYYY(item.start)} – ${formatDateDDMMMYYYY(item.end)}`;
+          metaTime.textContent = "EXAM";
+
+          metaDiv.appendChild(metaDate);
+          metaDiv.appendChild(metaTime);
+
+          colIndexWrapper.appendChild(indexDiv);
+          colIndexWrapper.appendChild(metaDiv);
 
           const title = document.createElement("div");
           title.className = "exam-title";
@@ -1061,11 +1098,10 @@
           const badge = document.createElement("span");
           badge.className = "exam-badge";
           badge.textContent = "EXAM";
-          colDate.appendChild(badge);
+          colModule.appendChild(badge);
 
-          li.appendChild(colIndex);
+          li.appendChild(colIndexWrapper);
           li.appendChild(colModule);
-          li.appendChild(colDate);
           list.appendChild(li);
           return;
         }
@@ -1074,7 +1110,8 @@
           li.classList.add("special");
         }
 
-        colIndex.textContent = item.classNo;
+        // Regular / special lesson index
+        indexDiv.textContent = item.classNo;
 
         const tag = document.createElement("span");
         tag.className = "module-tag";
@@ -1105,24 +1142,27 @@
           colModule.appendChild(notesDiv);
         }
 
+        // Meta date and time under class index
         const dateStr = formatDateDDMMMYYYY(item.date);
-        colDate.textContent = "";
+        metaDate.textContent = dateStr;
 
-        const dateSpan = document.createElement("div");
-        dateSpan.textContent = dateStr;
-
-        colDate.appendChild(dateSpan);
-
-        if (item.timeLabel) {
-          const timeSpan = document.createElement("div");
-          timeSpan.className = "lesson-time";
-          timeSpan.textContent = item.timeLabel;
-          colDate.appendChild(timeSpan);
+        // If we have a time label, show it; otherwise, show weekday name
+        let timeLabelToUse = item.timeLabel;
+        if (!timeLabelToUse) {
+          const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+          const weekdayShort = weekdayNames[item.date.getDay()];
+          timeLabelToUse = weekdayShort;
         }
+        metaTime.textContent = timeLabelToUse;
 
-        li.appendChild(colIndex);
+        metaDiv.appendChild(metaDate);
+        metaDiv.appendChild(metaTime);
+
+        colIndexWrapper.appendChild(indexDiv);
+        colIndexWrapper.appendChild(metaDiv);
+
+        li.appendChild(colIndexWrapper);
         li.appendChild(colModule);
-        li.appendChild(colDate);
         list.appendChild(li);
       });
     }
