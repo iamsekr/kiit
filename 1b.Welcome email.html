@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Course Welcome Email Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 16px;
+      margin: 0;
+      background: #f3f4f6;
+      color: #111827;
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 22px;
+      color: #0f172a;
+    }
+    .layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .panel {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 16px 18px 18px;
+      box-shadow: 0 8px 20px rgba(15,23,42,0.06);
+    }
+    .panel-form {
+      flex: 1;
+      min-width: 0;
+    }
+    .panel-preview {
+      flex: 1.1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px 16px;
+      margin-top: 12px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+    .field label {
+      font-weight: 600;
+      margin-bottom: 3px;
+      color: #0f172a;
+    }
+    .field small {
+      color: #6b7280;
+      font-size: 11px;
+    }
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+      box-sizing: border-box;
+      background-color: #f9fafb;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px #6366f1;
+      background-color: #ffffff;
+    }
+    textarea {
+      width: 100%;
+      height: 160px;
+      resize: vertical;
+      white-space: pre;
+    }
+    button {
+      padding: 9px 22px;
+      border-radius: 999px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg,#6366f1,#22c55e,#f97316);
+      background-size: 200% 200%;
+      color: #ffffff;
+      animation: gradientMove 6s ease infinite;
+    }
+    .actions {
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+    .note {
+      font-size: 11px;
+      color: #6b7280;
+    }
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .preview-frame {
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #f3f4f6;
+      overflow: hidden;
+      height: 520px;
+    }
+    .preview-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+    .preview-code-label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 4px;
+      color: #4b5563;
+    }
+    .preview-code {
+      font-size: 11px;
+      font-family: monospace;
+      background: #0f172a;
+      color: #e5e7eb;
+      border-radius: 8px;
+      padding: 6px 8px;
+      border: 1px solid #111827;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        flex-direction: column;
+      }
+      .preview-frame {
+        height: 460px;
+      }
+    }
+    @media (max-width: 640px) {
+      body {
+        padding: 10px;
+      }
+      .panel {
+        padding: 12px 12px 14px;
+      }
+      .preview-frame {
+        height: 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- LEFT: Form -->
+    <div class="panel panel-form">
+      <h1>Course Welcome Email Generator</h1>
+      <p style="font-size:13px; color:#4b5563; margin-top:4px;">
+        Fill the course details, then click <strong>Generate HTML &amp; Copy</strong>.
+        The email preview appears on the right, and the HTML is copied for you to paste into Gmail.
+      </p>
+
+      <div class="grid">
+        <div class="field">
+          <label for="recipientTitle">Recipient title</label>
+          <input id="recipientTitle" type="text" value="Students" />
+          <small>e.g., Student, Learner</small>
+        </div>
+
+        <div class="field">
+          <label for="institutionName">Institution / School name</label>
+          <input id="institutionName" type="text" value="KIIT School of Electrical Engineering" />
+        </div>
+
+        <div class="field">
+          <label for="courseName">Course name</label>
+          <input id="courseName" type="text" value="Basic Electrical Engineering" />
+        </div>
+
+        <div class="field">
+          <label for="courseCode">Course code</label>
+          <input id="courseCode" type="text" value="EE10002" />
+        </div>
+
+        <div class="field">
+          <label for="semesterName">Semester name</label>
+          <input id="semesterName" type="text" value="Spring Semester 2025–26" />
+        </div>
+
+        <div class="field">
+          <label for="classStartDate">Class start date</label>
+          <input id="classStartDate" type="text" value="03.12.2025" />
+          <small>e.g., 03.12.2025 or 03 December 2025</small>
+        </div>
+
+        <div class="field">
+          <label for="courseInfoUrl">Course information URL</label>
+          <input id="courseInfoUrl" type="text" placeholder="https://..." />
+          <small>Lesson plan / activity calendar link</small>
+        </div>
+
+        <div class="field">
+          <label for="classroomUrl">Google Classroom URL</label>
+          <input id="classroomUrl" type="text" placeholder="https://classroom.google.com/..." />
+        </div>
+
+        <div class="field">
+          <label for="facultyName">Faculty name</label>
+          <input id="facultyName" type="text" value="Prof.Thotakura NSC Sekhar" />
+          <small>Will be hyperlinked in the signature.</small>
+        </div>
+
+        <div class="field">
+          <label for="facultyEmail">Faculty email</label>
+          <input id="facultyEmail" type="email" value="thotakurafel@kiit.ac.in" />
+        </div>
+
+        <div class="field">
+          <label for="facultyProfileUrl">Faculty profile URL</label>
+          <input id="facultyProfileUrl" type="text" value="https://my.e-kard.in/tnsc" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="generateBtn" type="button">Generate HTML &amp; Copy</button>
+        <p class="note">
+          After generating, the preview updates on the right and the HTML is copied to your clipboard. Just paste in Gmail.
+        </p>
+      </div>
+    </div>
+
+    <!-- RIGHT: Preview -->
+    <div class="panel panel-preview">
+      <div style="font-size:13px; font-weight:600; margin-bottom:4px; color:#4b5563;">
+        Live Email Preview
+      </div>
+      <div class="preview-frame">
+        <iframe id="previewFrame" class="preview-iframe"></iframe>
+      </div>
+      <div class="preview-code-label">Generated HTML (backup)</div>
+      <textarea id="output" class="preview-code" readonly></textarea>
+    </div>
+  </div>
+
+  <script>
+    async function generateHtmlAndCopy() {
+      var RECIPIENT_TITLE = document.getElementById('recipientTitle').value || 'Student';
+      var INSTITUTION_NAME = document.getElementById('institutionName').value || '';
+      var COURSE_NAME = document.getElementById('courseName').value || '';
+      var COURSE_CODE = document.getElementById('courseCode').value || '';
+      var SEMESTER_NAME = document.getElementById('semesterName').value || '';
+      var CLASS_START_DATE = document.getElementById('classStartDate').value || '';
+      var COURSE_INFO_URL = document.getElementById('courseInfoUrl').value || '#';
+      var CLASSROOM_URL = document.getElementById('classroomUrl').value || '#';
+      var FACULTY_NAME = document.getElementById('facultyName').value || '';
+      var FACULTY_EMAIL = document.getElementById('facultyEmail').value || 'thotakurafel@kiit.ac.in';
+      var FACULTY_PROFILE_URL = document.getElementById('facultyProfileUrl').value || 'https://my.e-kard.in/tnsc';
+
+      // Auto-build faculty title from course info
+      var FACULTY_TITLE = '';
+      if (COURSE_NAME && COURSE_CODE) {
+        FACULTY_TITLE = 'Faculty, ' + COURSE_NAME + ' (' + COURSE_CODE + ')';
+      } else if (COURSE_NAME) {
+        FACULTY_TITLE = 'Faculty, ' + COURSE_NAME;
+      } else {
+        FACULTY_TITLE = 'Faculty';
+      }
+
+      // MOBILE‑CENTRIC, SIMPLE EMAIL LAYOUT
+      var html =
+'<!DOCTYPE html>\n' +
+'<html>\n' +
+'<head>\n' +
+'  <meta charset="UTF-8" />\n' +
+'  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n' +
+'  <title>Welcome to ' + COURSE_NAME + ' (' + COURSE_CODE + ')</title>\n' +
+'  <style>\n' +
+'    .btn-fancy {\n' +
+'      display:inline-block;\n' +
+'      padding:10px 22px;\n' +
+'      border-radius:999px;\n' +
+'      font-size:14px;\n' +
+'      font-weight:bold;\n' +
+'      color:#ffffff;\n' +
+'      text-decoration:none;\n' +
+'      font-family:Arial, sans-serif;\n' +
+'      background-image:linear-gradient(90deg,#6366f1,#22c55e,#f97316,#ec4899,#6366f1);\n' +
+'      background-size:250% 250%;\n' +
+'      animation:btnGradient 6s ease infinite;\n' +
+'      box-shadow:0 4px 12px rgba(15,23,42,0.25);\n' +
+'    }\n' +
+'    @keyframes btnGradient {\n' +
+'      0%{background-position:0% 50%;}\n' +
+'      50%{background-position:100% 50%;}\n' +
+'      100%{background-position:0% 50%;}\n' +
+'    }\n' +
+'    @media only screen and (max-width:600px){\n' +
+'      .wrapper{padding:12px !important;}\n' +
+'      .content{padding:12px !important;}\n' +
+'      h1{font-size:20px !important;}\n' +
+'      p,li{font-size:14px !important;}\n' +
+'      .btn-row{padding-top:8px !important;}\n' +
+'    }\n' +
+'  </style>\n' +
+'</head>\n' +
+'<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:Arial,sans-serif;">\n' +
+'\n' +
+'  <div class="wrapper" style="max-width:600px;margin:0 auto;padding:16px;background-color:#f3f4f6;">\n' +
+'    <!-- Header strip -->\n' +
+'    <div style="height:4px;width:100%;background:linear-gradient(90deg,#6366f1,#22c55e,#f97316,#ec4899);border-radius:999px;"></div>\n' +
+'\n' +
+'    <!-- Header / Hero -->\n' +
+'    <div style="background:linear-gradient(135deg,#e0f2fe,#ecfdf5);border-radius:16px;margin-top:10px;padding:16px 16px 14px 16px;">\n' +
+'      <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#6b7280;margin-bottom:6px;text-align:center;">' + INSTITUTION_NAME + '</div>\n' +
+'      <h1 style="margin:0 0 6px 0;font-size:22px;color:#111827;text-align:center;">Welcome to ' + COURSE_NAME + '</h1>\n' +
+'      <div style="font-size:13px;color:#4b5563;text-align:center;">\n' +
+'        Course Code: <span style="font-weight:bold;color:#2563eb;">' + COURSE_CODE + '</span> &nbsp;&bull;&nbsp;\n' +
+'        <span style="color:#b91c1c;">' + SEMESTER_NAME + '</span>\n' +
+'      </div>\n' +
+'    </div>\n' +
+'\n' +
+'    <!-- Body content -->\n' +
+'    <div class="content" style="background-color:#ffffff;border-radius:16px;margin-top:10px;padding:16px;">\n' +
+'      <p style="margin:0 0 8px 0;font-size:13px;color:#6b7280;">\n' +
+'        <strong style="color:#111827;">Semester From:</strong>\n' +
+'        <span style="color:#0f766e;">&nbsp;' + CLASS_START_DATE + '</span>\n' +
+'      </p>\n' +
+'\n' +
+'      <p style="margin:8px 0 10px 0;font-size:14px;color:#111827;">Dear ' + RECIPIENT_TITLE + ',</p>\n' +
+'\n' +
+'      <p style="margin:0 0 8px 0;font-size:14px;color:#374151;">\n' +
+'        Greetings from <strong>' + INSTITUTION_NAME + '</strong>!\n' +
+'      </p>\n' +
+'\n' +
+'      <p style="margin:0 0 10px 0;font-size:14px;color:#374151;">\n' +
+'        I am delighted to welcome you to <strong>' + SEMESTER_NAME + '</strong>. Regular classes for\n' +
+'        <strong>' + COURSE_NAME + ' (' + COURSE_CODE + ')</strong> will commence as per the schedule.\n' +
+'      </p>\n' +
+'\n' +
+'      <p style="margin:0 0 8px 0;font-size:14px;color:#374151;">\n' +
+'        The detailed syllabus and <strong>Course Lesson Plan</strong> and <strong>Evalution Scheme</strong> are available for your reference.\n' +
+'      <!-- Course info button -->\n' +
+'      <div class="btn-row" style="margin:8px 0 14px 0;text-align:left;">\n' +
+'        <a href="' + COURSE_INFO_URL + '" class="btn-fancy">View Course Information</a>\n' +
+'      </div>\n' +
+'\n' +
+'      <p style="margin:0 0 10px 0;font-size:14px;color:#374151;">\n' +
+'        As your course faculty, I assure you of my <strong>full support</strong> throughout your learning journey.\n' +
+'        If you have doubts, face challenges in understanding concepts, or seek guidance on the subject, please do not\n' +
+'        hesitate to reach out.\n' +
+'      </p>\n' +
+'\n' +
+'      <p style="margin:10px 0 8px 0;font-size:14px;color:#374151;">\n' +
+'        All official course communication, announcements, study materials, and updates will be shared via\n' +
+'        <strong>Google Classroom</strong>. Please join using the link below:\n' +
+'      </p>\n' +
+'\n' +
+'      <!-- Google Classroom button -->\n' +
+'      <div class="btn-row" style="margin:6px 0 14px 0;text-align:left;">\n' +
+'        <a href="' + CLASSROOM_URL + '" class="btn-fancy">Join Google Classroom</a>\n' +
+'      </div>\n' +
+'\n' +
+'      <p style="margin:0 0 10px 0;font-size:14px;color:#374151;">\n' +
+'        Your <strong>active participation</strong>, <strong>regular attendance</strong>, and\n' +
+'        <strong>sincere effort</strong> will be key to making this semester both\n' +
+'        <strong>productive</strong> and <strong>rewarding</strong>.\n' +
+'      </p>\n' +
+'\n' +
+'      <p style="margin:0 0 8px 0;font-size:13px;color:#6b7280;">\n' +
+'        For any queries, you may reach me at <strong style="color:#111827;">' + FACULTY_EMAIL + '</strong>.\n' +
+'      </p>\n' +
+'\n' +
+'      <p style="margin:10px 0 2px 0;font-size:14px;color:#374151;">Wishing you a successful and enriching semester ahead.</p>\n' +
+'      <p style="margin:0 0 2px 0;font-size:14px;color:#374151;"><br>Warm regards,</p>\n' +
+'      <p style="margin:0;font-size:14px;color:#111827;">\n' +
+'        <strong><a href="' + FACULTY_PROFILE_URL + '" style="color:#2563eb;text-decoration:none;">' + FACULTY_NAME + '</a></strong><br />\n' +
+'        ' + FACULTY_TITLE + '<br />\n' +
+'        ' + INSTITUTION_NAME + '\n' +
+'      </p>\n' +
+'    </div>\n' +
+'\n' +
+'    <!-- Footer note -->\n' +
+'    <p style="margin:8px 4px 0 4px;font-size:11px;color:#9ca3af;text-align:center;">\n' +
+'      This email is intended for students enrolled in ' + COURSE_NAME + ' (' + COURSE_CODE + '), ' + SEMESTER_NAME + '.\n' +
+'    </p>\n' +
+'  </div>\n' +
+'\n' +
+'</body>\n' +
+'</html>\n';
+
+      // Put HTML into textarea
+      var output = document.getElementById('output');
+      output.value = html;
+
+      // Update live preview (iframe)
+      var iframe = document.getElementById('previewFrame');
+      var doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write(html);
+      doc.close();
+
+      // Copy silently to clipboard
+      try {
+        await navigator.clipboard.writeText(html);
+      } catch (e) {
+        output.focus();
+        output.select();
+        document.execCommand('copy');
+      }
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', generateHtmlAndCopy);
+
+    // Generate once on load so you see preview with defaults
+    window.addEventListener('load', generateHtmlAndCopy);
+  </script>
+</body>
+</html>
