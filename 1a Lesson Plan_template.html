@@ -451,6 +451,89 @@
       color: #6b7280;
     }
 
+    /* ===== ACTIVITY CALENDAR (inside Evaluation) ===== */
+
+    .activity-calendar {
+      margin-top: 14px;
+      padding: 10px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    .activity-calendar-title {
+      font-weight: 650;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      color: #b91c1c;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .activity-calendar-description {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .activity-item {
+      padding: 6px 0;
+      border-top: 1px dashed #d1d5db;
+    }
+
+    .activity-item:first-of-type {
+      border-top: none;
+    }
+
+    .activity-item-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 4px;
+      font-weight: 600;
+      font-size: 0.86rem;
+    }
+
+    .activity-item-label {
+      color: #1f2937;
+    }
+
+    .activity-item-marks {
+      color: #b91c1c;
+      font-size: 0.8rem;
+    }
+
+    .activity-item-body {
+      margin-top: 2px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .activity-item-meta {
+      margin-top: 3px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: #4b5563;
+    }
+
+    .activity-meta-tag {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4338ca;
+    }
+
+    .activity-meta-date {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #ecfeff;
+      color: #0369a1;
+    }
+
     @media (max-width: 600px) {
       .header-row { font-size: 0.7rem; grid-template-columns: 80px minmax(0, 1fr); }
       .lesson-row { font-size: 0.85rem; grid-template-columns: 80px minmax(0,1fr); }
@@ -556,28 +639,29 @@
               <tr>
                 <td>1</td>
                 <td>Activity Based Learning<br>(30 Marks)</td>
-                <td>M1 to M6</td>
-                <td>1 to 38</td>
+                <td>M1 to M5</td>
+                <td>1 to 26</td>
               </tr>
               <tr>
                 <td>2</td>
                 <td>Mid Sem Examination<br>(20 Marks)</td>
-                <td>M1 to M3</td>
+                <td>M1 to M2</td>
                 <td>1 to 14</td>
               </tr>
               <tr>
                 <td>3</td>
                 <td>End Sem Examination<br>(50 Marks)</td>
-                <td>M1 to M6</td>
-                <td>1 to 38</td>
+                <td>M1 to M5</td>
+                <td>1 to 26</td>
               </tr>
             </tbody>
           </table>
         </div>
         <p class="eval-note">
-          Note: The above evaluation structure indicates how marks are distributed across activity based learning,
-          mid-semester and end-semester examinations, and the corresponding coverage of course modules and lecture numbers.
+          Note: Please Check the activity calendar below.
         </p>
+        <!-- Activity Calendar will be injected here -->
+        <div id="activityCalendarContainer" class="activity-calendar"></div>
       </div>
     </main>
 
@@ -590,6 +674,63 @@
     /* ========== 1. CONFIG – EDIT THIS BLOCK ONLY ========== */
 
     const config = {
+      // ===== ACTIVITY CALENDAR (generic, reusable) =====
+      activityCalendar: {
+        title: "Activity Calendar",
+        description:
+          "",
+        activities: [
+          {
+            activityLabel: "Activity 1",
+            mode: "Online quiz test",
+            details: "Pre-midsem first quiz test",
+            courseOutcomes: ["CO1 - CO3"],
+            assignedFrom: "09.01.26",
+            assignedTo: "16.01.26",
+            marks: 5
+          },
+          {
+            activityLabel: "Activity 2",
+            mode: "Assignment",
+            details:
+              "Pre-midsem first assignment",
+            courseOutcomes: ["CO1 - CO3"],
+            assignedFrom: "31.01.26",
+            assignedTo: "31.01.26",
+            marks: 5
+          },
+          {
+            activityLabel: "Activity 3",
+            mode: "Online quiz test",
+            details: "Post-midsem second quiz test",
+            courseOutcomes: ["CO4 - CO6"],
+            assignedFrom: "27.02.26",
+            assignedTo: "06.03.26",
+            marks: 5
+          },
+          {
+            activityLabel: "Activity 4",
+            mode: "Assignment",
+            details: "Post-midsem second assignment",
+            courseOutcomes: ["CO4 - CO6"],
+            assignedFrom: "20.03.26",
+            assignedTo: "27.03.26",
+            marks: 5
+          },
+          {
+            activityLabel: "Activity 5",
+            mode: null,
+            details:
+              "Report submission on Case study by Poster Presentation and ppt presentation deposite in google classroom",
+            courseOutcomes: ["CO1 - CO6"],
+            assignedFrom: null,
+            assignedTo: null,
+            marks: 10
+          }
+        ]
+      },
+
+
       // ===== BASIC COURSE DETAILS =====
       instituteName: "Kalinga Institute of Industrial Technology, Bhubaneswar",
       schoolLine: "(Deemed to be University)",
@@ -597,30 +738,32 @@
       semester: "Spring Sem 2025–2026",
 
       faculty: "Prof.Thotakura NSC Sekhar",
-      facultylink: "https://my.e-kard.in/sekhar",
 
-      courseTitle: "Semiconductor Fabrication Design and Technology",
-      courseCode: "EE30021",
-      courselink: "",
+      courseTitle: "Industry 4.0 Technologies",
+      courseCode: "EX20001",
+
+
+      facultylink: "https://my.e-kard.in/sekhar",
+      courselink: "https://classroom.google.com/c/ODMyMzU2MTkxNDQ5?cjc=jk43prgp",
 
       // Course meta
       courseMeta: {
-        credits: 3,
-        ltp: "3-0-0",
+        credits: 2,
+        ltp: "2-0-0",
         prereq: "Nil"
       },
 
       // Course objective & outcomes
       courseObjective:
-        "The Objective of this course is to equip participants with a comprehensive understanding of the Semiconductor manufacturing ecosystem, spanning from design concepts to final product realization",
+        "The current manufacturing industries and businesses are moving from the third industrial revolution of computers and automation to the fourth where automation becomes even smarter fueled by data analytic and artificial intelligence. This course is designed to offer learners an introduction to the use of the Internet and Digital technology for better manufacturing and business. Learners will gain deep insights into how smartness is being harnessed from data and appreciate what needs to be done to overcome some of the challenges.",
 
       courseOutcomes: [
-        { id: "CO1", text: "Understand the ecosystem of semiconductor and its manufacturing from design to product." },
-        { id: "CO2", text: "Know difference between design, fabrication, packaging, system manufacturing and product." },
-        { id: "CO3", text: "Learn microfabrication advantages, scaling effects, and their impact on device design." },
-        { id: "CO4", text: "Develop familiarity with advanced FinFET process integration and module-level decisions." },
-        { id: "CO5", text: "Gain working knowledge of process simulation using SEMulator3D." },
-        { id: "CO6", text: "Apply statistical tools for process control and optimization in semiconductor fabrication." }
+        { id: "CO1", text: "Understand the key components and enablers of Industry 4.0 Technology." },
+        { id: "CO2", text: "Appreciate the  AI core technologies  in Smart Industries, smart products and smart Services." },
+        { id: "CO3", text: "Outline Smart Factory technologies and their role in an Industry 4.0 world." },
+        { id: "CO4", text: "Outline IoT& IIOT technology and scope of implementing IoT in Industries and businesses." },
+        { id: "CO5", text: "Comprehend distributed cyber-physical and digital manufacturing system." },
+        { id: "CO6", text: "Demonstrate the opportunities, challenges brought about by Industry 4.0 and how organizations and individuals should prepare to reap the benefits.Economic growth ,Legal aspects etc." }
       ],
 
       // Holidays, dates, etc.
@@ -629,7 +772,7 @@
         "01-04-2026"
       ],
 
-      startDate: "04-12-2025",
+      startDate: "03-12-2025",
 
       /*
         classDaysWithTime
@@ -637,8 +780,8 @@
         Day abbreviation must be first token (Mon/Tue/Wed/Thu/Fri/Sat/Sun).
       */
       classDaysWithTime: [
-        "Wed 4:30–6pm",
-        "Fri 4:30–6pm"
+        "Wed 9–10am",
+        "Fri 11–12pm"
       ],
 
       midSem: {
@@ -657,88 +800,90 @@
         modules: [
           {
             id: "M1",
-            tag: "M1 – Semiconductor Fundamentals (6Hrs)",
+            tag: "M1 – Introduction",
             description:
-              "Energy bands in solids (insulators, semiconductors, metals), Intrinsic and extrinsic semiconductors, doping (n-type, p-type), Carrier concentration, drift and diffusion currents, mobility, resistivity, Generation and recombination of carriers, PN junction (equilibrium, forward/reverse bias characteristics), Introduction to semiconductor materials (Si, Ge, GaAs, SiC, GaN). Crystal structures, Miller indices."
+              "The Fourth Industrial Revolution, Difference between conventional automation and Industry 4.0, Case Studies: Health, Agriculture, Manufacturing."
           },
           {
             id: "M2",
-            tag: "M2 – Introduction to Semiconductor Manufacturing Ecosystem (5Hrs)",
+            tag: "M2 – Industry 4.0 and its components",
             description:
-              "Semiconductor value chain: design, fabrication, packaging, system, product, Foundry vs IDM vs Fabless, Microfabrication and Moore’s law, Circuit abstraction to layout and cross-section, Benefits and implications of scaling."
+              "Internet of Things (IoT) & Industrial Internet of Things (IIoT), Internet of Services, Value chains in manufacturing companies, Digital Twins."
           },
           {
             id: "M3",
-            tag: "M3 – Lithography and Unit Process Fundamentals (6Hrs)",
+            tag: "M3 – Digital Manufacturing and Design",
             description:
-              "Lithography: Resolution, i-line to EUV, SADP & SAQP; Unit processes: - Wafer properties and oxidation, Doping, diffusion, implantation, Deposition: APCVD, LPCVD, PECVD, MOCVD, ALD, PVD, Etching: wet/dry, isotropic/anisotropic, Cleaning and CMP."
+              "Cyber Physical Systems and Next Generation sensors, Collaborative Platform and Product Life-cycle Management, Robotics and Automation."
           },
           {
             id: "M4",
-            tag: "M4 – Advanced CMOS FinFET Process Integration (9Hrs)",
+            tag: "M4 – Industrial IoT",
             description:
-              "Isolation: STI vs LOCOS, Device Architecture: Planar to FinFET, strain, SiGe; Gate Stack: High-k dielectrics, metal gates, gate-first vs gate-last; Junction and Implantation: Well, source-drain, LDD; Contact: Metal-silicon contact, silicides (Ti/Co/Ni), salicidation; Interconnect: Cu vs Al, RC delay, electromigration, Damascene; ILD: Low-k dielectrics, integration challenges."
+              "Cloud Computing, Big Data Analytics, AI & ML, Virtual and Augmented Reality, Block-chain."
           },
           {
             id: "M5",
-            tag: "M5 – Tool Introduction: Process Simulation using SEMulator3D (6Hrs)",
+            tag: "M5 – Challenges & Opportunities in Industry 4.0",
             description:
-              "SEMulator3D overview, Layout import and creation, FinFET process flow simulation, Extraction of cross-sections, Geometric and overlay analysis."
-          },
-          {
-            id: "M6",
-            tag: "M6 – Statistical Process Control and Emerging Topics: (6Hrs)",
-            description:
-              "Statistical Process Control (SPC): distributions, z-test, t-test; ANOVA, DOE: screening, RSM, full/ fractional factorial; Test structures and design rules; Optional: 3D NAND process flow, semiconductor device physics basics."
+              "A Digital Strategy alongside Resource Scarcity, Standards and Data security, Financing conditions, availability of skilled workers, Comprehensive broadband infra- structure, Legal framework, protection of corporate data, liability, handling personal data."
           }
         ],
+
+
         textBooks: [
-          "S. M. Sze & Kwok K. Ng, Physics of Semiconductor Devices, 3rd Edition, Wiley.",
-          "Marc Madou, Fundamentals of Microfabrication and Nanotechnology, 3rd Edition, CRC Press."
+          "Tech Trends of the 4th Industrial Revolution,by D. Pyo, , J. Hwang, , and Y. Yoon, PUBLISHER: Mercury Learning & Information.",
+          "Understanding Industry 4. 0 : AI, the Internet of Things, and the Future of Work, by Bruno S. Sergi, Elena G. Popkova, Aleksei V. Bogoviz, and Tatiana N. Litvinova, Emerald Publishing Limited."
         ],
         referenceBooks: [
-          "Refer to IEEE Papers"
+          "Introduction to IoT. Cambridge University Press, by S. Misra, A. Mukherjee, and A. Roy, 2020",
+          "Emerging Technologies for Health and Medicine: Virtual Reality, Augmented Reality, Artificial Intelligence, Internet of Things, Robotics, Industry 4.0, Dac-Nhuong Le, Chung Van Le, Jolanda G.Tromp , Gia Nhu Nguyen, Wiley, ISBN: 978-1-119-50987-5, 2018",
+          "Industry 4.0: The Industrial Internet of Things 1st ed. Edition by Alasdair Gilchrist"
         ]
       },
 
       // ===== LESSONS (use module IDs only) =====
       lessons: [
-        { type: "special", label: "Introduction to the Course" },
-        { type: "class", module: "M1", notes: "Energy bands in solids (insulators, semiconductors, metals), Intrinsic and extrinsic semiconductors, doping (n-type, p-type)" },
-        { type: "class", module: "M1", notes: "Carrier concentration, drift and diffusion currents, mobility, resistivity, Generation and recombination of carriers" },
-        { type: "class", module: "M1", notes: "PN junction (equilibrium, forward/reverse bias characteristics), Introduction to semiconductor materials (Si, Ge, GaAs, SiC, GaN)" },
-        { type: "class", module: "M1", notes: "Crystal structures, Miller indices." },
+        { type: "special", label: "Introduction to Course" },
+
+        { type: "class", module: "M1", notes: "Evolution of Industrial Revolutions, The Fourth Industrial Revolution" },
+        { type: "class", module: "M1", notes: "Difference between conventional automation and Industry 4.0" },
+        { type: "class", module: "M1", notes: "Case Studies: Health, Agriculture, Manufacturing" },
+
+        { type: "class", module: "M2", notes: "Internet of Things (IoT)" },
+        { type: "class", module: "M2", notes: "Industrial Internet of Things (IIoT)" },        
+        { type: "class", module: "M2", notes: "Internet of Services, Value chains in manufacturing companies" },
+        { type: "class", module: "M2", notes: "Digital Twins" },
 
         { type: "special", label: "Doubt Clearing Session" },
 
-        { type: "class", module: "M2", notes: "Semiconductor value chain: design, fabrication, packaging system, product, Foundry vs IDM vs Fabless" },
-        { type: "class", module: "M2", notes: "Microfabrication and Moore’s law" },
-        { type: "class", module: "M2", notes: "Circuit abstraction to layout and cross-section" },
-        { type: "class", module: "M2", notes: "Benefits and implications of scaling." },
-
-        { type: "class", module: "M3", notes: "Lithography: Resolution, i-line to EUV, SADP & SAQP;" },
-        { type: "class", module: "M3", notes: "Unit processes: - Wafer properties and oxidation, Doping, diffusion, implantation" },
-        { type: "class", module: "M3", notes: "Deposition: APCVD, LPCVD, PECVD, MOCVD, ALD, PVD" },
-        { type: "class", module: "M3", notes: "Etching: wet/dry, isotropic/anisotropic, Cleaning and CMP" },
+        { type: "class", module: "M3", notes: "Cyber Physical Systems and Next Generation sensors" },
+        { type: "class", module: "M3", notes: "Cyber Physical Systems and Next Generation sensors" },
+        { type: "class", module: "M3", notes: "Collaborative Platform and Product Life-cycle Management" },
+        { type: "class", module: "M3", notes: "Robotics and Automation." },
+        { type: "class", module: "M3", notes: "Robotics and Automation." },
 
         { type: "special", label: "Doubt Clearing Session" },
+        { type: "special", label: "Discussion of previous year mid-sem questions" },
 
         { type: "exam_mid" },
 
-        { type: "class", module: "M4", notes: "Isolation: STI vs LOCOS, Device Architecture: Planar to FinFET, strain, SiGe;" },
-        { type: "class", module: "M4", notes: "Gate Stack: High-k dielectrics, metal gates, gate-first vs gate-last" },
-        { type: "class", module: "M4", notes: "Junction and Implantation: Well, source-drain, LDD" },
-        { type: "class", module: "M4", notes: "Contact: Metal-silicon contact, silicides (Ti/Co/Ni), salicidation" },
-        { type: "class", module: "M4", notes: "Interconnect: Cu vs Al, RC delay, electromigration, Damascene;" },
-        { type: "class", module: "M4", notes: "ILD: Low-k dielectrics, integration challenges" },
+        { type: "class", module: "M4", notes: "Cloud Computing" },
+        { type: "class", module: "M4", notes: "Big Data Analytics" },
+        { type: "class", module: "M4", notes: "AI & ML," },
+        { type: "class", module: "M4", notes: "Virtual and Augmented Reality" },
+        { type: "class", module: "M4", notes: "Block-chain" },
+        { type: "class", module: "M4", notes: "Block-chain" },
 
-        { type: "class", module: "M5", notes: "SEMulator3D overview, Layout import and creation" },
-        { type: "class", module: "M5", notes: "FinFET process flow simulation" },
-        { type: "class", module: "M5", notes: "Extraction of cross-sections, Geometric and overlay analysis" },
+        { type: "special", label: "Doubt Session & Revision" },
+        
 
-        { type: "class", module: "M6", notes: "Statistical Process Control (SPC): distributions, z-test, t-test" },
-        { type: "class", module: "M6", notes: "ANOVA, DOE: screening, RSM, full/ fractional factorial;" },
-        { type: "class", module: "M6", notes: "Test structures and design rules; Optional: 3D NAND process flow, semiconductor device physics basics." },
+        { type: "class", module: "M5", notes: "A Digital Strategy alongside Resource Scarcity, Standards and Data security, Financing conditions" },
+        { type: "class", module: "M5", notes: "A Digital Strategy alongside Resource Scarcity, Standards and Data security, Financing conditions" },
+        { type: "class", module: "M5", notes: "availability of skilled workers, Comprehensive broadband infra- structure, " },
+        { type: "class", module: "M5", notes: "Legal framework, protection of corporate data, liability" },
+        { type: "class", module: "M5", notes: "Legal framework, protection of corporate data, liability" },
+        { type: "class", module: "M5", notes: "handling personal data" },
 
         { type: "special", label: "Final Doubt Session & Revision" },
 
@@ -1038,10 +1183,9 @@
         ? dayTimeStrings.join(", ")
         : "See timetable";
 
-      // Summary: X Regular + Y Special, plus schedule  <span class="summary-item">${dayTimeSummary}</span>
+      // Summary: X Regular + Y Special, plus schedule
       summaryBar.innerHTML = `
         <span class="summary-item"><strong>${totalClasses - specialCount}</strong> Regular + <strong>${specialCount}</strong> Special classes</span>
-        
       `;
 
       const list = document.getElementById("lessonList");
@@ -1238,6 +1382,56 @@
       });
     }
 
+    /* ========== 6a. RENDERING: ACTIVITY CALENDAR ========= */
+
+    function renderActivityCalendar(cfg) {
+      const container = document.getElementById("activityCalendarContainer");
+      if (!container || !cfg.activityCalendar || !Array.isArray(cfg.activityCalendar.activities)) {
+        return;
+      }
+
+      const { title, description, activities } = cfg.activityCalendar;
+
+      let html = `
+        <div class="activity-calendar-title">${title || "Activity Calendar"}</div>
+      `;
+
+      if (description) {
+        html += `<div class="activity-calendar-description">${description}</div>`;
+      }
+
+      activities.forEach((act, index) => {
+        const coText = (act.courseOutcomes || []).join(", ");
+        let dateText = "";
+        if (act.assignedFrom && act.assignedTo) {
+          if (act.assignedFrom === act.assignedTo) {
+            dateText = act.assignedFrom;
+          } else {
+            dateText = `${act.assignedFrom} – ${act.assignedTo}`;
+          }
+        }
+
+        html += `
+          <div class="activity-item">
+            <div class="activity-item-header">
+              <div class="activity-item-label">${act.activityLabel || ("Activity " + (index + 1))}</div>
+              <div class="activity-item-marks">${act.marks != null ? act.marks + " Marks" : ""}</div>
+            </div>
+            <div class="activity-item-body">
+              ${act.details || ""}
+            </div>
+            <div class="activity-item-meta">
+              ${act.mode ? `<span class="activity-meta-tag">${act.mode}</span>` : ""}
+              ${coText ? `<span class="activity-meta-tag">${coText}</span>` : ""}
+              ${dateText ? `<span class="activity-meta-date">${dateText}</span>` : ""}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
     /* ========== 7. TABS ========= */
 
     function initTabs() {
@@ -1266,7 +1460,8 @@
         allViews.forEach(v => v.style.display = "none");
         view.style.display = "block";
 
-        summaryBar.style.display = showSummary ? "flex" : "none";
+        summaryBar.style.display = showSummary ?
+          "flex" : "none";
       }
 
       tabLessonPlan.addEventListener("click", () =>
@@ -1287,6 +1482,7 @@
     renderLessonPlan(config);
     renderSyllabus(config);
     renderOutcomes(config);
+    renderActivityCalendar(config);
     initTabs();
   </script>
 </body>
