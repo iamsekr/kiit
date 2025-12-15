@@ -1,0 +1,3425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KIIT Smart Attendance</title>
+
+  <!-- Excel parsing (XLS/XLSX) from cdnjs.cloudflare.com -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --panel: #0f172a;
+      --panel2: #0b1324;
+      --border: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.66);
+      --muted2: rgba(255,255,255,0.52);
+
+      --brand: #7c5cff;
+      --good: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+
+      --absentBg: rgba(239,68,68,0.10);
+      --absentBgHover: rgba(239,68,68,0.14);
+
+      --shadow: 0 10px 26px rgba(0,0,0,0.45);
+      --radius: 14px;
+      --radiusSmall: 12px;
+
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+      --space: 14px;
+    }
+
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 10% 0%, rgba(124,92,255,0.16), transparent 55%),
+        radial-gradient(900px 500px at 90% 10%, rgba(34,197,94,0.10), transparent 55%),
+        var(--bg);
+    }
+
+    a{ color: inherit; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+
+    .srOnly{
+      position: absolute !important;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+
+    .app{
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top bar: smaller, flatter */
+    .topBar{
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(11,18,32,0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+
+    .topBarInner{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 240px;
+    }
+    .logo{
+      width: 28px; height: 28px;
+      border-radius: 10px;
+      background: var(--brand);
+      box-shadow: 0 8px 20px rgba(124,92,255,0.22);
+    }
+    .brandTitle{
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .brandTitle h1{
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    .brandTitle p{
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.2;
+    }
+
+    .controls{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: flex-end;
+    }
+
+    .field{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 170px;
+    }
+
+    .field label{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .input{
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 9px 10px;
+      outline: none;
+      min-height: 38px;
+    }
+    .input:focus{
+      border-color: rgba(124,92,255,0.65);
+      box-shadow: 0 0 0 3px rgba(124,92,255,0.25);
+    }
+    textarea.input{
+      min-height: 110px;
+      resize: vertical;
+      line-height: 1.35;
+    }
+
+    .button{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      padding: 9px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.12s ease, transform 0.06s ease, border-color 0.12s ease;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .button:hover{ background: rgba(255,255,255,0.07); }
+    .button:active{ transform: translateY(1px); }
+    .button:focus{ outline: none; box-shadow: 0 0 0 3px rgba(124,92,255,0.25); }
+
+    .buttonPrimary{
+      background: rgba(124,92,255,0.16);
+      border-color: rgba(124,92,255,0.34);
+    }
+    .buttonGood{
+      background: rgba(34,197,94,0.12);
+      border-color: rgba(34,197,94,0.24);
+    }
+    .buttonWarn{
+      background: rgba(245,158,11,0.12);
+      border-color: rgba(245,158,11,0.24);
+    }
+    .buttonDanger{
+      background: rgba(239,68,68,0.12);
+      border-color: rgba(239,68,68,0.24);
+    }
+    .buttonSmall{
+      padding: 7px 10px;
+      min-height: 34px;
+      font-size: 12px;
+    }
+    .buttonGhost{
+      background: transparent;
+    }
+
+    .main{
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Status bar: minimal (single line) */
+    .statusBar{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+    }
+    .statusLeft{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .pill{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .statusMessage{
+      font-size: 12.5px;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 70ch;
+    }
+
+    .card{
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .cardHeader{
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .cardTitle{
+      font-weight: 850;
+      letter-spacing: 0.2px;
+      font-size: 14px;
+    }
+    .cardSubtitle{
+      margin-top: 4px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .cardBody{
+      padding: 14px;
+    }
+
+    .notice{
+      border: 1px solid rgba(245,158,11,0.25);
+      background: rgba(245,158,11,0.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      color: rgba(255,255,255,0.88);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+    .error{
+      border: 1px solid rgba(239,68,68,0.28);
+      background: rgba(239,68,68,0.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      color: rgba(255,255,255,0.9);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+    .success{
+      border: 1px solid rgba(34,197,94,0.24);
+      background: rgba(34,197,94,0.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      color: rgba(255,255,255,0.9);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    .sectionBox{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(0,0,0,0.12);
+    }
+
+    .divider{
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    .gridTwo{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 920px){
+      .gridTwo{ grid-template-columns: 1fr; }
+    }
+
+    .homeButtons{
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 720px){
+      .homeButtons{ grid-template-columns: 1fr; }
+    }
+
+    .bigButton{
+      padding: 14px;
+      min-height: 88px;
+      border-radius: 16px;
+      justify-content: space-between;
+      align-items: flex-start;
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+    .bigTitle{
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.2px;
+    }
+    .bigHint{
+      margin-top: 6px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .row{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .helpText{
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .helpText code{
+      font-family: var(--mono);
+      font-size: 11.5px;
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.75);
+    }
+
+    .tableWrap{
+      overflow: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.12);
+    }
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+    thead th{
+      text-align: left;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(15,23,42,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 2;
+    }
+    tbody td{
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      vertical-align: middle;
+    }
+    tbody tr:hover td{
+      background: rgba(255,255,255,0.03);
+    }
+
+    .cellInput{
+      width: 100%;
+      min-height: 36px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 10px;
+      padding: 8px 9px;
+      outline: none;
+    }
+    .cellInput:focus{
+      border-color: rgba(124,92,255,0.65);
+      box-shadow: 0 0 0 3px rgba(124,92,255,0.22);
+    }
+
+    .checkbox{
+      width: 18px;
+      height: 18px;
+      accent-color: var(--brand);
+      cursor: pointer;
+    }
+
+    .screen{ display:none; }
+    .screen.active{ display:block; }
+
+    details.helpPanel{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.12);
+      padding: 10px 12px;
+    }
+    details.helpPanel summary{
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    details.helpPanel li, details.helpPanel p{
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    /* Attendance row enhancements */
+    tr.attRow{
+      cursor: pointer;
+    }
+    tr.attRow.absent td{
+      background: var(--absentBg);
+    }
+    tr.attRow.absent:hover td{
+      background: var(--absentBgHover);
+    }
+    tr.attRow td .presentLabel{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .percentBadge{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(255,255,255,0.86);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+      padding: 4px 8px;
+      border-radius: 999px;
+      display: inline-block;
+      min-width: 56px;
+      text-align: center;
+    }
+
+    /* Modals (flat) */
+    .modalBackdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.60);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 70;
+    }
+    .modalBackdrop.open{ display:flex; }
+    .modal{
+      width: min(920px, 96vw);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.98);
+      box-shadow: 0 22px 70px rgba(0,0,0,0.62);
+      overflow: hidden;
+    }
+    .modalHeader{
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .modalTitle{
+      font-weight: 900;
+      letter-spacing: 0.2px;
+    }
+    .modalBody{ padding: 14px; }
+    .modalFooter{
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .remarksList{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .remarkItem{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+      padding: 10px;
+    }
+    .remarkMeta{
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .remarkText{
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+
+    .summaryCards{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 680px){
+      .summaryCards{ grid-template-columns: 1fr; }
+    }
+    .summaryCard{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.12);
+      padding: 12px;
+    }
+    .summaryValue{
+      font-weight: 950;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+    .summaryLabel{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topBar" role="banner">
+      <div class="topBarInner">
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div class="brandTitle">
+            <h1>KIIT Smart Attendance</h1>
+            <p>Import roster, mark attendance (remarks + live %), report & send.</p>
+          </div>
+        </div>
+
+        <div class="controls" role="group" aria-label="Top controls">
+          <div class="field" style="min-width: 210px;">
+            <label for="sectionSelect">Section</label>
+            <select id="sectionSelect" class="input" aria-label="Select section">
+              <option value="section1">Section 1</option>
+              <option value="section2">Section 2</option>
+              <option value="section3">Section 3</option>
+            </select>
+          </div>
+
+          <div class="field" style="min-width: 210px;">
+            <label for="sectionNameInput">Rename section</label>
+            <input id="sectionNameInput" class="input" type="text" placeholder="Section name" />
+          </div>
+
+          <button id="applySectionNameButton" class="button buttonPrimary" type="button">Rename</button>
+          <button id="settingsButton" class="button" type="button">Settings</button>
+          <button id="backupButton" class="button buttonGhost" type="button">Backup</button>
+          <button id="resetButton" class="button buttonDanger" type="button">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="main" role="main">
+      <div class="statusBar" aria-live="polite">
+        <div class="statusLeft">
+          <span class="pill" id="activeSectionPill">Active: Section 1</span>
+          <span class="pill" id="todayPill">Today: —</span>
+          <span class="statusMessage" id="statusMessage">Ready.</span>
+        </div>
+        <div class="statusRight">
+          <span class="pill" title="Keyboard shortcuts: H = Home, / = Search" style="font-family: var(--mono);">H • /</span>
+        </div>
+      </div>
+
+      <!-- Home -->
+      <section id="screenHome" class="card screen active" aria-label="Home">
+        <div class="cardHeader">
+          <div>
+            <div class="cardTitle">Home</div>
+            <div class="cardSubtitle">Choose an action for the selected section.</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button id="goHomeButton" class="button buttonSmall buttonGhost" type="button">Home</button>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <div class="notice">
+            <strong>Import mapping:</strong> Column A = Roll, Column B = Name, Column C = Student Phone, Column E = Parent Phone (Column D ignored).
+            Names are stored as <strong>Title Case</strong>. Student email is auto: <span style="font-family:var(--mono);">ROLL@kiit.ac.in</span>.
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="homeButtons" role="group" aria-label="Home actions">
+            <button class="button bigButton buttonPrimary" type="button" id="homeLoadStudents">
+              <div class="bigTitle">Load Students</div>
+              <div class="bigHint">Import roster (CSV/XLS/XLSX) for the current section, then edit roster.</div>
+            </button>
+
+            <button class="button bigButton buttonGood" type="button" id="homeAddAttendance">
+              <div class="bigTitle">Add Attendance</div>
+              <div class="bigHint">Tap row to toggle Present/Absent. Add per-student remarks. See live %.</div>
+            </button>
+
+            <button class="button bigButton" type="button" id="homeShowReport">
+              <div class="bigTitle">Show Report</div>
+              <div class="bigHint">Filter by date/period and % range. View aggregated remarks per student.</div>
+            </button>
+
+            <button class="button bigButton buttonWarn" type="button" id="homeSendReports">
+              <div class="bigTitle">Send Reports</div>
+              <div class="bigHint">Select student (filter by %) and send WhatsApp/email using templates + {remarks}.</div>
+            </button>
+          </div>
+
+          <div class="divider"></div>
+
+          <details class="helpPanel">
+            <summary>Help</summary>
+            <ul>
+              <li>Excel import works if the XLSX library loads (requires internet). If not, export Excel as CSV and import CSV.</li>
+              <li>Attendance % shown in Add Attendance is a live preview: <strong>all saved sessions</strong> + <strong>current in-progress session</strong>.</li>
+              <li>Tap anywhere on a student row to toggle, except when clicking inside the remarks box.</li>
+            </ul>
+          </details>
+        </div>
+      </section>
+
+      <!-- Load Students -->
+      <section id="screenLoadStudents" class="card screen" aria-label="Load Students">
+        <div class="cardHeader">
+          <div>
+            <div class="cardTitle">Load Students</div>
+            <div class="cardSubtitle">Import roster for the selected section (CSV or Excel). Edit roster anytime.</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="button buttonSmall buttonGhost" type="button" data-navigation="home">Home</button>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <div id="xlsxNoticeBox" style="margin-bottom:12px;"></div>
+
+          <div class="sectionBox">
+            <div style="font-weight:900;">Import roster for current section</div>
+            <div class="helpText" style="margin-top:6px;">
+              Choose a CSV or Excel (.xls/.xlsx). For Excel, only the <strong>first sheet</strong> is used.
+              Header row is skipped if it contains “roll” or “name”.
+            </div>
+
+            <div class="gridTwo" style="margin-top:10px;">
+              <div class="field">
+                <label for="importModeSelect">Import mode</label>
+                <select id="importModeSelect" class="input" aria-label="Import mode">
+                  <option value="merge">Merge (update matching roll, add new)</option>
+                  <option value="replace">Replace (overwrite roster)</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="singleRosterFileInput">Choose file (CSV/XLS/XLSX)</label>
+                <input id="singleRosterFileInput" class="input" type="file"
+                  accept=".csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xls,.xlsx" />
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+              <button id="importSingleButton" class="button buttonPrimary" type="button">Import</button>
+              <button id="downloadFormatSampleButton" class="button buttonSmall" type="button">Download Sample Format</button>
+            </div>
+
+            <div id="importSingleResult" style="margin-top:10px;"></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="sectionBox" aria-label="Roster management">
+            <div class="row">
+              <div>
+                <div style="font-weight:900;">Roster</div>
+                <div class="helpText" style="margin-top:6px;">
+                  Title Case is enforced. Parent Email is optional (for Email Parent in Send Reports).
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button id="exportRosterButton" class="button buttonSmall" type="button">Export Roster CSV</button>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="gridTwo">
+              <div class="sectionBox" style="margin:0;">
+                <div style="font-weight:900;">Add student</div>
+
+                <div class="gridTwo" style="grid-template-columns: 0.8fr 1.2fr; margin-top:10px;">
+                  <div class="field">
+                    <label for="addRollInput">Roll</label>
+                    <input id="addRollInput" class="input" type="text" placeholder="e.g., 2201CS01" />
+                  </div>
+                  <div class="field">
+                    <label for="addNameInput">Name</label>
+                    <input id="addNameInput" class="input" type="text" placeholder="Student name" />
+                  </div>
+                </div>
+
+                <div class="gridTwo" style="margin-top:10px;">
+                  <div class="field">
+                    <label for="addStudentPhoneInput">Student phone</label>
+                    <input id="addStudentPhoneInput" class="input" type="tel" placeholder="Phone" />
+                  </div>
+                  <div class="field">
+                    <label for="addParentPhoneInput">Parent phone</label>
+                    <input id="addParentPhoneInput" class="input" type="tel" placeholder="Phone" />
+                  </div>
+                </div>
+
+                <div class="field" style="margin-top:10px;">
+                  <label for="addParentEmailInput">Parent email (optional)</label>
+                  <input id="addParentEmailInput" class="input" type="email" placeholder="parent@example.com" />
+                </div>
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+                  <button id="addStudentButton" class="button buttonPrimary" type="button">Add</button>
+                </div>
+              </div>
+
+              <div class="sectionBox" style="margin:0;">
+                <div style="font-weight:900;">Search roster</div>
+                <div class="field" style="margin-top:10px;">
+                  <label for="rosterSearchInput">Search by roll or name</label>
+                  <input id="rosterSearchInput" class="input" type="text" placeholder="Type to filter..." />
+                </div>
+                <div class="helpText" style="margin-top:10px;">
+                  Student email is computed as <code>ROLL@kiit.ac.in</code>.
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="tableWrap" aria-label="Roster table">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:140px;">Roll</th>
+                    <th style="width:260px;">Name</th>
+                    <th style="width:180px;">Student Phone</th>
+                    <th style="width:180px;">Parent Phone</th>
+                    <th style="width:260px;">Parent Email</th>
+                    <th style="width:260px;">Student Email (auto)</th>
+                    <th style="width:110px;">Delete</th>
+                  </tr>
+                </thead>
+                <tbody id="rosterTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Add Attendance -->
+      <section id="screenAttendance" class="card screen" aria-label="Add Attendance">
+        <div class="cardHeader">
+          <div>
+            <div class="cardTitle">Add Attendance</div>
+            <div class="cardSubtitle">Tap a row to toggle Present/Absent (remarks box won’t toggle). % is live preview (all sessions + this one).</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="button buttonSmall buttonGhost" type="button" data-navigation="home">Home</button>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <div class="gridTwo">
+            <div class="sectionBox">
+              <div class="row" style="align-items:flex-end;">
+                <div class="field">
+                  <label for="attendanceDateInput">Date</label>
+                  <input id="attendanceDateInput" class="input" type="date" />
+                </div>
+                <div class="field" style="min-width: 260px;">
+                  <label for="attendancePeriodInput">Period / Lecture</label>
+                  <input id="attendancePeriodInput" class="input" type="text" placeholder="e.g., Lecture 3" />
+                </div>
+              </div>
+
+              <div class="field" style="margin-top:10px;">
+                <label for="attendanceNotesInput">Session notes (optional)</label>
+                <input id="attendanceNotesInput" class="input" type="text" placeholder="Topic, quiz, etc." />
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="row">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                  <button id="markAllPresentButton" class="button buttonGood" type="button">Mark All Present</button>
+                  <button id="markAllAbsentButton" class="button buttonDanger" type="button">Mark All Absent</button>
+                  <button id="clearAttendanceTogglesButton" class="button" type="button">Clear Toggles</button>
+                  <button id="clearRemarksButton" class="button" type="button">Clear Remarks</button>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                  <span class="pill" id="attendanceSummaryPill">Present: 0 • Absent: 0 • Total: 0</span>
+                  <button id="saveAttendanceButton" class="button buttonPrimary" type="button">Save Record</button>
+                </div>
+              </div>
+
+              <div id="attendanceSaveResult" style="margin-top:10px;"></div>
+            </div>
+
+            <div class="sectionBox">
+              <div style="font-weight:900;">Search</div>
+              <div class="field" style="margin-top:10px;">
+                <label for="attendanceSearchInput">Search by roll or name</label>
+                <input id="attendanceSearchInput" class="input" type="text" placeholder="Type to filter..." />
+              </div>
+              <div class="helpText" style="margin-top:10px;">
+                Table order: <code>Roll</code> | <code>Present</code> | <code>Name</code> | <code>%</code> | <code>Remarks</code>.
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="tableWrap" aria-label="Attendance table">
+            <table style="min-width: 1040px;">
+              <thead>
+                <tr>
+                  <th style="width:140px;">Roll</th>
+                  <th style="width:160px;">Present</th>
+                  <th style="width:260px;">Name</th>
+                  <th style="width:110px;">%</th>
+                  <th style="width:420px;">Remarks (this session)</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Show Report -->
+      <section id="screenReport" class="card screen" aria-label="Show Report">
+        <div class="cardHeader">
+          <div>
+            <div class="cardTitle">Show Report</div>
+            <div class="cardSubtitle">Filter sessions; compute per-student attendance and view all remarks.</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="button buttonSmall buttonGhost" type="button" data-navigation="home">Home</button>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <div class="summaryCards">
+            <div class="summaryCard">
+              <div class="summaryValue" id="reportTotalClasses">0</div>
+              <div class="summaryLabel">Total classes held (filtered)</div>
+            </div>
+            <div class="summaryCard">
+              <div class="summaryValue" id="reportTotalStudents">0</div>
+              <div class="summaryLabel">Total students (current roster)</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="sectionBox">
+            <div style="font-weight:900;">Filters</div>
+
+            <div class="gridTwo" style="margin-top:10px;">
+              <div class="field">
+                <label for="reportFromDate">From date</label>
+                <input id="reportFromDate" class="input" type="date" />
+              </div>
+              <div class="field">
+                <label for="reportToDate">To date</label>
+                <input id="reportToDate" class="input" type="date" />
+              </div>
+            </div>
+
+            <div class="field" style="margin-top:10px;">
+              <label for="reportPeriodFilter">Period contains (optional)</label>
+              <input id="reportPeriodFilter" class="input" type="text" placeholder="e.g., Lab" />
+            </div>
+
+            <div class="gridTwo" style="margin-top:10px;">
+              <div class="field">
+                <label for="reportMinPercent">Min %</label>
+                <input id="reportMinPercent" class="input" type="number" min="0" max="100" step="0.1" placeholder="0" />
+              </div>
+              <div class="field">
+                <label for="reportMaxPercent">Max %</label>
+                <input id="reportMaxPercent" class="input" type="number" min="0" max="100" step="0.1" placeholder="100" />
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <div class="helpText">Leave fields blank to include everything.</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button id="applyReportFiltersButton" class="button buttonPrimary buttonSmall" type="button">Apply</button>
+                <button id="clearReportFiltersButton" class="button buttonSmall" type="button">Clear</button>
+                <button id="exportReportCsvButton" class="button buttonSmall" type="button">Export Report CSV</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="sectionBox">
+            <div class="row">
+              <div>
+                <div style="font-weight:900;">Per-student report</div>
+                <div class="helpText" style="margin-top:6px;">Remarks are aggregated from filtered sessions.</div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <span class="pill" id="reportVisibleCountPill">Showing: 0</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="tableWrap" aria-label="Report table">
+              <table style="min-width: 1020px;">
+                <thead>
+                  <tr>
+                    <th style="width:140px;">Roll</th>
+                    <th style="width:260px;">Name</th>
+                    <th style="width:130px;">Present</th>
+                    <th style="width:130px;">Absent</th>
+                    <th style="width:160px;">Attendance %</th>
+                    <th style="width:180px;">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody id="reportTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="sectionBox">
+            <div class="row">
+              <div>
+                <div style="font-weight:900;">Saved sessions</div>
+                <div class="helpText" style="margin-top:6px;">Filters affect this list.</div>
+              </div>
+              <div>
+                <button id="refreshSessionsButton" class="button buttonSmall" type="button">Refresh</button>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="sessionsList" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Send Reports -->
+      <section id="screenSendReports" class="card screen" aria-label="Send Reports">
+        <div class="cardHeader">
+          <div>
+            <div class="cardTitle">Send Reports</div>
+            <div class="cardSubtitle">Filter by date/period/% and generate WhatsApp/email using placeholders including {percent} and {remarks}.</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="button buttonSmall buttonGhost" type="button" data-navigation="home">Home</button>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <div class="gridTwo">
+            <div class="sectionBox">
+              <div style="font-weight:900;">Filters</div>
+
+              <div class="gridTwo" style="margin-top:10px;">
+                <div class="field">
+                  <label for="sendFromDate">From date</label>
+                  <input id="sendFromDate" class="input" type="date" />
+                </div>
+                <div class="field">
+                  <label for="sendToDate">To date</label>
+                  <input id="sendToDate" class="input" type="date" />
+                </div>
+              </div>
+
+              <div class="field" style="margin-top:10px;">
+                <label for="sendPeriodFilter">Period contains (optional)</label>
+                <input id="sendPeriodFilter" class="input" type="text" placeholder="e.g., Lab" />
+              </div>
+
+              <div class="gridTwo" style="margin-top:10px;">
+                <div class="field">
+                  <label for="sendMinPercent">Min %</label>
+                  <input id="sendMinPercent" class="input" type="number" min="0" max="100" step="0.1" placeholder="0" />
+                </div>
+                <div class="field">
+                  <label for="sendMaxPercent">Max %</label>
+                  <input id="sendMaxPercent" class="input" type="number" min="0" max="100" step="0.1" placeholder="100" />
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div style="font-weight:900;">Student selection</div>
+              <div class="field" style="margin-top:10px;">
+                <label for="sendStudentSearchInput">Search (roll or name)</label>
+                <input id="sendStudentSearchInput" class="input" type="text" placeholder="Type to filter list..." />
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label for="sendStudentSelect">Choose student</label>
+                <select id="sendStudentSelect" class="input" aria-label="Choose student"></select>
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <div class="helpText">Dropdown is filtered by % based on the filters above.</div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                  <span class="pill" id="sendMatchCountPill">Matches: 0</span>
+                  <button id="computeStudentStatsButton" class="button buttonPrimary buttonSmall" type="button">Compute</button>
+                  <button id="clearSendFiltersButton" class="button buttonSmall" type="button">Clear</button>
+                </div>
+              </div>
+
+              <div id="studentStatsBox" style="margin-top:10px;"></div>
+            </div>
+
+            <div class="sectionBox">
+              <div style="font-weight:900;">Generate and send</div>
+
+              <div class="field" style="margin-top:10px;">
+                <label for="messageTypeSelect">Preview content</label>
+                <select id="messageTypeSelect" class="input" aria-label="Select preview type">
+                  <option value="waStudent">WhatsApp (Student)</option>
+                  <option value="waParent">WhatsApp (Parent)</option>
+                  <option value="emailStudent">Email (Student)</option>
+                  <option value="emailParent">Email (Parent)</option>
+                </select>
+              </div>
+
+              <div class="field" style="margin-top:10px;">
+                <label for="messagePreviewArea">Preview</label>
+                <textarea id="messagePreviewArea" class="input" readonly></textarea>
+              </div>
+
+              <div class="divider"></div>
+
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button id="openWhatsAppStudentButton" class="button buttonGood" type="button">WhatsApp Student</button>
+                <button id="openWhatsAppParentButton" class="button buttonGood" type="button">WhatsApp Parent</button>
+                <button id="openEmailStudentButton" class="button" type="button">Email Student</button>
+                <button id="openEmailParentButton" class="button" type="button">Email Parent</button>
+                <button id="copyMessageButton" class="button" type="button">Copy</button>
+              </div>
+
+              <div class="helpText" style="margin-top:10px;">
+                Email Parent needs parent email in roster. Student email is always <code>ROLL@kiit.ac.in</code>.
+              </div>
+
+              <div id="sendResultBox" style="margin-top:10px;"></div>
+
+              <div class="divider"></div>
+
+              <details class="helpPanel">
+                <summary>Template placeholders</summary>
+                <ul>
+                  <li><code>{section}</code>, <code>{roll}</code>, <code>{name}</code></li>
+                  <li><code>{from}</code>, <code>{to}</code>, <code>{sessions}</code></li>
+                  <li><code>{present}</code>, <code>{absent}</code>, <code>{percent}</code></li>
+                  <li><code>{remarks}</code> (multi-line list with date+period)</li>
+                </ul>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModalBackdrop" class="modalBackdrop" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+        <div class="modalHeader">
+          <div>
+            <div class="modalTitle" id="settingsModalTitle">Settings (Templates)</div>
+            <div class="cardSubtitle">Use placeholders: {section},{roll},{name},{from},{to},{present},{absent},{percent},{sessions},{remarks}</div>
+          </div>
+          <button id="closeSettingsButton" class="button buttonSmall" type="button">Close</button>
+        </div>
+        <div class="modalBody">
+          <div class="gridTwo">
+            <div class="field">
+              <label for="templateWhatsAppStudent">WhatsApp template (Student)</label>
+              <textarea id="templateWhatsAppStudent" class="input"></textarea>
+            </div>
+            <div class="field">
+              <label for="templateWhatsAppParent">WhatsApp template (Parent)</label>
+              <textarea id="templateWhatsAppParent" class="input"></textarea>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="gridTwo">
+            <div class="field">
+              <label for="templateEmailStudentSubject">Email subject (Student)</label>
+              <input id="templateEmailStudentSubject" class="input" type="text" />
+            </div>
+            <div class="field">
+              <label for="templateEmailParentSubject">Email subject (Parent)</label>
+              <input id="templateEmailParentSubject" class="input" type="text" />
+            </div>
+          </div>
+
+          <div class="gridTwo" style="margin-top:10px;">
+            <div class="field">
+              <label for="templateEmailStudentBody">Email body (Student)</label>
+              <textarea id="templateEmailStudentBody" class="input"></textarea>
+            </div>
+            <div class="field">
+              <label for="templateEmailParentBody">Email body (Parent)</label>
+              <textarea id="templateEmailParentBody" class="input"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modalFooter">
+          <button id="restoreDefaultTemplatesButton" class="button buttonWarn" type="button">Restore Defaults</button>
+          <button id="saveSettingsButton" class="button buttonPrimary" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Backup Modal -->
+    <div id="backupModalBackdrop" class="modalBackdrop" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="backupModalTitle">
+        <div class="modalHeader">
+          <div>
+            <div class="modalTitle" id="backupModalTitle">Backup</div>
+            <div class="cardSubtitle">Export/import all data (rosters, records, remarks, templates).</div>
+          </div>
+          <button id="closeBackupButton" class="button buttonSmall" type="button">Close</button>
+        </div>
+        <div class="modalBody">
+          <div class="sectionBox">
+            <div style="font-weight:900;">Export</div>
+            <div class="helpText" style="margin-top:6px;">Download a JSON backup.</div>
+            <div style="margin-top:10px;">
+              <button id="exportBackupJsonButton" class="button buttonPrimary" type="button">Export JSON Backup</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="sectionBox">
+            <div style="font-weight:900;">Import</div>
+            <div class="helpText" style="margin-top:6px;">Restore from a JSON backup.</div>
+            <div class="field" style="margin-top:10px;">
+              <label for="importBackupJsonInput">Select JSON file</label>
+              <input id="importBackupJsonInput" class="input" type="file" accept=".json,application/json" />
+            </div>
+            <div style="margin-top:10px;">
+              <button id="importBackupJsonButton" class="button buttonGood" type="button">Import JSON Backup</button>
+            </div>
+            <div id="backupResultBox" style="margin-top:10px;"></div>
+          </div>
+        </div>
+        <div class="modalFooter">
+          <button id="closeBackupFooterButton" class="button buttonPrimary" type="button">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remarks Modal -->
+    <div id="remarksModalBackdrop" class="modalBackdrop" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="remarksModalTitle">
+        <div class="modalHeader">
+          <div>
+            <div class="modalTitle" id="remarksModalTitle">Remarks</div>
+            <div class="cardSubtitle" id="remarksModalSubtitle">—</div>
+          </div>
+          <button id="closeRemarksButton" class="button buttonSmall" type="button">Close</button>
+        </div>
+        <div class="modalBody">
+          <div id="remarksModalList" class="remarksList"></div>
+        </div>
+        <div class="modalFooter">
+          <button id="copyRemarksButton" class="button" type="button">Copy</button>
+          <button id="closeRemarksFooterButton" class="button buttonPrimary" type="button">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      const Merlin = {
+        storageKey: "kiitSmartAttendance.v3",
+        state: null,
+        runtime: {
+          activeSectionId: "section1",
+
+          // Attendance session runtime state
+          attendanceTogglesByRoll: {},   // roll -> boolean present override (default present)
+          attendanceRemarksByRoll: {},   // roll -> remark text for current session
+          attendanceRowRefs: {},         // roll -> { row, checkbox, labelText, percentCell, percentBadge, remarksInput }
+
+          reportFilters: { fromDate: "", toDate: "", periodContains: "", minPercent: "", maxPercent: "" },
+          sendFilters: { fromDate: "", toDate: "", periodContains: "", minPercent: "", maxPercent: "" },
+
+          selectedStudentRoll: ""
+        }
+      };
+
+      function setStatus(message){
+        document.getElementById("statusMessage").textContent = message;
+      }
+
+      function todayLocalDateString(){
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        return year + "-" + month + "-" + day;
+      }
+
+      function formatLocalDate(yyyyMmDd){
+        if(!yyyyMmDd) return "—";
+        const parts = yyyyMmDd.split("-");
+        if(parts.length !== 3) return yyyyMmDd;
+        const y = Number(parts[0]);
+        const m = Number(parts[1]);
+        const d = Number(parts[2]);
+        const date = new Date(y, m - 1, d);
+        return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+      }
+
+      function formatLocalDateTime(isoString){
+        try{
+          const date = new Date(isoString);
+          return date.toLocaleString(undefined, {
+            year: "numeric", month: "short", day: "2-digit",
+            hour: "2-digit", minute: "2-digit"
+          });
+        }catch(e){
+          return isoString;
+        }
+      }
+
+      function normalizeRoll(rawRoll){
+        const text = String(rawRoll ?? "");
+        return text.trim().replace(/\s+/g, "").toUpperCase();
+      }
+
+      function safeTrim(value){
+        return String(value ?? "").replace(/\s+/g, " ").trim();
+      }
+
+      function toTitleCase(value){
+        const text = safeTrim(value).toLowerCase();
+        if(!text) return "";
+        return text.split(" ").filter(Boolean).map(word => {
+          const parts = word.split("-");
+          return parts.map(p => p ? (p[0].toUpperCase() + p.slice(1)) : "").join("-");
+        }).join(" ");
+      }
+
+      function makeStudentEmailFromRoll(roll){
+        const r = normalizeRoll(roll);
+        if(!r) return "";
+        return r + "@kiit.ac.in";
+      }
+
+      function sanitizeWhatsAppPhone(phone){
+        return String(phone ?? "").replace(/[^\d]/g, "");
+      }
+
+      function isValidEmail(email){
+        const text = String(email ?? "").trim();
+        if(!text) return true;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text);
+      }
+
+      function clampNumber(value, min, max){
+        if(value === "" || value === null || value === undefined) return null;
+        const n = Number(value);
+        if(Number.isNaN(n)) return null;
+        return Math.min(max, Math.max(min, n));
+      }
+
+      function escapeCsvValue(value){
+        const text = String(value ?? "");
+        if(/[",\n\r]/.test(text)){
+          return "\"" + text.replace(/"/g, "\"\"") + "\"";
+        }
+        return text;
+      }
+
+      function csvFromRows(rows){
+        return rows.map(row => row.map(escapeCsvValue).join(",")).join("\n");
+      }
+
+      function downloadText(filename, text, mimeType){
+        const blob = new Blob([text], { type: mimeType || "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function makeIdentifier(){
+        return "record_" + Math.random().toString(16).slice(2) + "_" + Date.now();
+      }
+
+      function applyTemplate(template, context){
+        return String(template ?? "").replace(/\{(\w+)\}/g, (match, key) => {
+          if(Object.prototype.hasOwnProperty.call(context, key)) return String(context[key] ?? "");
+          return match;
+        });
+      }
+
+      function isTextInputFocused(){
+        const el = document.activeElement;
+        if(!el) return false;
+        const tag = el.tagName.toLowerCase();
+        return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable;
+      }
+
+      function escapeHtml(text){
+        return String(text ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function parseCsv(text){
+        const rows = [];
+        let row = [];
+        let field = "";
+        let inQuotes = false;
+
+        for(let i = 0; i < text.length; i++){
+          const ch = text[i];
+          const next = text[i + 1];
+
+          if(inQuotes){
+            if(ch === "\"" && next === "\""){
+              field += "\"";
+              i++;
+            }else if(ch === "\""){
+              inQuotes = false;
+            }else{
+              field += ch;
+            }
+          }else{
+            if(ch === "\""){
+              inQuotes = true;
+            }else if(ch === ","){
+              row.push(field);
+              field = "";
+            }else if(ch === "\n"){
+              row.push(field);
+              rows.push(row);
+              row = [];
+              field = "";
+            }else if(ch === "\r"){
+              // ignore
+            }else{
+              field += ch;
+            }
+          }
+        }
+
+        row.push(field);
+        rows.push(row);
+
+        if(rows.length && rows[rows.length - 1].every(cell => String(cell ?? "").trim() === "")){
+          rows.pop();
+        }
+
+        return rows;
+      }
+
+      function defaultTemplates(){
+        return {
+          whatsAppStudent:
+            "Hello {name} ({roll}),\n\nAttendance summary for {section}\nFrom: {from}\nTo: {to}\nSessions: {sessions}\nPresent: {present}\nAbsent: {absent}\nAttendance: {percent}%\n\nRemarks:\n{remarks}",
+          whatsAppParent:
+            "Hello,\n\nAttendance update for {name} ({roll}) - {section}\nFrom: {from}\nTo: {to}\nSessions: {sessions}\nPresent: {present}\nAbsent: {absent}\nAttendance: {percent}%\n\nRemarks:\n{remarks}",
+
+          emailStudentSubject: "Attendance Report - {section} - {roll} - {percent}%",
+          emailParentSubject: "Attendance Update - {section} - {name} ({roll}) - {percent}%",
+
+          emailStudentBody:
+            "Dear {name},\n\nYour attendance summary for {section}:\nFrom: {from}\nTo: {to}\nSessions: {sessions}\nPresent: {present}\nAbsent: {absent}\nAttendance: {percent}%\n\nRemarks:\n{remarks}\n\nRegards,\n",
+          emailParentBody:
+            "Dear Parent/Guardian,\n\nAttendance summary for {name} ({roll}) - {section}:\nFrom: {from}\nTo: {to}\nSessions: {sessions}\nPresent: {present}\nAbsent: {absent}\nAttendance: {percent}%\n\nRemarks:\n{remarks}\n\nRegards,\n"
+        };
+      }
+
+      function buildSampleRosters(){
+        return {
+          section1: [
+            { roll: "2201CS01", name: "Ananya Dash", studentPhone: "9876500001", parentPhone: "9876501001", parentEmail: "" },
+            { roll: "2201CS02", name: "Rohan Sahu", studentPhone: "9876500002", parentPhone: "9876501002", parentEmail: "" }
+          ],
+          section2: [
+            { roll: "2201IT01", name: "Priya Mohanty", studentPhone: "9876500101", parentPhone: "9876501101", parentEmail: "" },
+            { roll: "2201IT02", name: "Arjun Singh", studentPhone: "9876500102", parentPhone: "9876501102", parentEmail: "" }
+          ],
+          section3: [
+            { roll: "2201EC01", name: "Sneha Patra", studentPhone: "9876500201", parentPhone: "9876501201", parentEmail: "" },
+            { roll: "2201EC02", name: "Vivek Nayak", studentPhone: "9876500202", parentPhone: "9876501202", parentEmail: "" }
+          ]
+        };
+      }
+
+      function buildDefaultState(){
+        const sample = buildSampleRosters();
+        return {
+          version: 3,
+          sections: {
+            section1: { name: "Section 1", roster: sample.section1.map(s => ({...s, roll: normalizeRoll(s.roll), name: toTitleCase(s.name)})), records: [] },
+            section2: { name: "Section 2", roster: sample.section2.map(s => ({...s, roll: normalizeRoll(s.roll), name: toTitleCase(s.name)})), records: [] },
+            section3: { name: "Section 3", roster: sample.section3.map(s => ({...s, roll: normalizeRoll(s.roll), name: toTitleCase(s.name)})), records: [] }
+          },
+          templates: defaultTemplates()
+        };
+      }
+
+      function saveState(state){
+        localStorage.setItem(Merlin.storageKey, JSON.stringify(state));
+      }
+
+      function loadState(){
+        const raw = localStorage.getItem(Merlin.storageKey);
+        if(!raw){
+          const initial = buildDefaultState();
+          saveState(initial);
+          return initial;
+        }
+        try{
+          const parsed = JSON.parse(raw);
+          if(!parsed.version) parsed.version = 3;
+          if(!parsed.sections) parsed.sections = buildDefaultState().sections;
+          if(!parsed.templates) parsed.templates = defaultTemplates();
+
+          for(const sectionId of ["section1","section2","section3"]){
+            if(!parsed.sections[sectionId]){
+              parsed.sections[sectionId] = buildDefaultState().sections[sectionId];
+            }
+            if(!Array.isArray(parsed.sections[sectionId].roster)) parsed.sections[sectionId].roster = [];
+            if(!Array.isArray(parsed.sections[sectionId].records)) parsed.sections[sectionId].records = [];
+            if(!parsed.sections[sectionId].name) parsed.sections[sectionId].name = sectionId;
+
+            parsed.sections[sectionId].roster = parsed.sections[sectionId].roster.map(st => ({
+              roll: normalizeRoll(st.roll),
+              name: toTitleCase(st.name),
+              studentPhone: safeTrim(st.studentPhone),
+              parentPhone: safeTrim(st.parentPhone),
+              parentEmail: safeTrim(st.parentEmail)
+            }));
+
+            parsed.sections[sectionId].records = parsed.sections[sectionId].records.map(rec => {
+              const next = {...rec};
+              next.entries = (next.entries || []).map(e => ({
+                roll: normalizeRoll(e.roll),
+                name: toTitleCase(e.name),
+                studentPhone: safeTrim(e.studentPhone),
+                parentPhone: safeTrim(e.parentPhone),
+                present: !!e.present,
+                remarks: safeTrim(e.remarks || "")
+              }));
+              return next;
+            });
+          }
+
+          return parsed;
+        }catch(e){
+          const initial = buildDefaultState();
+          saveState(initial);
+          return initial;
+        }
+      }
+
+      function getActiveSection(){
+        return Merlin.state.sections[Merlin.runtime.activeSectionId];
+      }
+
+      // Navigation
+      function showScreen(screenId){
+        const ids = ["screenHome","screenLoadStudents","screenAttendance","screenReport","screenSendReports"];
+        for(const id of ids){
+          document.getElementById(id).classList.toggle("active", id === screenId);
+        }
+        if(screenId === "screenLoadStudents"){
+          renderRosterTable();
+          updateXlsxNotice();
+        }
+        if(screenId === "screenAttendance"){
+          prepareAttendanceDefaults();
+          renderAttendanceTable();
+          updateAttendanceSummary();
+        }
+        if(screenId === "screenReport"){
+          applyReportFiltersFromInputs();
+          renderReport();
+        }
+        if(screenId === "screenSendReports"){
+          applySendFiltersFromInputs();
+          renderSendReportsStudentSelect();
+          updateSendReportsPreview();
+          updateSendReportsActionsEnabledState();
+        }
+      }
+
+      function wireNavigation(){
+        document.getElementById("goHomeButton").addEventListener("click", () => showScreen("screenHome"));
+        document.querySelectorAll("[data-navigation='home']").forEach(btn => btn.addEventListener("click", () => showScreen("screenHome")));
+
+        document.getElementById("homeLoadStudents").addEventListener("click", () => showScreen("screenLoadStudents"));
+        document.getElementById("homeAddAttendance").addEventListener("click", () => showScreen("screenAttendance"));
+        document.getElementById("homeShowReport").addEventListener("click", () => showScreen("screenReport"));
+        document.getElementById("homeSendReports").addEventListener("click", () => showScreen("screenSendReports"));
+
+        document.addEventListener("keydown", (event) => {
+          if(event.key.toLowerCase() === "h" && !isTextInputFocused()){
+            showScreen("screenHome");
+          }
+          if(event.key === "/" && !isTextInputFocused()){
+            event.preventDefault();
+            const active = document.querySelector(".screen.active");
+            if(!active) return;
+            if(active.id === "screenLoadStudents") document.getElementById("rosterSearchInput").focus();
+            if(active.id === "screenAttendance") document.getElementById("attendanceSearchInput").focus();
+            if(active.id === "screenSendReports") document.getElementById("sendStudentSearchInput").focus();
+            if(active.id === "screenReport") document.getElementById("reportPeriodFilter").focus();
+          }
+        });
+      }
+
+      // Top bar
+      function renderTopBar(){
+        const select = document.getElementById("sectionSelect");
+        select.querySelector("option[value='section1']").textContent = Merlin.state.sections.section1.name;
+        select.querySelector("option[value='section2']").textContent = Merlin.state.sections.section2.name;
+        select.querySelector("option[value='section3']").textContent = Merlin.state.sections.section3.name;
+        select.value = Merlin.runtime.activeSectionId;
+
+        document.getElementById("activeSectionPill").textContent = "Active: " + getActiveSection().name;
+      }
+
+      function wireTopBar(){
+        const select = document.getElementById("sectionSelect");
+        const nameInput = document.getElementById("sectionNameInput");
+        const renameBtn = document.getElementById("applySectionNameButton");
+
+        select.addEventListener("change", () => {
+          Merlin.runtime.activeSectionId = select.value;
+          Merlin.runtime.attendanceTogglesByRoll = {};
+          Merlin.runtime.attendanceRemarksByRoll = {};
+          Merlin.runtime.attendanceRowRefs = {};
+          Merlin.runtime.selectedStudentRoll = "";
+
+          renderTopBar();
+          nameInput.value = getActiveSection().name;
+
+          const active = document.querySelector(".screen.active");
+          if(active){
+            if(active.id === "screenLoadStudents") renderRosterTable();
+            if(active.id === "screenAttendance"){
+              prepareAttendanceDefaults();
+              renderAttendanceTable();
+              updateAttendanceSummary();
+            }
+            if(active.id === "screenReport") renderReport();
+            if(active.id === "screenSendReports"){
+              applySendFiltersFromInputs();
+              renderSendReportsStudentSelect();
+              updateSendReportsPreview();
+              updateSendReportsActionsEnabledState();
+            }
+          }
+
+          setStatus("Switched to " + getActiveSection().name + ".");
+        });
+
+        renameBtn.addEventListener("click", () => {
+          const newName = safeTrim(nameInput.value);
+          if(!newName){
+            setStatus("Section name cannot be empty.");
+            nameInput.focus();
+            return;
+          }
+          Merlin.state.sections[Merlin.runtime.activeSectionId].name = newName;
+          saveState(Merlin.state);
+          renderTopBar();
+          setStatus("Renamed section to " + newName + ".");
+        });
+      }
+
+      // Excel availability notice
+      function updateXlsxNotice(){
+        const box = document.getElementById("xlsxNoticeBox");
+        const available = typeof window.XLSX !== "undefined";
+        if(available){
+          box.innerHTML = "";
+          box.style.display = "none";
+          return;
+        }
+        box.style.display = "block";
+        box.className = "error";
+        box.innerHTML = "<strong>Excel import not available.</strong><br/>XLSX library did not load. Please export Excel as CSV and import CSV.";
+      }
+
+      // Roster helpers
+      function validateUniqueRolls(roster){
+        const seen = new Set();
+        for(const st of roster){
+          const r = normalizeRoll(st.roll);
+          if(!r) return { ok: false, error: "Roll cannot be empty." };
+          if(seen.has(r)) return { ok: false, error: "Duplicate roll found: " + r };
+          seen.add(r);
+        }
+        return { ok: true };
+      }
+
+      function makeRosterCellInput(value, ariaLabel, onCommit){
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "cellInput";
+        input.value = value ?? "";
+        input.setAttribute("aria-label", ariaLabel);
+        input.addEventListener("keydown", (e) => {
+          if(e.key === "Enter"){
+            e.preventDefault();
+            input.blur();
+          }
+        });
+        input.addEventListener("blur", () => onCommit(input.value, input));
+        return input;
+      }
+
+      function getFilteredRoster(query){
+        const roster = getActiveSection().roster.slice();
+        const q = safeTrim(query).toLowerCase();
+        if(!q) return roster;
+        return roster.filter(s => String(s.roll).toLowerCase().includes(q) || String(s.name).toLowerCase().includes(q));
+      }
+
+      function renderRosterTable(){
+        const body = document.getElementById("rosterTableBody");
+        const search = document.getElementById("rosterSearchInput").value;
+        const rows = getFilteredRoster(search).sort((a,b) => String(a.roll).localeCompare(String(b.roll), undefined, { numeric: true }));
+
+        body.innerHTML = "";
+        if(rows.length === 0){
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 7;
+          td.style.padding = "16px 10px";
+          td.innerHTML = "<span style='color: var(--muted);'>No students found. Import roster or add manually.</span>";
+          tr.appendChild(td);
+          body.appendChild(tr);
+          return;
+        }
+
+        for(const st of rows){
+          const tr = document.createElement("tr");
+
+          const tdRoll = document.createElement("td");
+          const rollInput = makeRosterCellInput(st.roll, "Roll", (val) => {
+            const old = st.roll;
+            const next = normalizeRoll(val);
+            if(!next){ setStatus("Roll cannot be empty."); renderRosterTable(); return; }
+            const roster = getActiveSection().roster;
+            if(roster.some(x => x !== st && normalizeRoll(x.roll) === next)){
+              setStatus("Duplicate roll: " + next);
+              renderRosterTable();
+              return;
+            }
+            st.roll = next;
+
+            if(Object.prototype.hasOwnProperty.call(Merlin.runtime.attendanceTogglesByRoll, old)){
+              Merlin.runtime.attendanceTogglesByRoll[next] = Merlin.runtime.attendanceTogglesByRoll[old];
+              delete Merlin.runtime.attendanceTogglesByRoll[old];
+            }
+            if(Object.prototype.hasOwnProperty.call(Merlin.runtime.attendanceRemarksByRoll, old)){
+              Merlin.runtime.attendanceRemarksByRoll[next] = Merlin.runtime.attendanceRemarksByRoll[old];
+              delete Merlin.runtime.attendanceRemarksByRoll[old];
+            }
+
+            saveState(Merlin.state);
+            renderRosterTable();
+            updateSendReportsStudentSelectIfVisible();
+            setStatus("Updated roll.");
+          });
+          tdRoll.appendChild(rollInput);
+          tr.appendChild(tdRoll);
+
+          const tdName = document.createElement("td");
+          const nameInput = makeRosterCellInput(st.name, "Name", (val) => {
+            st.name = toTitleCase(val);
+            saveState(Merlin.state);
+            renderRosterTable();
+            updateSendReportsStudentSelectIfVisible();
+            setStatus("Updated name.");
+          });
+          tdName.appendChild(nameInput);
+          tr.appendChild(tdName);
+
+          const tdStudentPhone = document.createElement("td");
+          const studentPhoneInput = makeRosterCellInput(st.studentPhone, "Student phone", (val) => {
+            st.studentPhone = safeTrim(val);
+            saveState(Merlin.state);
+            setStatus("Updated student phone.");
+          });
+          tdStudentPhone.appendChild(studentPhoneInput);
+          tr.appendChild(tdStudentPhone);
+
+          const tdParentPhone = document.createElement("td");
+          const parentPhoneInput = makeRosterCellInput(st.parentPhone, "Parent phone", (val) => {
+            st.parentPhone = safeTrim(val);
+            saveState(Merlin.state);
+            setStatus("Updated parent phone.");
+          });
+          tdParentPhone.appendChild(parentPhoneInput);
+          tr.appendChild(tdParentPhone);
+
+          const tdParentEmail = document.createElement("td");
+          const parentEmailInput = makeRosterCellInput(st.parentEmail, "Parent email", (val, el) => {
+            const next = safeTrim(val);
+            if(!isValidEmail(next)){
+              el.style.borderColor = "rgba(239,68,68,0.7)";
+              setStatus("Invalid parent email format.");
+              return;
+            }
+            el.style.borderColor = "rgba(255,255,255,0.10)";
+            st.parentEmail = next;
+            saveState(Merlin.state);
+            updateSendReportsActionsEnabledState();
+            setStatus("Updated parent email.");
+          });
+          tdParentEmail.appendChild(parentEmailInput);
+          tr.appendChild(tdParentEmail);
+
+          const tdStudentEmail = document.createElement("td");
+          tdStudentEmail.innerHTML = "<span style='color: var(--muted2); font-family: var(--mono);'>" + escapeHtml(makeStudentEmailFromRoll(st.roll)) + "</span>";
+          tr.appendChild(tdStudentEmail);
+
+          const tdDelete = document.createElement("td");
+          const del = document.createElement("button");
+          del.type = "button";
+          del.className = "button buttonSmall buttonDanger";
+          del.textContent = "Delete";
+          del.addEventListener("click", () => {
+            const ok = confirm("Delete " + (st.name || st.roll) + " from roster? Attendance records are not deleted.");
+            if(!ok) return;
+            const roster = getActiveSection().roster;
+            const idx = roster.indexOf(st);
+            if(idx >= 0) roster.splice(idx, 1);
+            saveState(Merlin.state);
+            renderRosterTable();
+            updateSendReportsStudentSelectIfVisible();
+            setStatus("Deleted student.");
+          });
+          tdDelete.appendChild(del);
+          tr.appendChild(tdDelete);
+
+          body.appendChild(tr);
+        }
+      }
+
+      // Import
+      function isHeaderRowMaybe(row){
+        const c0 = String(row[0] ?? "").toLowerCase();
+        const c1 = String(row[1] ?? "").toLowerCase();
+        return c0.includes("roll") || c1.includes("name");
+      }
+
+      function normalizeImportedStudent(rawRoll, rawName, rawStudentPhone, rawParentPhone){
+        return {
+          roll: normalizeRoll(rawRoll),
+          name: toTitleCase(rawName),
+          studentPhone: safeTrim(rawStudentPhone),
+          parentPhone: safeTrim(rawParentPhone),
+          parentEmail: ""
+        };
+      }
+
+      function parseRosterCsvToStudents(csvText){
+        const rows = parseCsv(csvText);
+        const students = [];
+        const messages = [];
+        let skipped = 0;
+
+        if(rows.length === 0){
+          return { students, skipped: 0, messages: ["CSV is empty."] };
+        }
+
+        for(let i = 0; i < rows.length; i++){
+          const row = rows[i] || [];
+          if(i === 0 && isHeaderRowMaybe(row)) continue;
+
+          const st = normalizeImportedStudent(row[0], row[1], row[2], row[4]);
+          if(!st.roll || !st.name){
+            skipped++;
+            messages.push("Skipped row " + (i + 1) + ": missing roll or name.");
+            continue;
+          }
+          students.push(st);
+        }
+
+        const unique = validateUniqueRolls(students);
+        if(!unique.ok){
+          return { students: [], skipped, messages: ["Import contains duplicates: " + unique.error] };
+        }
+
+        return { students, skipped, messages };
+      }
+
+      function parseRosterExcelToStudents(arrayBuffer){
+        if(typeof window.XLSX === "undefined"){
+          return { ok: false, error: "Excel import is not available. Please import CSV instead." };
+        }
+        try{
+          const wb = window.XLSX.read(arrayBuffer, { type: "array" });
+          const firstSheet = wb.SheetNames && wb.SheetNames[0];
+          if(!firstSheet) return { ok: false, error: "Excel file contains no sheets." };
+
+          const sheet = wb.Sheets[firstSheet];
+          const rows = window.XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: "" });
+
+          const students = [];
+          const messages = [];
+          let skipped = 0;
+
+          for(let i = 0; i < rows.length; i++){
+            const row = rows[i] || [];
+            if(i === 0 && isHeaderRowMaybe(row)) continue;
+
+            const st = normalizeImportedStudent(row[0], row[1], row[2], row[4]);
+            if(!st.roll || !st.name){
+              skipped++;
+              messages.push("Skipped row " + (i + 1) + ": missing roll or name.");
+              continue;
+            }
+            students.push(st);
+          }
+
+          const unique = validateUniqueRolls(students);
+          if(!unique.ok){
+            return { ok: false, error: "Import contains duplicates: " + unique.error };
+          }
+
+          return { ok: true, students, skipped, messages };
+        }catch(e){
+          return { ok: false, error: "Could not parse Excel file. Try exporting as CSV." };
+        }
+      }
+
+      function importRosterStudentsIntoActiveSection(students, mode){
+        const section = getActiveSection();
+        let imported = 0;
+        let updated = 0;
+
+        if(mode === "replace"){
+          section.roster = students;
+          imported = students.length;
+          saveState(Merlin.state);
+          return { ok: true, imported, updated, totalAfter: section.roster.length };
+        }
+
+        const map = new Map(section.roster.map(s => [normalizeRoll(s.roll), s]));
+        for(const st of students){
+          const key = normalizeRoll(st.roll);
+          if(map.has(key)){
+            const target = map.get(key);
+            target.name = toTitleCase(st.name);
+            target.studentPhone = safeTrim(st.studentPhone);
+            target.parentPhone = safeTrim(st.parentPhone);
+            updated++;
+          }else{
+            section.roster.push(st);
+            imported++;
+          }
+        }
+
+        const unique = validateUniqueRolls(section.roster);
+        if(!unique.ok) return { ok: false, error: "Merge created duplicates: " + unique.error };
+
+        saveState(Merlin.state);
+        return { ok: true, imported, updated, totalAfter: section.roster.length };
+      }
+
+      function buildImportResultBox(result){
+        const div = document.createElement("div");
+        if(result.ok){
+          div.className = "success";
+          div.innerHTML = "<strong>Import complete.</strong><br/>" +
+            "Imported: " + result.imported + " • Updated: " + result.updated + " • Skipped: " + result.skipped + " • Total: " + result.totalAfter +
+            (result.messages && result.messages.length ? "<br/><span style='color:var(--muted2)'>Notes:</span><br/>" + result.messages.map(escapeHtml).join("<br/>") : "");
+        }else{
+          div.className = "error";
+          div.innerHTML = "<strong>Import failed.</strong><br/>" + escapeHtml(result.error || "Unknown error.");
+        }
+        return div;
+      }
+
+      function wireImport(){
+        const fileInput = document.getElementById("singleRosterFileInput");
+        const modeSelect = document.getElementById("importModeSelect");
+        const importBtn = document.getElementById("importSingleButton");
+        const resultBox = document.getElementById("importSingleResult");
+
+        importBtn.addEventListener("click", async () => {
+          resultBox.innerHTML = "";
+          const file = fileInput.files && fileInput.files[0];
+          if(!file){
+            const d = document.createElement("div");
+            d.className = "error";
+            d.textContent = "Please choose a file first.";
+            resultBox.appendChild(d);
+            return;
+          }
+
+          const mode = modeSelect.value;
+          const nameLower = String(file.name || "").toLowerCase();
+          const isExcel = nameLower.endsWith(".xlsx") || nameLower.endsWith(".xls");
+          const isCsv = nameLower.endsWith(".csv") || (file.type && file.type.includes("csv"));
+
+          try{
+            let students = [];
+            let skipped = 0;
+            let messages = [];
+
+            if(isExcel){
+              const buffer = await file.arrayBuffer();
+              const parsed = parseRosterExcelToStudents(buffer);
+              if(!parsed.ok){
+                resultBox.appendChild(buildImportResultBox({ ok:false, error: parsed.error }));
+                setStatus("Import failed.");
+                return;
+              }
+              students = parsed.students;
+              skipped = parsed.skipped;
+              messages = parsed.messages || [];
+            }else if(isCsv){
+              const text = await file.text();
+              const parsed = parseRosterCsvToStudents(text);
+              if(parsed.students.length === 0 && parsed.messages.length && String(parsed.messages[0]).startsWith("Import contains duplicates")){
+                resultBox.appendChild(buildImportResultBox({ ok:false, error: parsed.messages[0] }));
+                setStatus("Import failed.");
+                return;
+              }
+              students = parsed.students;
+              skipped = parsed.skipped;
+              messages = parsed.messages || [];
+            }else{
+              resultBox.appendChild(buildImportResultBox({ ok:false, error: "Unsupported file type. Use CSV/XLS/XLSX." }));
+              setStatus("Import failed.");
+              return;
+            }
+
+            const imported = importRosterStudentsIntoActiveSection(students, mode);
+            if(!imported.ok){
+              resultBox.appendChild(buildImportResultBox({ ok:false, error: imported.error }));
+              setStatus("Import failed.");
+              return;
+            }
+
+            resultBox.appendChild(buildImportResultBox({
+              ok: true,
+              imported: imported.imported,
+              updated: imported.updated,
+              skipped,
+              totalAfter: imported.totalAfter,
+              messages
+            }));
+
+            renderRosterTable();
+            renderSendReportsStudentSelect();
+            setStatus("Imported roster for " + getActiveSection().name + ".");
+          }catch(e){
+            resultBox.appendChild(buildImportResultBox({ ok:false, error: "Could not read the selected file. Try again or use CSV." }));
+            setStatus("Import failed.");
+          }finally{
+            fileInput.value = "";
+          }
+        });
+
+        document.getElementById("downloadFormatSampleButton").addEventListener("click", () => {
+          const rows = [
+            ["Roll(ColumnA)","Name(ColumnB)","StudentPhone(ColumnC)","Ignored(ColumnD)","ParentPhone(ColumnE)"],
+            ["2201CS01","student name","9876500001","IGNORE","9876501001"]
+          ];
+          downloadText("kiit-roster-sample-format.csv", csvFromRows(rows), "text/csv;charset=utf-8");
+          setStatus("Downloaded sample format.");
+        });
+      }
+
+      function wireRosterManagement(){
+        document.getElementById("rosterSearchInput").addEventListener("input", () => renderRosterTable());
+
+        document.getElementById("addStudentButton").addEventListener("click", () => {
+          const roll = normalizeRoll(document.getElementById("addRollInput").value);
+          const name = toTitleCase(document.getElementById("addNameInput").value);
+          const studentPhone = safeTrim(document.getElementById("addStudentPhoneInput").value);
+          const parentPhone = safeTrim(document.getElementById("addParentPhoneInput").value);
+          const parentEmail = safeTrim(document.getElementById("addParentEmailInput").value);
+
+          if(!roll){ setStatus("Roll is required."); document.getElementById("addRollInput").focus(); return; }
+          if(!name){ setStatus("Name is required."); document.getElementById("addNameInput").focus(); return; }
+          if(!isValidEmail(parentEmail)){ setStatus("Parent email is invalid."); document.getElementById("addParentEmailInput").focus(); return; }
+
+          const roster = getActiveSection().roster;
+          if(roster.some(s => normalizeRoll(s.roll) === roll)){ setStatus("Roll already exists."); return; }
+
+          roster.push({ roll, name, studentPhone, parentPhone, parentEmail });
+          const unique = validateUniqueRolls(roster);
+          if(!unique.ok){ setStatus(unique.error); return; }
+
+          saveState(Merlin.state);
+          document.getElementById("addRollInput").value = "";
+          document.getElementById("addNameInput").value = "";
+          document.getElementById("addStudentPhoneInput").value = "";
+          document.getElementById("addParentPhoneInput").value = "";
+          document.getElementById("addParentEmailInput").value = "";
+
+          renderRosterTable();
+          updateSendReportsStudentSelectIfVisible();
+          setStatus("Student added.");
+        });
+
+        document.getElementById("exportRosterButton").addEventListener("click", () => {
+          const section = getActiveSection();
+          const rows = [["roll","name","studentPhone","(ignoredColumnD)","parentPhone","parentEmail","studentEmail(auto)"]];
+          const sorted = section.roster.slice().sort((a,b) => String(a.roll).localeCompare(String(b.roll), undefined, { numeric: true }));
+          for(const st of sorted){
+            rows.push([st.roll, st.name || "", st.studentPhone || "", "", st.parentPhone || "", st.parentEmail || "", makeStudentEmailFromRoll(st.roll)]);
+          }
+          const fileName = safeTrim(section.name).replace(/\s+/g, "-").toLowerCase() + "-roster-export.csv";
+          downloadText(fileName, csvFromRows(rows), "text/csv;charset=utf-8");
+          setStatus("Roster exported.");
+        });
+      }
+
+      // Attendance
+      function prepareAttendanceDefaults(){
+        const dateInput = document.getElementById("attendanceDateInput");
+        if(!dateInput.value) dateInput.value = todayLocalDateString();
+      }
+
+      function isPresentForRoll(roll){
+        const r = normalizeRoll(roll);
+        const override = Merlin.runtime.attendanceTogglesByRoll[r];
+        if(override === false) return false;
+        if(override === true) return true;
+        return true;
+      }
+
+      function setPresentForRoll(roll, value){
+        Merlin.runtime.attendanceTogglesByRoll[normalizeRoll(roll)] = !!value;
+      }
+
+      function togglePresentForRoll(roll){
+        const current = isPresentForRoll(roll);
+        setPresentForRoll(roll, !current);
+      }
+
+      function getRemarkForRoll(roll){
+        return safeTrim(Merlin.runtime.attendanceRemarksByRoll[normalizeRoll(roll)] || "");
+      }
+
+      function setRemarkForRoll(roll, value){
+        Merlin.runtime.attendanceRemarksByRoll[normalizeRoll(roll)] = String(value ?? "");
+      }
+
+      function getFilteredRosterForAttendance(){
+        const q = safeTrim(document.getElementById("attendanceSearchInput").value).toLowerCase();
+        const roster = getActiveSection().roster.slice();
+        if(!q) return roster;
+        return roster.filter(s => String(s.roll).toLowerCase().includes(q) || String(s.name).toLowerCase().includes(q));
+      }
+
+      // Precompute historical attendance counts for ALL saved sessions (unfiltered)
+      function computeHistoricalCountsForSection(){
+        const section = getActiveSection();
+        const counts = new Map(); // roll -> { present, total }
+        for(const rec of (section.records || [])){
+          for(const entry of (rec.entries || [])){
+            const roll = normalizeRoll(entry.roll);
+            if(!roll) continue;
+            if(!counts.has(roll)) counts.set(roll, { present: 0, total: 0 });
+            const c = counts.get(roll);
+            c.total += 1;
+            if(entry.present) c.present += 1;
+          }
+        }
+        return counts;
+      }
+
+      // Live preview percent = all saved sessions + current session state (always adds 1)
+      function computeLivePercentForRoll(roll, historicalCounts){
+        const r = normalizeRoll(roll);
+        const hist = historicalCounts.get(r) || { present: 0, total: 0 };
+        const currentPresent = isPresentForRoll(r) ? 1 : 0;
+
+        // As requested: if no previous sessions, default 100 and update with current toggle
+        // This formula naturally does that: total = 0 + 1 => percent is 100 if present else 0.
+        const total = hist.total + 1;
+        const present = hist.present + currentPresent;
+
+        const percent = total ? (present / total) * 100 : 100;
+        return Math.round(percent * 10) / 10; // 1 decimal
+      }
+
+      function updateAttendanceRowUI(roll, historicalCounts){
+        const r = normalizeRoll(roll);
+        const ref = Merlin.runtime.attendanceRowRefs[r];
+        if(!ref) return;
+
+        const present = isPresentForRoll(r);
+        ref.checkbox.checked = present;
+        ref.labelText.textContent = present ? "Present" : "Absent";
+
+        ref.row.classList.toggle("absent", !present);
+
+        const p = computeLivePercentForRoll(r, historicalCounts);
+        ref.percentBadge.textContent = String(p) + "%";
+      }
+
+      function updateAttendanceSummary(){
+        const roster = getActiveSection().roster;
+        const total = roster.length;
+        let present = 0;
+        for(const st of roster){
+          if(isPresentForRoll(st.roll)) present++;
+        }
+        const absent = total - present;
+        document.getElementById("attendanceSummaryPill").textContent = "Present: " + present + " • Absent: " + absent + " • Total: " + total;
+      }
+
+      function renderAttendanceTable(){
+        const tbody = document.getElementById("attendanceTableBody");
+        const rosterAll = getActiveSection().roster;
+        const roster = getFilteredRosterForAttendance().sort((a,b) => String(a.roll).localeCompare(String(b.roll), undefined, { numeric: true }));
+
+        Merlin.runtime.attendanceRowRefs = {};
+        tbody.innerHTML = "";
+
+        if(rosterAll.length === 0){
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 5;
+          td.style.padding = "16px 10px";
+          td.innerHTML = "<span style='color:var(--muted);'>Roster is empty. Import/add students first.</span>";
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+          updateAttendanceSummary();
+          return;
+        }
+
+        if(roster.length === 0){
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 5;
+          td.style.padding = "16px 10px";
+          td.innerHTML = "<span style='color:var(--muted);'>No matches. Clear search to see students.</span>";
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+          updateAttendanceSummary();
+          return;
+        }
+
+        const historicalCounts = computeHistoricalCountsForSection();
+
+        for(const st of roster){
+          const roll = normalizeRoll(st.roll);
+          const name = toTitleCase(st.name || "");
+
+          const tr = document.createElement("tr");
+          tr.className = "attRow";
+          tr.dataset.roll = roll;
+
+          const tdRoll = document.createElement("td");
+          tdRoll.textContent = roll;
+          tr.appendChild(tdRoll);
+
+          const tdPresent = document.createElement("td");
+          const label = document.createElement("label");
+          label.className = "presentLabel";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "checkbox";
+          checkbox.checked = isPresentForRoll(roll);
+          checkbox.setAttribute("aria-label", "Present toggle for " + roll + " " + name);
+
+          const labelText = document.createElement("span");
+          labelText.style.fontSize = "12.5px";
+          labelText.style.color = "var(--muted)";
+          labelText.textContent = checkbox.checked ? "Present" : "Absent";
+
+          checkbox.addEventListener("click", (e) => {
+            // prevent row click double-toggle
+            e.stopPropagation();
+          });
+
+          checkbox.addEventListener("change", () => {
+            setPresentForRoll(roll, checkbox.checked);
+            updateAttendanceSummary();
+            updateAttendanceRowUI(roll, historicalCounts);
+          });
+
+          label.appendChild(checkbox);
+          label.appendChild(labelText);
+          tdPresent.appendChild(label);
+          tr.appendChild(tdPresent);
+
+          const tdName = document.createElement("td");
+          tdName.textContent = name;
+          tr.appendChild(tdName);
+
+          const tdPercent = document.createElement("td");
+          const badge = document.createElement("span");
+          badge.className = "percentBadge";
+          badge.textContent = String(computeLivePercentForRoll(roll, historicalCounts)) + "%";
+          tdPercent.appendChild(badge);
+          tr.appendChild(tdPercent);
+
+          const tdRemarks = document.createElement("td");
+          const remarksInput = document.createElement("input");
+          remarksInput.type = "text";
+          remarksInput.className = "cellInput remarksInput";
+          remarksInput.placeholder = "Optional remark (late, medical, etc.)";
+          remarksInput.value = getRemarkForRoll(roll);
+          remarksInput.setAttribute("aria-label", "Remarks for " + roll);
+
+          // clicking into remarks should not toggle row
+          remarksInput.addEventListener("click", (e) => e.stopPropagation());
+          remarksInput.addEventListener("mousedown", (e) => e.stopPropagation());
+          remarksInput.addEventListener("touchstart", (e) => e.stopPropagation());
+
+          remarksInput.addEventListener("input", () => {
+            setRemarkForRoll(roll, remarksInput.value);
+          });
+
+          tdRemarks.appendChild(remarksInput);
+          tr.appendChild(tdRemarks);
+
+          // Row-tap toggling (except remarks input / form controls)
+          tr.addEventListener("click", (event) => {
+            const target = event.target;
+            const tag = (target && target.tagName) ? target.tagName.toLowerCase() : "";
+            if(tag === "input" || tag === "textarea" || tag === "select" || tag === "button" || (target && target.closest && target.closest(".remarksInput"))){
+              return;
+            }
+            togglePresentForRoll(roll);
+            updateAttendanceSummary();
+            updateAttendanceRowUI(roll, historicalCounts);
+          });
+
+          // store refs for fast updates
+          Merlin.runtime.attendanceRowRefs[roll] = {
+            row: tr,
+            checkbox,
+            labelText,
+            percentBadge: badge,
+            remarksInput
+          };
+
+          // initial absent highlight
+          tr.classList.toggle("absent", !checkbox.checked);
+
+          tbody.appendChild(tr);
+        }
+
+        updateAttendanceSummary();
+      }
+
+      function buildAttendanceRecordFromCurrentUI(){
+        const section = getActiveSection();
+        const date = document.getElementById("attendanceDateInput").value;
+        const period = safeTrim(document.getElementById("attendancePeriodInput").value);
+        const notes = safeTrim(document.getElementById("attendanceNotesInput").value);
+
+        if(!date) throw new Error("Please select a date.");
+        if(!period) throw new Error("Please enter Period / Lecture.");
+        if(section.roster.length === 0) throw new Error("Roster is empty. Import/add students first.");
+
+        const entries = section.roster
+          .slice()
+          .sort((a,b) => String(a.roll).localeCompare(String(b.roll), undefined, { numeric: true }))
+          .map(st => ({
+            roll: normalizeRoll(st.roll),
+            name: toTitleCase(st.name || ""),
+            studentPhone: safeTrim(st.studentPhone),
+            parentPhone: safeTrim(st.parentPhone),
+            present: isPresentForRoll(st.roll),
+            remarks: getRemarkForRoll(st.roll)
+          }));
+
+        const presentCount = entries.filter(e => e.present).length;
+        const absentCount = entries.length - presentCount;
+
+        return {
+          id: makeIdentifier(),
+          date,
+          period,
+          notes,
+          timestamp: new Date().toISOString(),
+          summary: { total: entries.length, present: presentCount, absent: absentCount },
+          entries
+        };
+      }
+
+      function exportAttendanceRecordToCsv(record, sectionName){
+        const rows = [["section","date","period","timestamp","roll","name","status","remarks","notes"]];
+        for(const e of record.entries){
+          rows.push([
+            sectionName,
+            record.date,
+            record.period,
+            record.timestamp,
+            e.roll,
+            e.name || "",
+            e.present ? "Present" : "Absent",
+            e.remarks || "",
+            record.notes || ""
+          ]);
+        }
+        const filename =
+          safeTrim(sectionName).replace(/\s+/g, "-").toLowerCase() +
+          "-attendance-" + record.date + "-" +
+          safeTrim(record.period).replace(/[^\w\-]+/g, "-").toLowerCase() + ".csv";
+        downloadText(filename, csvFromRows(rows), "text/csv;charset=utf-8");
+      }
+
+      function wireAttendance(){
+        document.getElementById("attendanceSearchInput").addEventListener("input", () => renderAttendanceTable());
+
+        document.getElementById("markAllPresentButton").addEventListener("click", () => {
+          for(const st of getActiveSection().roster) setPresentForRoll(st.roll, true);
+          renderAttendanceTable();
+          setStatus("Marked all present.");
+        });
+
+        document.getElementById("markAllAbsentButton").addEventListener("click", () => {
+          for(const st of getActiveSection().roster) setPresentForRoll(st.roll, false);
+          renderAttendanceTable();
+          setStatus("Marked all absent.");
+        });
+
+        document.getElementById("clearAttendanceTogglesButton").addEventListener("click", () => {
+          Merlin.runtime.attendanceTogglesByRoll = {};
+          renderAttendanceTable();
+          setStatus("Toggles cleared (default Present).");
+        });
+
+        document.getElementById("clearRemarksButton").addEventListener("click", () => {
+          Merlin.runtime.attendanceRemarksByRoll = {};
+          renderAttendanceTable();
+          setStatus("Session remarks cleared.");
+        });
+
+        document.getElementById("saveAttendanceButton").addEventListener("click", () => {
+          const result = document.getElementById("attendanceSaveResult");
+          result.innerHTML = "";
+          try{
+            const record = buildAttendanceRecordFromCurrentUI();
+            const section = getActiveSection();
+            section.records.push(record);
+            saveState(Merlin.state);
+
+            const box = document.createElement("div");
+            box.className = "success";
+            box.innerHTML =
+              "<strong>Saved attendance record.</strong><br/>" +
+              escapeHtml(formatLocalDate(record.date)) + " • " + escapeHtml(record.period) + "<br/>" +
+              "Present: " + record.summary.present + "/" + record.summary.total + " • Absent: " + record.summary.absent +
+              "<br/>Saved: " + escapeHtml(formatLocalDateTime(record.timestamp));
+
+            const exportBtn = document.createElement("button");
+            exportBtn.type = "button";
+            exportBtn.className = "button buttonSmall";
+            exportBtn.style.marginTop = "10px";
+            exportBtn.textContent = "Export This Record to CSV";
+            exportBtn.addEventListener("click", () => {
+              exportAttendanceRecordToCsv(record, section.name);
+              setStatus("Attendance record exported.");
+            });
+
+            box.appendChild(document.createElement("br"));
+            box.appendChild(exportBtn);
+            result.appendChild(box);
+
+            // After saving, re-render to ensure live % now includes the saved session as historical too
+            renderAttendanceTable();
+            updateAttendanceSummary();
+            renderSendReportsStudentSelect();
+            updateSendReportsPreview();
+
+            setStatus("Attendance record saved.");
+          }catch(e){
+            const box = document.createElement("div");
+            box.className = "error";
+            box.textContent = e.message || "Could not save attendance record.";
+            result.appendChild(box);
+            setStatus("Could not save attendance record.");
+          }
+        });
+      }
+
+      // Report + remarks aggregation
+      function recordMatchesFilters(record, filters){
+        const from = filters.fromDate || "";
+        const to = filters.toDate || "";
+        const contains = (filters.periodContains || "").toLowerCase();
+
+        if(from && record.date < from) return false;
+        if(to && record.date > to) return false;
+
+        if(contains){
+          const p = String(record.period || "").toLowerCase();
+          if(!p.includes(contains)) return false;
+        }
+        return true;
+      }
+
+      function computeRemarksForStudentFromRecords(roll, records){
+        const r = normalizeRoll(roll);
+        const list = [];
+        for(const rec of records){
+          const entry = (rec.entries || []).find(e => normalizeRoll(e.roll) === r);
+          if(!entry) continue;
+          const txt = safeTrim(entry.remarks || "");
+          if(!txt) continue;
+          list.push({ date: rec.date, period: rec.period || "", text: txt });
+        }
+        return list;
+      }
+
+      function formatRemarksMultiline(list){
+        if(!list.length) return "(No remarks)";
+        return list
+          .slice()
+          .sort((a,b) => String(a.date).localeCompare(String(b.date)) || String(a.period).localeCompare(String(b.period)))
+          .map(item => "- " + formatLocalDate(item.date) + " • " + (item.period || "") + ": " + item.text)
+          .join("\n");
+      }
+
+      function withinPercentRange(percent, minValue, maxValue){
+        if(minValue !== null && percent < minValue) return false;
+        if(maxValue !== null && percent > maxValue) return false;
+        return true;
+      }
+
+      function applyReportFiltersFromInputs(){
+        Merlin.runtime.reportFilters.fromDate = document.getElementById("reportFromDate").value || "";
+        Merlin.runtime.reportFilters.toDate = document.getElementById("reportToDate").value || "";
+        Merlin.runtime.reportFilters.periodContains = safeTrim(document.getElementById("reportPeriodFilter").value || "");
+        Merlin.runtime.reportFilters.minPercent = document.getElementById("reportMinPercent").value;
+        Merlin.runtime.reportFilters.maxPercent = document.getElementById("reportMaxPercent").value;
+      }
+
+      function computeReportData(){
+        const section = getActiveSection();
+        const filters = Merlin.runtime.reportFilters;
+        const matchingRecords = (section.records || []).filter(r => recordMatchesFilters(r, filters));
+
+        const studentMap = new Map();
+        for(const st of (section.roster || [])){
+          studentMap.set(normalizeRoll(st.roll), { roll: normalizeRoll(st.roll), name: toTitleCase(st.name) });
+        }
+        for(const rec of matchingRecords){
+          for(const e of (rec.entries || [])){
+            const r = normalizeRoll(e.roll);
+            if(!studentMap.has(r)) studentMap.set(r, { roll: r, name: toTitleCase(e.name || "(Not In Roster)") });
+          }
+        }
+
+        const stats = new Map();
+        for(const s of studentMap.values()){
+          stats.set(s.roll, { roll: s.roll, name: s.name, present: 0, absent: 0, total: 0 });
+        }
+
+        for(const rec of matchingRecords){
+          for(const e of (rec.entries || [])){
+            const r = normalizeRoll(e.roll);
+            if(!stats.has(r)) stats.set(r, { roll: r, name: toTitleCase(e.name || "(Not In Roster)"), present: 0, absent: 0, total: 0 });
+            const item = stats.get(r);
+            item.total += 1;
+            if(e.present) item.present += 1;
+            else item.absent += 1;
+          }
+        }
+
+        const enriched = Array.from(stats.values()).map(item => {
+          const percent = item.total ? Math.round((item.present / item.total) * 1000) / 10 : 0;
+          const remarks = computeRemarksForStudentFromRecords(item.roll, matchingRecords);
+          return { ...item, percent, remarks };
+        });
+
+        return { matchingRecords, stats: enriched };
+      }
+
+      function renderReport(){
+        const section = getActiveSection();
+        const computed = computeReportData();
+
+        document.getElementById("reportTotalClasses").textContent = String(computed.matchingRecords.length);
+        document.getElementById("reportTotalStudents").textContent = String((section.roster || []).length);
+
+        const minP = clampNumber(Merlin.runtime.reportFilters.minPercent, 0, 100);
+        const maxP = clampNumber(Merlin.runtime.reportFilters.maxPercent, 0, 100);
+
+        const stats = computed.stats
+          .filter(s => withinPercentRange(s.percent, minP, maxP))
+          .sort((a,b) => String(a.roll).localeCompare(String(b.roll), undefined, { numeric: true }));
+
+        document.getElementById("reportVisibleCountPill").textContent = "Showing: " + stats.length;
+
+        const tbody = document.getElementById("reportTableBody");
+        tbody.innerHTML = "";
+
+        if(stats.length === 0){
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 6;
+          td.style.padding = "16px 10px";
+          td.innerHTML = "<span style='color:var(--muted);'>No students match current filters.</span>";
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        }else{
+          for(const s of stats){
+            const tr = document.createElement("tr");
+
+            const tdRoll = document.createElement("td");
+            tdRoll.textContent = s.roll;
+            tr.appendChild(tdRoll);
+
+            const tdName = document.createElement("td");
+            tdName.textContent = s.name || "";
+            tr.appendChild(tdName);
+
+            const tdPresent = document.createElement("td");
+            tdPresent.textContent = String(s.present);
+            tr.appendChild(tdPresent);
+
+            const tdAbsent = document.createElement("td");
+            tdAbsent.textContent = String(s.absent);
+            tr.appendChild(tdAbsent);
+
+            const tdPercent = document.createElement("td");
+            tdPercent.textContent = String(s.percent) + "%";
+            tr.appendChild(tdPercent);
+
+            const tdRemarks = document.createElement("td");
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "button buttonSmall";
+            const count = (s.remarks || []).length;
+            btn.textContent = count ? ("View remarks (" + count + ")") : "View remarks";
+            btn.addEventListener("click", () => openRemarksModal(s.roll, s.name, s.remarks || []));
+            tdRemarks.appendChild(btn);
+            tr.appendChild(tdRemarks);
+
+            tbody.appendChild(tr);
+          }
+        }
+
+        renderSessionsList(computed.matchingRecords);
+      }
+
+      function exportReportCsv(){
+        const section = getActiveSection();
+        const computed = computeReportData();
+
+        const filters = Merlin.runtime.reportFilters;
+        const from = filters.fromDate ? formatLocalDate(filters.fromDate) : "All";
+        const to = filters.toDate ? formatLocalDate(filters.toDate) : "All";
+        const periodContains = filters.periodContains ? filters.periodContains : "Any";
+        const minP = clampNumber(filters.minPercent, 0, 100);
+        const maxP = clampNumber(filters.maxPercent, 0, 100);
+
+        const stats = computed.stats
+          .filter(s => withinPercentRange(s.percent, minP, maxP))
+          .sort((a,b) => String(a.roll).localeCompare(String(b.roll), undefined, { numeric: true }));
+
+        const rows = [
+          ["section", section.name],
+          ["from", from],
+          ["to", to],
+          ["periodContains", periodContains],
+          ["minPercent", minP === null ? "Any" : String(minP)],
+          ["maxPercent", maxP === null ? "Any" : String(maxP)],
+          ["sessionsCount(filtered)", String(computed.matchingRecords.length)],
+          [],
+          ["roll","name","present","absent","sessions","percent","remarks(multiline)"]
+        ];
+
+        for(const s of stats){
+          rows.push([
+            s.roll,
+            s.name || "",
+            String(s.present),
+            String(s.absent),
+            String(s.total || 0),
+            String(s.percent),
+            formatRemarksMultiline(s.remarks || [])
+          ]);
+        }
+
+        const fileName = safeTrim(section.name).replace(/\s+/g, "-").toLowerCase() + "-report-" + (filters.fromDate || "all") + "-to-" + (filters.toDate || "all") + ".csv";
+        downloadText(fileName, csvFromRows(rows), "text/csv;charset=utf-8");
+        setStatus("Report exported.");
+      }
+
+      function renderSessionsList(records){
+        const container = document.getElementById("sessionsList");
+        container.innerHTML = "";
+
+        const section = getActiveSection();
+        const sorted = (records || []).slice().sort((a,b) => String(b.timestamp || "").localeCompare(String(a.timestamp || "")));
+
+        if(sorted.length === 0){
+          const div = document.createElement("div");
+          div.style.color = "var(--muted)";
+          div.style.fontSize = "12.5px";
+          div.textContent = "No sessions match current filters.";
+          container.appendChild(div);
+          return;
+        }
+
+        for(const rec of sorted){
+          const item = document.createElement("div");
+          item.className = "sectionBox";
+
+          const top = document.createElement("div");
+          top.className = "row";
+
+          const left = document.createElement("div");
+          left.innerHTML =
+            "<div style='font-weight:900; font-size:13px;'>" + escapeHtml(formatLocalDate(rec.date)) + " • " + escapeHtml(rec.period || "") + "</div>" +
+            "<div style='margin-top:4px; color:var(--muted); font-size:12.5px; line-height:1.35;'>" +
+            "Saved: " + escapeHtml(formatLocalDateTime(rec.timestamp)) +
+            " • Present: " + (rec.summary ? rec.summary.present : "?") + "/" + (rec.summary ? rec.summary.total : "?") +
+            " • Absent: " + (rec.summary ? rec.summary.absent : "?") +
+            (rec.notes ? ("<br/>Notes: " + escapeHtml(rec.notes)) : "") +
+            "</div>";
+
+          const actions = document.createElement("div");
+          actions.style.display = "flex";
+          actions.style.gap = "8px";
+          actions.style.flexWrap = "wrap";
+
+          const exportBtn = document.createElement("button");
+          exportBtn.type = "button";
+          exportBtn.className = "button buttonSmall";
+          exportBtn.textContent = "Export";
+          exportBtn.addEventListener("click", () => {
+            exportAttendanceRecordToCsv(rec, section.name);
+            setStatus("Session exported.");
+          });
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.type = "button";
+          deleteBtn.className = "button buttonSmall buttonDanger";
+          deleteBtn.textContent = "Delete";
+          deleteBtn.addEventListener("click", () => {
+            const ok = confirm("Delete this session?\n" + formatLocalDate(rec.date) + " • " + rec.period);
+            if(!ok) return;
+            const idx = section.records.findIndex(r => r.id === rec.id);
+            if(idx >= 0){
+              section.records.splice(idx, 1);
+              saveState(Merlin.state);
+              renderReport();
+              renderSendReportsStudentSelect();
+              updateSendReportsPreview();
+              setStatus("Session deleted.");
+            }
+          });
+
+          actions.appendChild(exportBtn);
+          actions.appendChild(deleteBtn);
+
+          top.appendChild(left);
+          top.appendChild(actions);
+          item.appendChild(top);
+
+          container.appendChild(item);
+        }
+      }
+
+      function wireReport(){
+        document.getElementById("applyReportFiltersButton").addEventListener("click", () => {
+          applyReportFiltersFromInputs();
+          renderReport();
+          setStatus("Report filters applied.");
+        });
+        document.getElementById("clearReportFiltersButton").addEventListener("click", () => {
+          document.getElementById("reportFromDate").value = "";
+          document.getElementById("reportToDate").value = "";
+          document.getElementById("reportPeriodFilter").value = "";
+          document.getElementById("reportMinPercent").value = "";
+          document.getElementById("reportMaxPercent").value = "";
+          applyReportFiltersFromInputs();
+          renderReport();
+          setStatus("Report filters cleared.");
+        });
+        document.getElementById("exportReportCsvButton").addEventListener("click", exportReportCsv);
+        document.getElementById("refreshSessionsButton").addEventListener("click", () => {
+          renderReport();
+          setStatus("Sessions refreshed.");
+        });
+      }
+
+      // Remarks modal
+      function openRemarksModal(roll, name, list){
+        const backdrop = document.getElementById("remarksModalBackdrop");
+        document.getElementById("remarksModalTitle").textContent = "Remarks";
+        document.getElementById("remarksModalSubtitle").textContent = (name || "") + " (" + normalizeRoll(roll) + ")";
+
+        const container = document.getElementById("remarksModalList");
+        container.innerHTML = "";
+
+        const sorted = (list || []).slice().sort((a,b) => String(a.date).localeCompare(String(b.date)) || String(a.period).localeCompare(String(b.period)));
+        if(sorted.length === 0){
+          const box = document.createElement("div");
+          box.className = "notice";
+          box.textContent = "No remarks found under current filters.";
+          container.appendChild(box);
+        }else{
+          for(const r of sorted){
+            const item = document.createElement("div");
+            item.className = "remarkItem";
+
+            const meta = document.createElement("div");
+            meta.className = "remarkMeta";
+            meta.textContent = formatLocalDate(r.date) + " • " + (r.period || "");
+
+            const text = document.createElement("div");
+            text.className = "remarkText";
+            text.textContent = r.text || "";
+
+            item.appendChild(meta);
+            item.appendChild(text);
+            container.appendChild(item);
+          }
+        }
+
+        document.getElementById("copyRemarksButton").onclick = async () => {
+          const formatted = formatRemarksMultiline(list || []);
+          try{
+            await navigator.clipboard.writeText(formatted);
+            setStatus("Remarks copied.");
+          }catch(e){
+            setStatus("Clipboard blocked. Copy manually.");
+          }
+        };
+
+        backdrop.classList.add("open");
+        backdrop.setAttribute("aria-hidden", "false");
+      }
+
+      function closeRemarksModal(){
+        const backdrop = document.getElementById("remarksModalBackdrop");
+        backdrop.classList.remove("open");
+        backdrop.setAttribute("aria-hidden", "true");
+      }
+
+      function wireRemarksModal(){
+        document.getElementById("closeRemarksButton").addEventListener("click", closeRemarksModal);
+        document.getElementById("closeRemarksFooterButton").addEventListener("click", closeRemarksModal);
+        document.getElementById("remarksModalBackdrop").addEventListener("click", (e) => {
+          if(e.target.id === "remarksModalBackdrop") closeRemarksModal();
+        });
+      }
+
+      // Send Reports
+      function applySendFiltersFromInputs(){
+        Merlin.runtime.sendFilters.fromDate = document.getElementById("sendFromDate").value || "";
+        Merlin.runtime.sendFilters.toDate = document.getElementById("sendToDate").value || "";
+        Merlin.runtime.sendFilters.periodContains = safeTrim(document.getElementById("sendPeriodFilter").value || "");
+        Merlin.runtime.sendFilters.minPercent = document.getElementById("sendMinPercent").value;
+        Merlin.runtime.sendFilters.maxPercent = document.getElementById("sendMaxPercent").value;
+      }
+
+      function getStudentByRoll(roll){
+        const r = normalizeRoll(roll);
+        return getActiveSection().roster.find(s => normalizeRoll(s.roll) === r) || null;
+      }
+
+      function computeStudentStatsForSend(roll){
+        const section = getActiveSection();
+        const filters = Merlin.runtime.sendFilters;
+        const records = (section.records || []).filter(r => recordMatchesFilters(r, filters));
+
+        let present = 0;
+        let absent = 0;
+        let sessions = 0;
+
+        const rr = normalizeRoll(roll);
+        for(const rec of records){
+          const e = (rec.entries || []).find(x => normalizeRoll(x.roll) === rr);
+          if(!e) continue;
+          sessions += 1;
+          if(e.present) present += 1;
+          else absent += 1;
+        }
+
+        const percent = sessions ? Math.round((present / sessions) * 1000) / 10 : 0;
+        const from = filters.fromDate ? formatLocalDate(filters.fromDate) : "All";
+        const to = filters.toDate ? formatLocalDate(filters.toDate) : "All";
+        const remarks = computeRemarksForStudentFromRecords(rr, records);
+
+        return { present, absent, sessions, percent, from, to, remarks };
+      }
+
+      function buildTemplateContextForStudent(student, stats){
+        return {
+          section: getActiveSection().name,
+          roll: normalizeRoll(student.roll),
+          name: toTitleCase(student.name || ""),
+          from: stats.from,
+          to: stats.to,
+          present: String(stats.present),
+          absent: String(stats.absent),
+          percent: String(stats.percent),
+          sessions: String(stats.sessions),
+          remarks: formatRemarksMultiline(stats.remarks || [])
+        };
+      }
+
+      function renderSendReportsStudentSelect(){
+        const select = document.getElementById("sendStudentSelect");
+        const search = safeTrim(document.getElementById("sendStudentSearchInput").value).toLowerCase();
+
+        const minP = clampNumber(Merlin.runtime.sendFilters.minPercent, 0, 100);
+        const maxP = clampNumber(Merlin.runtime.sendFilters.maxPercent, 0, 100);
+
+        const roster = getActiveSection().roster.slice()
+          .filter(st => {
+            if(search){
+              const ok = String(st.roll).toLowerCase().includes(search) || String(st.name).toLowerCase().includes(search);
+              if(!ok) return false;
+            }
+            const stats = computeStudentStatsForSend(st.roll);
+            return withinPercentRange(stats.percent, minP, maxP);
+          })
+          .sort((a,b) => String(a.roll).localeCompare(String(b.roll), undefined, { numeric: true }));
+
+        document.getElementById("sendMatchCountPill").textContent = "Matches: " + roster.length;
+
+        select.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = roster.length ? "Select a student..." : "No students match filters";
+        select.appendChild(placeholder);
+
+        for(const st of roster){
+          const opt = document.createElement("option");
+          opt.value = normalizeRoll(st.roll);
+          opt.textContent = normalizeRoll(st.roll) + " - " + (st.name || "");
+          select.appendChild(opt);
+        }
+
+        if(Merlin.runtime.selectedStudentRoll){
+          const exists = roster.some(s => normalizeRoll(s.roll) === normalizeRoll(Merlin.runtime.selectedStudentRoll));
+          select.value = exists ? Merlin.runtime.selectedStudentRoll : "";
+          if(!exists) Merlin.runtime.selectedStudentRoll = "";
+        }
+      }
+
+      function updateSendReportsPreview(){
+        const preview = document.getElementById("messagePreviewArea");
+        const type = document.getElementById("messageTypeSelect").value;
+
+        const roll = Merlin.runtime.selectedStudentRoll || "";
+        const student = roll ? getStudentByRoll(roll) : null;
+
+        if(!student){
+          preview.value = "Select a student to generate messages.";
+          document.getElementById("studentStatsBox").innerHTML = "";
+          updateSendReportsActionsEnabledState();
+          return;
+        }
+
+        const stats = computeStudentStatsForSend(student.roll);
+        const context = buildTemplateContextForStudent(student, stats);
+
+        const t = Merlin.state.templates;
+        if(type === "waStudent"){
+          preview.value = applyTemplate(t.whatsAppStudent, context);
+        }else if(type === "waParent"){
+          preview.value = applyTemplate(t.whatsAppParent, context);
+        }else if(type === "emailStudent"){
+          const subject = applyTemplate(t.emailStudentSubject, context);
+          const body = applyTemplate(t.emailStudentBody, context);
+          preview.value = "Subject: " + subject + "\n\n" + body;
+        }else{
+          const subject = applyTemplate(t.emailParentSubject, context);
+          const body = applyTemplate(t.emailParentBody, context);
+          preview.value = "Subject: " + subject + "\n\n" + body;
+        }
+
+        const statsBox = document.getElementById("studentStatsBox");
+        statsBox.innerHTML = "";
+        const box = document.createElement("div");
+        box.className = "success";
+        box.innerHTML =
+          "<strong>Computed stats</strong><br/>" +
+          "Sessions: " + stats.sessions + "<br/>" +
+          "Present: " + stats.present + " • Absent: " + stats.absent + " • %: " + stats.percent + "%<br/>" +
+          "Remarks: " + (stats.remarks ? stats.remarks.length : 0);
+        statsBox.appendChild(box);
+
+        updateSendReportsActionsEnabledState();
+      }
+
+      function updateSendReportsActionsEnabledState(){
+        const roll = Merlin.runtime.selectedStudentRoll || "";
+        const student = roll ? getStudentByRoll(roll) : null;
+
+        const btnWaStudent = document.getElementById("openWhatsAppStudentButton");
+        const btnWaParent = document.getElementById("openWhatsAppParentButton");
+        const btnEmailStudent = document.getElementById("openEmailStudentButton");
+        const btnEmailParent = document.getElementById("openEmailParentButton");
+
+        if(!student){
+          btnWaStudent.disabled = true;
+          btnWaParent.disabled = true;
+          btnEmailStudent.disabled = true;
+          btnEmailParent.disabled = true;
+          return;
+        }
+
+        btnWaStudent.disabled = !sanitizeWhatsAppPhone(student.studentPhone);
+        btnWaParent.disabled = !sanitizeWhatsAppPhone(student.parentPhone);
+
+        btnEmailStudent.disabled = !makeStudentEmailFromRoll(student.roll);
+
+        const pe = safeTrim(student.parentEmail);
+        btnEmailParent.disabled = !pe || !isValidEmail(pe);
+      }
+
+      function openWhatsAppTo(phone, message){
+        const p = sanitizeWhatsAppPhone(phone);
+        if(!p) throw new Error("Phone number is missing or invalid.");
+        window.open("https://wa.me/" + p + "?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
+      }
+
+      function openMailTo(email, subject, body){
+        if(!email || !isValidEmail(email)) throw new Error("Email is missing or invalid.");
+        const url = "mailto:" + encodeURIComponent(email) +
+          "?subject=" + encodeURIComponent(subject) +
+          "&body=" + encodeURIComponent(body);
+        window.location.href = url;
+      }
+
+      function wireSendReports(){
+        const refreshList = () => {
+          applySendFiltersFromInputs();
+          renderSendReportsStudentSelect();
+          updateSendReportsPreview();
+        };
+
+        document.getElementById("sendStudentSearchInput").addEventListener("input", refreshList);
+        document.getElementById("sendFromDate").addEventListener("change", refreshList);
+        document.getElementById("sendToDate").addEventListener("change", refreshList);
+        document.getElementById("sendPeriodFilter").addEventListener("input", refreshList);
+        document.getElementById("sendMinPercent").addEventListener("input", refreshList);
+        document.getElementById("sendMaxPercent").addEventListener("input", refreshList);
+
+        document.getElementById("sendStudentSelect").addEventListener("change", () => {
+          Merlin.runtime.selectedStudentRoll = document.getElementById("sendStudentSelect").value;
+          updateSendReportsPreview();
+        });
+
+        document.getElementById("messageTypeSelect").addEventListener("change", updateSendReportsPreview);
+
+        document.getElementById("computeStudentStatsButton").addEventListener("click", () => {
+          applySendFiltersFromInputs();
+          renderSendReportsStudentSelect();
+          updateSendReportsPreview();
+          setStatus("Computed student stats.");
+        });
+
+        document.getElementById("clearSendFiltersButton").addEventListener("click", () => {
+          document.getElementById("sendFromDate").value = "";
+          document.getElementById("sendToDate").value = "";
+          document.getElementById("sendPeriodFilter").value = "";
+          document.getElementById("sendMinPercent").value = "";
+          document.getElementById("sendMaxPercent").value = "";
+          applySendFiltersFromInputs();
+          renderSendReportsStudentSelect();
+          updateSendReportsPreview();
+          setStatus("Send filters cleared.");
+        });
+
+        document.getElementById("openWhatsAppStudentButton").addEventListener("click", () => {
+          const out = document.getElementById("sendResultBox");
+          out.innerHTML = "";
+          try{
+            const student = getStudentByRoll(Merlin.runtime.selectedStudentRoll);
+            const stats = computeStudentStatsForSend(student.roll);
+            const ctx = buildTemplateContextForStudent(student, stats);
+            const msg = applyTemplate(Merlin.state.templates.whatsAppStudent, ctx);
+            openWhatsAppTo(student.studentPhone, msg);
+            setStatus("Opened WhatsApp (student).");
+          }catch(e){
+            const box = document.createElement("div");
+            box.className = "error";
+            box.textContent = e.message || "Could not open WhatsApp.";
+            out.appendChild(box);
+            setStatus("Could not open WhatsApp.");
+          }
+        });
+
+        document.getElementById("openWhatsAppParentButton").addEventListener("click", () => {
+          const out = document.getElementById("sendResultBox");
+          out.innerHTML = "";
+          try{
+            const student = getStudentByRoll(Merlin.runtime.selectedStudentRoll);
+            const stats = computeStudentStatsForSend(student.roll);
+            const ctx = buildTemplateContextForStudent(student, stats);
+            const msg = applyTemplate(Merlin.state.templates.whatsAppParent, ctx);
+            openWhatsAppTo(student.parentPhone, msg);
+            setStatus("Opened WhatsApp (parent).");
+          }catch(e){
+            const box = document.createElement("div");
+            box.className = "error";
+            box.textContent = e.message || "Could not open WhatsApp.";
+            out.appendChild(box);
+            setStatus("Could not open WhatsApp.");
+          }
+        });
+
+        document.getElementById("openEmailStudentButton").addEventListener("click", () => {
+          const out = document.getElementById("sendResultBox");
+          out.innerHTML = "";
+          try{
+            const student = getStudentByRoll(Merlin.runtime.selectedStudentRoll);
+            const stats = computeStudentStatsForSend(student.roll);
+            const ctx = buildTemplateContextForStudent(student, stats);
+
+            const email = makeStudentEmailFromRoll(student.roll);
+            const subject = applyTemplate(Merlin.state.templates.emailStudentSubject, ctx);
+            const body = applyTemplate(Merlin.state.templates.emailStudentBody, ctx);
+
+            openMailTo(email, subject, body);
+            setStatus("Opened Email (student).");
+          }catch(e){
+            const box = document.createElement("div");
+            box.className = "error";
+            box.textContent = e.message || "Could not open email.";
+            out.appendChild(box);
+            setStatus("Could not open email.");
+          }
+        });
+
+        document.getElementById("openEmailParentButton").addEventListener("click", () => {
+          const out = document.getElementById("sendResultBox");
+          out.innerHTML = "";
+          try{
+            const student = getStudentByRoll(Merlin.runtime.selectedStudentRoll);
+            const parentEmail = safeTrim(student.parentEmail);
+            if(!parentEmail) throw new Error("Parent email is missing. Add it in roster.");
+            if(!isValidEmail(parentEmail)) throw new Error("Parent email is invalid. Fix it in roster.");
+
+            const stats = computeStudentStatsForSend(student.roll);
+            const ctx = buildTemplateContextForStudent(student, stats);
+
+            const subject = applyTemplate(Merlin.state.templates.emailParentSubject, ctx);
+            const body = applyTemplate(Merlin.state.templates.emailParentBody, ctx);
+
+            openMailTo(parentEmail, subject, body);
+            setStatus("Opened Email (parent).");
+          }catch(e){
+            const box = document.createElement("div");
+            box.className = "error";
+            box.textContent = e.message || "Could not open email.";
+            out.appendChild(box);
+            setStatus("Could not open email.");
+          }
+        });
+
+        document.getElementById("copyMessageButton").addEventListener("click", async () => {
+          const out = document.getElementById("sendResultBox");
+          out.innerHTML = "";
+          const text = document.getElementById("messagePreviewArea").value;
+          try{
+            await navigator.clipboard.writeText(text);
+            const box = document.createElement("div");
+            box.className = "success";
+            box.textContent = "Copied to clipboard.";
+            out.appendChild(box);
+            setStatus("Copied message.");
+          }catch(e){
+            const box = document.createElement("div");
+            box.className = "error";
+            box.textContent = "Clipboard blocked. Select and copy manually.";
+            out.appendChild(box);
+            const area = document.getElementById("messagePreviewArea");
+            area.focus();
+            area.select();
+            setStatus("Clipboard blocked.");
+          }
+        });
+      }
+
+      function updateSendReportsStudentSelectIfVisible(){
+        const screen = document.getElementById("screenSendReports");
+        if(screen.classList.contains("active")){
+          applySendFiltersFromInputs();
+          renderSendReportsStudentSelect();
+          updateSendReportsPreview();
+          updateSendReportsActionsEnabledState();
+        }
+      }
+
+      // Settings
+      function openSettingsModal(){
+        const b = document.getElementById("settingsModalBackdrop");
+        b.classList.add("open");
+        b.setAttribute("aria-hidden", "false");
+
+        const t = Merlin.state.templates;
+        document.getElementById("templateWhatsAppStudent").value = t.whatsAppStudent || "";
+        document.getElementById("templateWhatsAppParent").value = t.whatsAppParent || "";
+        document.getElementById("templateEmailStudentSubject").value = t.emailStudentSubject || "";
+        document.getElementById("templateEmailParentSubject").value = t.emailParentSubject || "";
+        document.getElementById("templateEmailStudentBody").value = t.emailStudentBody || "";
+        document.getElementById("templateEmailParentBody").value = t.emailParentBody || "";
+
+        setTimeout(() => document.getElementById("templateWhatsAppStudent").focus(), 0);
+      }
+
+      function closeSettingsModal(){
+        const b = document.getElementById("settingsModalBackdrop");
+        b.classList.remove("open");
+        b.setAttribute("aria-hidden", "true");
+      }
+
+      function wireSettings(){
+        document.getElementById("settingsButton").addEventListener("click", openSettingsModal);
+        document.getElementById("closeSettingsButton").addEventListener("click", closeSettingsModal);
+        document.getElementById("settingsModalBackdrop").addEventListener("click", (e) => {
+          if(e.target.id === "settingsModalBackdrop") closeSettingsModal();
+        });
+
+        document.getElementById("restoreDefaultTemplatesButton").addEventListener("click", () => {
+          Merlin.state.templates = defaultTemplates();
+          saveState(Merlin.state);
+          openSettingsModal();
+          setStatus("Templates restored.");
+        });
+
+        document.getElementById("saveSettingsButton").addEventListener("click", () => {
+          const next = {
+            whatsAppStudent: String(document.getElementById("templateWhatsAppStudent").value || ""),
+            whatsAppParent: String(document.getElementById("templateWhatsAppParent").value || ""),
+            emailStudentSubject: String(document.getElementById("templateEmailStudentSubject").value || ""),
+            emailParentSubject: String(document.getElementById("templateEmailParentSubject").value || ""),
+            emailStudentBody: String(document.getElementById("templateEmailStudentBody").value || ""),
+            emailParentBody: String(document.getElementById("templateEmailParentBody").value || "")
+          };
+          if(!next.whatsAppStudent.trim() || !next.whatsAppParent.trim() ||
+             !next.emailStudentSubject.trim() || !next.emailParentSubject.trim() ||
+             !next.emailStudentBody.trim() || !next.emailParentBody.trim()){
+            setStatus("Templates cannot be empty.");
+            return;
+          }
+          Merlin.state.templates = next;
+          saveState(Merlin.state);
+          closeSettingsModal();
+          updateSendReportsPreview();
+          setStatus("Settings saved.");
+        });
+      }
+
+      // Backup
+      function openBackupModal(){
+        const b = document.getElementById("backupModalBackdrop");
+        b.classList.add("open");
+        b.setAttribute("aria-hidden", "false");
+        document.getElementById("backupResultBox").innerHTML = "";
+        document.getElementById("importBackupJsonInput").value = "";
+      }
+
+      function closeBackupModal(){
+        const b = document.getElementById("backupModalBackdrop");
+        b.classList.remove("open");
+        b.setAttribute("aria-hidden", "true");
+      }
+
+      function wireBackup(){
+        document.getElementById("backupButton").addEventListener("click", openBackupModal);
+        document.getElementById("closeBackupButton").addEventListener("click", closeBackupModal);
+        document.getElementById("closeBackupFooterButton").addEventListener("click", closeBackupModal);
+        document.getElementById("backupModalBackdrop").addEventListener("click", (e) => {
+          if(e.target.id === "backupModalBackdrop") closeBackupModal();
+        });
+
+        document.getElementById("exportBackupJsonButton").addEventListener("click", () => {
+          const payload = { exportedAt: new Date().toISOString(), data: Merlin.state };
+          downloadText("kiit-smart-attendance-backup.json", JSON.stringify(payload, null, 2), "application/json;charset=utf-8");
+          setStatus("Backup exported.");
+        });
+
+        document.getElementById("importBackupJsonButton").addEventListener("click", async () => {
+          const input = document.getElementById("importBackupJsonInput");
+          const out = document.getElementById("backupResultBox");
+          out.innerHTML = "";
+          const file = input.files && input.files[0];
+          if(!file){
+            const box = document.createElement("div");
+            box.className = "error";
+            box.textContent = "Please select a JSON file.";
+            out.appendChild(box);
+            return;
+          }
+          try{
+            const text = await file.text();
+            const parsed = JSON.parse(text);
+            if(!parsed || !parsed.data || !parsed.data.sections) throw new Error("Invalid backup format.");
+
+            Merlin.state = parsed.data;
+            // re-run normalization
+            localStorage.setItem(Merlin.storageKey, JSON.stringify(Merlin.state));
+            Merlin.state = loadState();
+            saveState(Merlin.state);
+
+            Merlin.runtime.activeSectionId = "section1";
+            Merlin.runtime.attendanceTogglesByRoll = {};
+            Merlin.runtime.attendanceRemarksByRoll = {};
+            Merlin.runtime.attendanceRowRefs = {};
+            Merlin.runtime.selectedStudentRoll = "";
+
+            renderTopBar();
+            document.getElementById("sectionNameInput").value = getActiveSection().name;
+
+            renderRosterTable();
+            renderAttendanceTable();
+            applyReportFiltersFromInputs();
+            renderReport();
+            applySendFiltersFromInputs();
+            renderSendReportsStudentSelect();
+            updateSendReportsPreview();
+
+            const box = document.createElement("div");
+            box.className = "success";
+            box.textContent = "Backup imported successfully.";
+            out.appendChild(box);
+            setStatus("Backup imported.");
+          }catch(e){
+            const box = document.createElement("div");
+            box.className = "error";
+            box.textContent = e.message || "Could not import backup.";
+            out.appendChild(box);
+            setStatus("Backup import failed.");
+          }finally{
+            input.value = "";
+          }
+        });
+      }
+
+      // Reset
+      function wireReset(){
+        document.getElementById("resetButton").addEventListener("click", () => {
+          const ok = confirm("Reset will delete all rosters, attendance records (including remarks), and templates stored in this browser. Continue?");
+          if(!ok) return;
+          localStorage.removeItem(Merlin.storageKey);
+          Merlin.state = loadState();
+
+          Merlin.runtime.activeSectionId = "section1";
+          Merlin.runtime.attendanceTogglesByRoll = {};
+          Merlin.runtime.attendanceRemarksByRoll = {};
+          Merlin.runtime.attendanceRowRefs = {};
+          Merlin.runtime.selectedStudentRoll = "";
+
+          renderTopBar();
+          document.getElementById("sectionNameInput").value = getActiveSection().name;
+
+          document.getElementById("attendanceDateInput").value = todayLocalDateString();
+          document.getElementById("attendancePeriodInput").value = "";
+          document.getElementById("attendanceNotesInput").value = "";
+          document.getElementById("attendanceSearchInput").value = "";
+
+          renderRosterTable();
+          renderAttendanceTable();
+          applyReportFiltersFromInputs();
+          renderReport();
+          applySendFiltersFromInputs();
+          renderSendReportsStudentSelect();
+          updateSendReportsPreview();
+
+          showScreen("screenHome");
+          setStatus("All local data reset (sample data restored).");
+        });
+      }
+
+      // Global Escape
+      function wireGlobalEscape(){
+        document.addEventListener("keydown", (event) => {
+          if(event.key !== "Escape") return;
+          if(document.getElementById("settingsModalBackdrop").classList.contains("open")) closeSettingsModal();
+          if(document.getElementById("backupModalBackdrop").classList.contains("open")) closeBackupModal();
+          if(document.getElementById("remarksModalBackdrop").classList.contains("open")) closeRemarksModal();
+        });
+      }
+
+      // Wire report buttons
+      function wireReportButtons(){
+        wireReport();
+      }
+
+      // Init
+      function initialize(){
+        Merlin.state = loadState();
+
+        const today = todayLocalDateString();
+        document.getElementById("todayPill").textContent = "Today: " + formatLocalDate(today);
+        document.getElementById("attendanceDateInput").value = today;
+
+        renderTopBar();
+        document.getElementById("sectionNameInput").value = getActiveSection().name;
+
+        wireTopBar();
+        wireNavigation();
+        wireImport();
+        wireRosterManagement();
+        wireAttendance();
+        wireReportButtons();
+        wireSendReports();
+        wireSettings();
+        wireBackup();
+        wireReset();
+        wireRemarksModal();
+        wireGlobalEscape();
+
+        // Report filters defaults
+        document.getElementById("reportFromDate").value = "";
+        document.getElementById("reportToDate").value = "";
+        document.getElementById("reportPeriodFilter").value = "";
+        document.getElementById("reportMinPercent").value = "";
+        document.getElementById("reportMaxPercent").value = "";
+
+        // Send filters defaults
+        document.getElementById("sendFromDate").value = "";
+        document.getElementById("sendToDate").value = "";
+        document.getElementById("sendPeriodFilter").value = "";
+        document.getElementById("sendMinPercent").value = "";
+        document.getElementById("sendMaxPercent").value = "";
+
+        updateXlsxNotice();
+        setStatus("Ready. Import roster, then mark attendance (tap rows) and save.");
+        showScreen("screenHome");
+      }
+
+      initialize();
+
+    })();
+  </script>
+</body>
+</html>
