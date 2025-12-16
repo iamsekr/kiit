@@ -107,6 +107,12 @@
       gap: 0.5rem;
       flex-wrap: wrap;
     }
+    .cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+      flex-wrap: wrap;
+    }
     .card {
       background-color: var(--color-surface);
       border-radius: var(--radius-medium);
@@ -449,9 +455,11 @@
       <div class="nav-segments" id="nav-segments"></div>
       <div class="nav-right">
         <span>Stored in this browser (per class). Local only.</span>
+        <button id="settings-btn" class="btn btn-sm btn-outline" type="button">Settings</button>
         <button id="backup-btn" class="btn btn-sm btn-outline" type="button">Backup Data</button>
         <input id="restore-file-input" type="file" accept=".json" style="display:none;" />
         <button id="restore-btn" class="btn btn-sm btn-outline" type="button">Restore Data</button>
+        <button id="export-class-excel-btn" class="btn btn-sm btn-outline" type="button">Export Class Excel</button>
       </div>
     </div>
 
@@ -461,6 +469,14 @@
         <div>
           <h2 class="section-title" contenteditable="true" spellcheck="false">Roster</h2>
           <p class="card-subtitle">Maintain the list of students, import from XLS, and manage contact details.</p>
+        </div>
+        <div class="flex-gap-sm">
+          <button id="roster-select-all-btn" class="btn btn-sm btn-outline" type="button">
+            Select All
+          </button>
+          <button id="roster-delete-selected-btn" class="btn btn-sm btn-danger-soft" type="button">
+            Delete Selected
+          </button>
         </div>
       </div>
 
@@ -547,6 +563,9 @@
         <table id="roster-table">
           <thead>
             <tr>
+              <th style="width:40px;">
+                <input type="checkbox" id="roster-header-checkbox" />
+              </th>
               <th class="sortable-roster" data-sort-field="sno" style="width:50px;">S.No</th>
               <th class="sortable-roster" data-sort-field="roll" style="width:90px;">Roll</th>
               <th class="sortable-roster" data-sort-field="name">Name</th>
@@ -590,9 +609,12 @@
             <button id="check-all-btn" class="btn btn-sm btn-outline" type="button">Check all</button>
             <button id="uncheck-all-btn" class="btn btn-sm btn-outline" type="button">Uncheck all</button>
           </div>
-          <div style="display:flex; gap:0.25rem; justify-content:flex-end;">
+          <div style="display:flex; gap:0.25rem; justify-content:flex-end; flex-wrap:wrap;">
             <button id="clear-day-btn" class="btn btn-sm btn-outline" type="button">
               Clear This Day
+            </button>
+            <button id="export-excel-btn" class="btn btn-sm btn-outline" type="button">
+              Export Excel
             </button>
             <button id="save-session-btn" class="btn btn-primary btn-sm" type="button">
               Save Attendance Session
@@ -662,6 +684,45 @@
     </div>
   </div>
 
+  <!-- Settings Modal -->
+  <div id="settings-modal-backdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+      <div class="modal-header">
+        <h3 id="settings-modal-title" class="modal-title">Templates Settings</h3>
+        <button type="button" class="btn btn-icon btn-sm" id="close-settings-modal-btn">Close</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-top:0;margin-bottom:0.5rem;font-size:0.8rem;color:#6b7280;">
+          Use placeholders: <code>{name}</code>, <code>{roll}</code>, <code>{percent}</code>, <code>{remarks}</code>.
+        </p>
+
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label for="settings-wa-student-template" style="font-weight:600;">WhatsApp template (Student)</label>
+          <textarea id="settings-wa-student-template" style="min-height:60px;"></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label for="settings-wa-parent-template" style="font-weight:600;">WhatsApp template (Parent)</label>
+          <textarea id="settings-wa-parent-template" style="min-height:60px;"></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label for="settings-student-email-template" style="font-weight:600;">Student email template</label>
+          <textarea id="settings-student-email-template" style="min-height:60px;"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="settings-parent-email-template" style="font-weight:600;">Parent email template</label>
+          <textarea id="settings-parent-email-template" style="min-height:60px;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" id="settings-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="settings-save-btn">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
@@ -679,9 +740,15 @@
       // Add more: { key: "Section D", label: "Section D" },
     ];
 
+    const TEMPLATE_CONFIG_DEFAULTS = {
+      whatsappStudentTemplate: "Dear {name} ({roll}), your current attendance is {percent}%. Remarks: {remarks}",
+      whatsappParentTemplate: "Dear Parent of {name} ({roll}), your ward's current attendance is {percent}%. Remarks: {remarks}",
+      studentEmailTemplate: "Dear {name},\nYour attendance is {percent}%. Remarks: {remarks}",
+      parentEmailTemplate: "Dear Parent of {name} ({roll}),\nYour ward's attendance is {percent}%. Remarks: {remarks}"
+    };
+
     const WHATSAPP_CONFIG = {
       buttonLabel: "WhatsApp",
-      template: "Dear {name} ({roll}), your current attendance is {percent}%. Remarks: {remarks}",
       apiBase: "https://cloud.wazbulk.in/api/send",
       instanceId: "xyzxyzxyz",
       accessToken: "abccabcabcabcabc"
@@ -694,7 +761,13 @@
     let currentClassKey = CLASS_CONFIG[0].key;
     let currentSession = { date: "", notes: "", marks: {} };
 
-    // Roster sort state (view only, not base order)
+    const appSettings = {
+      whatsappStudentTemplate: TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate,
+      whatsappParentTemplate: TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate,
+      studentEmailTemplate: TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate,
+      parentEmailTemplate: TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate
+    };
+
     let rosterSort = { field: "sno", dir: "asc" };
 
     function ensureClass(key) {
@@ -763,11 +836,71 @@
       updateClassSummary();
     }
 
+    // -------- HISTORY (including live currentSession) --------
+    function computeLast3HistoryWithCurrent(st) {
+      const sessionsByDate = getSessionsByDate();
+      const dates = Object.keys(sessionsByDate).sort(); // ascending
+      const historyPairs = dates.map(d => {
+        const sess = sessionsByDate[d];
+        const mark = sess && sess.marks && sess.marks[st.id];
+        let val = null;
+        if (mark) val = mark.present ? "P" : "A";
+        return { date: d, val };
+      }).filter(p => p.val !== null);
+
+      if (currentSession && currentSession.date) {
+        const d = currentSession.date;
+        const mark = currentSession.marks[st.id];
+        if (mark) {
+          const val = mark.present ? "P" : "A";
+          const idx = historyPairs.findIndex(p => p.date === d);
+          if (idx >= 0) historyPairs[idx].val = val;
+          else historyPairs.push({ date: d, val });
+        }
+      }
+
+      historyPairs.sort((a, b) => a.date.localeCompare(b.date));
+      return historyPairs.slice(-3).map(p => p.val);
+    }
+
+    function updateHistoryCellForStudent(st) {
+      const history = computeLast3HistoryWithCurrent(st);
+      const container = document.querySelector('[data-history-cell="' + st.id + '"]');
+      if (!container) return;
+      container.innerHTML = "";
+      let dots;
+      if (!history.length) {
+        dots = [null];
+      } else {
+        dots = Array(3 - history.length).fill(null).concat(history);
+      }
+      dots.forEach(val => {
+        const dot = document.createElement("span");
+        if (val === "P") {
+          dot.className = "history-dot history-p";
+          dot.textContent = "P";
+        } else if (val === "A") {
+          dot.className = "history-dot history-a";
+          dot.textContent = "A";
+        } else {
+          dot.className = "history-dot history-empty";
+          dot.textContent = "-";
+        }
+        container.appendChild(dot);
+      });
+    }
+
+    function refreshAllHistoryCells() {
+      const students = getStudents();
+      students.forEach(st => updateHistoryCellForStudent(st));
+    }
+
     // -------- LOCAL STORAGE --------
     function saveToLocalStorage() {
       const data = {
         classes,
         currentClassKey,
+        appSettings,
         savedAt: new Date().toISOString()
       };
       try {
@@ -794,6 +927,18 @@
         } else {
           currentClassKey = keysFromConfig[0];
         }
+
+        if (parsed.appSettings && typeof parsed.appSettings === "object") {
+          appSettings.whatsappStudentTemplate =
+            parsed.appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
+          appSettings.whatsappParentTemplate =
+            parsed.appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
+          appSettings.studentEmailTemplate =
+            parsed.appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
+          appSettings.parentEmailTemplate =
+            parsed.appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
+        }
+
         return true;
       } catch (e) {
         console.error("Error loading from localStorage", e);
@@ -823,6 +968,7 @@
       renderAttendanceTable();
       renderReportsTable();
       refreshAllPercents();
+      refreshAllHistoryCells();
       saveToLocalStorage();
     };
 
@@ -835,6 +981,9 @@
     const saveStudentBtn = document.getElementById("save-student-btn");
     const saveStudentLabel = document.getElementById("save-student-label");
     const rosterTbody = document.getElementById("roster-tbody");
+    const rosterHeaderCheckbox = document.getElementById("roster-header-checkbox");
+    const rosterSelectAllBtn = document.getElementById("roster-select-all-btn");
+    const rosterDeleteSelectedBtn = document.getElementById("roster-delete-selected-btn");
     let editingStudentId = null;
 
     function updateEmailDisplay() {
@@ -894,6 +1043,7 @@
       renderAttendanceTable();
       renderReportsTable();
       refreshAllPercents();
+      refreshAllHistoryCells();
       saveToLocalStorage();
     }
     saveStudentBtn.addEventListener("click", e => {
@@ -905,10 +1055,12 @@
       const baseStudents = getStudents();
       rosterTbody.innerHTML = "";
 
+      rosterHeaderCheckbox.checked = false;
+
       if (baseStudents.length === 0) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 7;
+        td.colSpan = 8;
         td.className = "empty-state";
         td.textContent = "No students added yet. Use the form or import XLS.";
         tr.appendChild(td);
@@ -917,7 +1069,6 @@
         return;
       }
 
-      // Work on a copy so we don't change base/custom order
       const students = baseStudents.slice();
 
       if (rosterSort.field === "roll") {
@@ -930,12 +1081,19 @@
           const cmp = a.name.localeCompare(b.name);
           return rosterSort.dir === "asc" ? cmp : -cmp;
         });
-      } else {
-        // "sno" => keep base array order (custom order)
       }
 
       students.forEach((st, index) => {
         const tr = document.createElement("tr");
+        tr.dataset.studentId = st.id;
+
+        const tdSel = document.createElement("td");
+        const chk = document.createElement("input");
+        chk.type = "checkbox";
+        chk.className = "roster-row-checkbox";
+        chk.addEventListener("click", e => e.stopPropagation());
+        tdSel.appendChild(chk);
+
         const tdSno = document.createElement("td");
         tdSno.textContent = index + 1;
 
@@ -971,7 +1129,7 @@
         wrap.append(editBtn, delBtn);
         tdActions.appendChild(wrap);
 
-        tr.append(tdSno, tdRoll, tdName, tdSP, tdPP, tdEmail, tdActions);
+        tr.append(tdSel, tdSno, tdRoll, tdName, tdSP, tdPP, tdEmail, tdActions);
         rosterTbody.appendChild(tr);
       });
 
@@ -999,15 +1157,63 @@
       renderAttendanceTable();
       renderReportsTable();
       refreshAllPercents();
+      refreshAllHistoryCells();
       saveToLocalStorage();
     }
+
+    rosterHeaderCheckbox.addEventListener("change", () => {
+      const checked = rosterHeaderCheckbox.checked;
+      document.querySelectorAll("#roster-tbody .roster-row-checkbox").forEach(cb => {
+        cb.checked = checked;
+      });
+    });
+
+    rosterSelectAllBtn.onclick = () => {
+      rosterHeaderCheckbox.checked = true;
+      rosterHeaderCheckbox.dispatchEvent(new Event("change"));
+    };
+
+    rosterDeleteSelectedBtn.onclick = () => {
+      const cls = getCurrentClass();
+      const idsToDelete = [];
+      document.querySelectorAll("#roster-tbody tr").forEach(tr => {
+        const cb = tr.querySelector(".roster-row-checkbox");
+        if (cb && cb.checked && tr.dataset.studentId) {
+          idsToDelete.push(tr.dataset.studentId);
+        }
+      });
+      if (idsToDelete.length === 0) {
+        alert("No students selected.");
+        return;
+      }
+      if (!confirm("Delete " + idsToDelete.length + " selected student(s)?")) return;
+
+      cls.students = cls.students.filter(st => !idsToDelete.includes(st.id));
+
+      idsToDelete.forEach(id => {
+        delete currentSession.marks[id];
+        const sessionsByDate = getSessionsByDate();
+        Object.keys(sessionsByDate).forEach(date => {
+          const sess = sessionsByDate[date];
+          if (sess && sess.marks && sess.marks[id]) {
+            delete sess.marks[id];
+          }
+        });
+      });
+
+      renderRosterTable();
+      renderAttendanceTable();
+      renderReportsTable();
+      refreshAllPercents();
+      refreshAllHistoryCells();
+      saveToLocalStorage();
+    };
 
     document.getElementById("toggle-help-btn").onclick = () => {
       const box = document.getElementById("help-box");
       box.style.display = (box.style.display === "none" || !box.style.display) ? "block" : "none";
     };
 
-    // Roster header click sorting
     document.querySelectorAll("#roster-table thead th.sortable-roster").forEach(th => {
       th.onclick = () => {
         const field = th.dataset.sortField;
@@ -1095,6 +1301,7 @@
       renderAttendanceTable();
       renderReportsTable();
       refreshAllPercents();
+      refreshAllHistoryCells();
       saveToLocalStorage();
       importXlsStatus.textContent = "Import complete: " + added + " added, " + updated + " updated.";
     }
@@ -1131,6 +1338,7 @@
     const checkAllBtn = document.getElementById("check-all-btn");
     const uncheckAllBtn = document.getElementById("uncheck-all-btn");
     const clearDayBtn = document.getElementById("clear-day-btn");
+    const exportExcelBtn = document.getElementById("export-excel-btn");
 
     function setTodayDate() {
       const today = new Date().toISOString().slice(0, 10);
@@ -1157,50 +1365,38 @@
       attendanceNotesInput.value = currentSession.notes || "";
       renderAttendanceTable();
       refreshAllPercents();
-    }
-
-    function computeLast3HistoryForStudent(st) {
-      const sessionsByDate = getSessionsByDate();
-      const dates = Object.keys(sessionsByDate).sort(); // ascending
-      const last3 = dates.slice(-3);
-      const history = last3.map(d => {
-        const sess = sessionsByDate[d];
-        if (!sess || !sess.marks) return null;
-        const mark = sess.marks[st.id];
-        if (!mark) return null;
-        return mark.present ? "P" : "A";
-      });
-      return history;
+      refreshAllHistoryCells();
     }
 
     function renderHistoryCell(st) {
-      const history = computeLast3HistoryForStudent(st);
+      const history = computeLast3HistoryWithCurrent(st);
       const td = document.createElement("td");
       const pill = document.createElement("div");
       pill.className = "history-pill";
+      pill.dataset.historyCell = st.id;
 
+      let dots;
       if (!history.length) {
-        const dot = document.createElement("span");
-        dot.className = "history-dot history-empty";
-        dot.textContent = "-";
-        pill.appendChild(dot);
+        dots = [null];
       } else {
-        const padded = Array(3 - history.length).fill(null).concat(history);
-        padded.forEach(val => {
-          const dot = document.createElement("span");
-          if (val === "P") {
-            dot.className = "history-dot history-p";
-            dot.textContent = "P";
-          } else if (val === "A") {
-            dot.className = "history-dot history-a";
-            dot.textContent = "A";
-          } else {
-            dot.className = "history-dot history-empty";
-            dot.textContent = "-";
-          }
-          pill.appendChild(dot);
-        });
+        dots = Array(3 - history.length).fill(null).concat(history);
       }
+
+      dots.forEach(val => {
+        const dot = document.createElement("span");
+        if (val === "P") {
+          dot.className = "history-dot history-p";
+          dot.textContent = "P";
+        } else if (val === "A") {
+          dot.className = "history-dot history-a";
+          dot.textContent = "A";
+        } else {
+          dot.className = "history-dot history-empty";
+          dot.textContent = "-";
+        }
+        pill.appendChild(dot);
+      });
+
       td.appendChild(pill);
       return td;
     }
@@ -1290,6 +1486,8 @@
       currentSession.marks[studentId] = mark;
       applyRowState(studentId, mark.present);
       refreshAllPercents();
+      const st = findStudentById(studentId);
+      if (st) updateHistoryCellForStudent(st);
     }
 
     function setPresentForStudent(studentId, isPresent) {
@@ -1298,6 +1496,8 @@
       currentSession.marks[studentId] = mark;
       applyRowState(studentId, isPresent);
       refreshAllPercents();
+      const st = findStudentById(studentId);
+      if (st) updateHistoryCellForStudent(st);
     }
 
     checkAllBtn.onclick = () => {
@@ -1309,6 +1509,7 @@
           currentSession.marks[st.id].present = true;
         }
         applyRowState(st.id, true);
+        updateHistoryCellForStudent(st);
       });
       refreshAllPercents();
     };
@@ -1321,8 +1522,68 @@
           currentSession.marks[st.id].present = false;
         }
         applyRowState(st.id, false);
+        updateHistoryCellForStudent(st);
       });
       refreshAllPercents();
+    };
+
+    // per-lecture export (current date)
+    function exportAttendanceExcelForCurrentDate() {
+      const cls = getCurrentClass();
+      const students = cls.students;
+      if (!students || students.length === 0) {
+        alert("No students in roster for this class.");
+        return;
+      }
+      const date = currentSession.date || attendanceDateInput.value;
+      if (!date) {
+        alert("Please select a date first.");
+        return;
+      }
+
+      const sessionsByDate = cls.sessionsByDate || {};
+      const savedSession = sessionsByDate[date];
+
+      if (!savedSession) {
+        if (!currentSession.marks || Object.keys(currentSession.marks).length === 0) {
+          alert("No attendance data for this date.");
+          return;
+        }
+      }
+
+      const rows = [];
+      rows.push(["S.No", "Roll", "Name", "Status", "Remark", "Notes", "Class"]);
+
+      const marksSource = savedSession ? savedSession.marks : currentSession.marks;
+      const notesSource = savedSession ? (savedSession.notes || "") : (currentSession.notes || "");
+      const classLabel = currentClassKey;
+
+      students.forEach((st, index) => {
+        const m = marksSource[st.id] || { present: true, remark: "" };
+        const status = m.present ? "Present" : "Absent";
+        const remark = m.remark || "";
+        rows.push([
+          index + 1,
+          st.roll,
+          st.name,
+          status,
+          remark,
+          notesSource,
+          classLabel
+        ]);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+
+      const filename = "attendance_" + classLabel.replace(/\s+/g, "_") + "_" + date + ".xlsx";
+      XLSX.writeFile(wb, filename);
+    }
+
+    exportExcelBtn.onclick = e => {
+      e.preventDefault();
+      exportAttendanceExcelForCurrentDate();
     };
 
     function saveAttendanceSession() {
@@ -1339,7 +1600,6 @@
       const sessionsByDate = cls.sessionsByDate;
       const prev = sessionsByDate[currentSession.date];
 
-      // Roll back previous session if it exists
       if (prev && prev.marks) {
         students.forEach(st => {
           const oldMark = prev.marks[st.id];
@@ -1375,6 +1635,7 @@
       renderAttendanceTable();
       renderReportsTable();
       refreshAllPercents();
+      refreshAllHistoryCells();
       saveToLocalStorage();
     }
     saveSessionBtn.onclick = e => {
@@ -1396,6 +1657,7 @@
         attendanceNotesInput.value = "";
         renderAttendanceTable();
         refreshAllPercents();
+        refreshAllHistoryCells();
         saveToLocalStorage();
         return;
       }
@@ -1419,6 +1681,7 @@
       renderAttendanceTable();
       renderReportsTable();
       refreshAllPercents();
+      refreshAllHistoryCells();
       saveToLocalStorage();
     }
     clearDayBtn.onclick = e => {
@@ -1493,9 +1756,14 @@
         const waBtn = document.createElement("button");
         waBtn.className = "btn btn-sm btn-primary";
         waBtn.textContent = WHATSAPP_CONFIG.buttonLabel;
-        waBtn.onclick = () => sendWhatsAppToStudent(st.id);
+        waBtn.onclick = () => sendWhatsAppToStudent(st.id, "student");
 
-        wrap.append(waBtn);
+        const waParentBtn = document.createElement("button");
+        waParentBtn.className = "btn btn-sm btn-outline";
+        waParentBtn.textContent = "WA Parent";
+        waParentBtn.onclick = () => sendWhatsAppToStudent(st.id, "parent");
+
+        wrap.append(waBtn, waParentBtn);
         tdActions.appendChild(wrap);
 
         tr.append(tdSno, tdRoll, tdName, tdPercent, tdRemarksCount, tdActions);
@@ -1564,21 +1832,82 @@
       if (e.target === remarksModalBackdrop) closeRemarksModal();
     };
 
+    // -------- SETTINGS MODAL --------
+    const settingsBtn = document.getElementById("settings-btn");
+    const settingsModalBackdrop = document.getElementById("settings-modal-backdrop");
+    const closeSettingsModalBtn = document.getElementById("close-settings-modal-btn");
+    const settingsCancelBtn = document.getElementById("settings-cancel-btn");
+    const settingsSaveBtn = document.getElementById("settings-save-btn");
+    const settingsWaStudentTextarea = document.getElementById("settings-wa-student-template");
+    const settingsWaParentTextarea = document.getElementById("settings-wa-parent-template");
+    const settingsStudentEmailTextarea = document.getElementById("settings-student-email-template");
+    const settingsParentEmailTextarea = document.getElementById("settings-parent-email-template");
+
+    function openSettingsModal() {
+      settingsWaStudentTextarea.value =
+        appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
+      settingsWaParentTextarea.value =
+        appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
+      settingsStudentEmailTextarea.value =
+        appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
+      settingsParentEmailTextarea.value =
+        appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
+
+      settingsModalBackdrop.classList.add("active");
+      settingsModalBackdrop.setAttribute("aria-hidden", "false");
+    }
+
+    function closeSettingsModal() {
+      settingsModalBackdrop.classList.remove("active");
+      settingsModalBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    settingsBtn.onclick = () => openSettingsModal();
+    closeSettingsModalBtn.onclick = () => closeSettingsModal();
+    settingsCancelBtn.onclick = () => closeSettingsModal();
+    settingsModalBackdrop.onclick = e => {
+      if (e.target === settingsModalBackdrop) closeSettingsModal();
+    };
+
+    settingsSaveBtn.onclick = () => {
+      appSettings.whatsappStudentTemplate =
+        settingsWaStudentTextarea.value || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
+      appSettings.whatsappParentTemplate =
+        settingsWaParentTextarea.value || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
+      appSettings.studentEmailTemplate =
+        settingsStudentEmailTextarea.value || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
+      appSettings.parentEmailTemplate =
+        settingsParentEmailTextarea.value || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
+
+      saveToLocalStorage();
+      closeSettingsModal();
+    };
+
     // -------- WHATSAPP --------
-    function sendWhatsAppToStudent(studentId) {
+    function sendWhatsAppToStudent(studentId, to = "student") {
       const st = findStudentById(studentId);
       if (!st) return;
-      const phone = (st.studentPhone || "").trim();
+
+      const phone =
+        to === "parent"
+          ? (st.parentPhone || "").trim()
+          : (st.studentPhone || "").trim();
+
       if (!phone) {
-        alert("Student phone number is missing.");
+        alert((to === "parent" ? "Parent" : "Student") + " phone number is missing.");
         return;
       }
+
       const percent = computePercentWithPreview(st);
       const remarksSummary = st.remarks.length === 0
         ? "None"
         : st.remarks.slice(-3).map(r => r.text).join("; ");
 
-      const template = WHATSAPP_CONFIG.template;
+      const template =
+        to === "parent"
+          ? appSettings.whatsappParentTemplate
+          : appSettings.whatsappStudentTemplate;
+
       const message = template
         .replace("{name}", st.name)
         .replace("{roll}", st.roll)
@@ -1600,6 +1929,7 @@
     const backupBtn = document.getElementById("backup-btn");
     const restoreBtn = document.getElementById("restore-btn");
     const restoreFileInput = document.getElementById("restore-file-input");
+    const exportClassExcelBtn = document.getElementById("export-class-excel-btn");
 
     function downloadTextFile(filename, text) {
       const blob = new Blob([text], { type: "application/json" });
@@ -1617,6 +1947,7 @@
       const data = {
         classes,
         currentClassKey,
+        appSettings,
         exportedAt: new Date().toISOString()
       };
       const json = JSON.stringify(data, null, 2);
@@ -1650,6 +1981,17 @@
           }
           classSelect.value = currentClassKey;
 
+          if (parsed.appSettings && typeof parsed.appSettings === "object") {
+            appSettings.whatsappStudentTemplate =
+              parsed.appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
+            appSettings.whatsappParentTemplate =
+              parsed.appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
+            appSettings.studentEmailTemplate =
+              parsed.appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
+            appSettings.parentEmailTemplate =
+              parsed.appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
+          }
+
           const today = new Date().toISOString().slice(0, 10);
           currentSession = { date: today, notes: "", marks: {} };
           attendanceDateInput.value = today;
@@ -1658,6 +2000,7 @@
           renderAttendanceTable();
           renderReportsTable();
           refreshAllPercents();
+          refreshAllHistoryCells();
 
           alert("Data restored successfully.");
           saveToLocalStorage();
@@ -1669,6 +2012,70 @@
         }
       };
       reader.readAsText(file);
+    };
+
+    // -------- EXPORT FULL CLASS EXCEL (DETAILED P/A MATRIX) --------
+    function exportFullClassExcel() {
+      const cls = getCurrentClass();
+      const students = cls.students;
+      const sessionsByDate = cls.sessionsByDate || {};
+      const classLabel = currentClassKey;
+
+      if (!students || students.length === 0) {
+        alert("No students in roster for this class.");
+        return;
+      }
+
+      const sessionDates = Object.keys(sessionsByDate).sort();
+      if (sessionDates.length === 0) {
+        alert("No saved attendance sessions for this class.");
+        return;
+      }
+
+      const rows = [];
+      const header = ["Roll", "Name"];
+      sessionDates.forEach(d => header.push(d));
+      header.push("Total P", "Total A", "%");
+      rows.push(header);
+
+      students.forEach(st => {
+        let totalSessions = 0;
+        let presents = 0;
+        const row = [st.roll, st.name];
+
+        sessionDates.forEach(d => {
+          const sess = sessionsByDate[d];
+          const mark = sess && sess.marks && sess.marks[st.id];
+          if (mark) {
+            totalSessions += 1;
+            if (mark.present) {
+              presents += 1;
+              row.push("P");
+            } else {
+              row.push("A");
+            }
+          } else {
+            row.push("");
+          }
+        });
+
+        const absents = totalSessions - presents;
+        const percent = totalSessions === 0 ? 0 : Math.round(100 * presents / totalSessions);
+        row.push(presents, absents, percent + "%");
+        rows.push(row);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Class Attendance");
+
+      const filename =
+        "class_attendance_" + classLabel.replace(/\s+/g, "_") + "_" + Date.now() + ".xlsx";
+      XLSX.writeFile(wb, filename);
+    }
+
+    exportClassExcelBtn.onclick = () => {
+      exportFullClassExcel();
     };
 
     // -------- NAV (SECTIONS) --------
@@ -1697,6 +2104,7 @@
         if (id === "attendance-section") {
           renderAttendanceTable();
           refreshAllPercents();
+          refreshAllHistoryCells();
         } else if (id === "reports-section") {
           renderReportsTable();
           refreshAllPercents();
@@ -1725,6 +2133,7 @@
       renderAttendanceTable();
       renderReportsTable();
       refreshAllPercents();
+      refreshAllHistoryCells();
     })();
   </script>
 </body>
