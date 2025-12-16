@@ -391,7 +391,7 @@
       padding: 0.35rem 0;
       border-bottom: 1px dashed #e5e7eb;
     }
-    .remarks-date { font-size: 0.7rem; color: #6b7280; }
+    .remarks-date { font-size: 0.7rem; color:#6b7280; }
     .remarks-text { margin-top: 2px; }
     .empty-state {
       padding: var(--spacing-sm) 0;
@@ -440,8 +440,6 @@
 <body>
   <div class="app-shell">
     <header>
-      <h1 class="app-title">KIIT Attendance</h1>
-      <p class="app-subtitle">Minimal single-page roster, attendance, and reporting tool.</p>
       <div class="class-bar">
         <span>Class / Section:</span>
         <select id="class-select" class="class-select"></select>
@@ -580,20 +578,7 @@
 
     <!-- Mark Attendance Section -->
     <section id="attendance-section" class="card" style="display:block;">
-      <div class="card-header">
-        <div>
-          <h2 class="section-title" contenteditable="true" spellcheck="false">Mark Attendance</h2>
-          <p class="card-subtitle">
-            Tap rows to toggle present/absent. Save per date. First column shows last 3 classes (P/A/–), newest on the right.
-          </p>
-        </div>
-        <div class="flex-gap-sm">
-          <span class="pill">Quick tips</span>
-          <span style="font-size:0.7rem;color:#6b7280;">
-            Changing date loads/saves that day's attendance. "Clear This Day" removes saved data for the selected date.
-          </span>
-        </div>
-      </div>
+
 
       <div class="form-row" style="align-items:flex-end;">
         <div class="form-group" style="flex:0 0 180px;max-width:200px;">
@@ -839,7 +824,7 @@
     // -------- HISTORY (including live currentSession, newest on right) --------
     function computeLast3HistoryWithCurrent(st) {
       const sessionsByDate = getSessionsByDate();
-      const dates = Object.keys(sessionsByDate).sort(); // ascending
+      const dates = Object.keys(sessionsByDate).sort();
       const historyPairs = dates.map(d => {
         const sess = sessionsByDate[d];
         const mark = sess && sess.marks && sess.marks[st.id];
@@ -873,7 +858,6 @@
       if (!history.length) {
         dots = [null];
       } else {
-        // pad LEFT so newest is RIGHT-most
         dots = Array(3 - history.length).fill(null).concat(history);
       }
 
@@ -1548,7 +1532,17 @@
       refreshAllPercents();
     };
 
-    // Per-lecture export (current date) with consolidated remarks + session notes
+    // HELPER: split full name into first & last name
+    function splitName(fullName) {
+      const parts = (fullName || "").trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 0) return { first: "", last: "" };
+      if (parts.length === 1) return { first: parts[0], last: "" };
+      const first = parts[0];
+      const last = parts.slice(1).join(" ");
+      return { first, last };
+    }
+
+    // Export for Mark Attendance: Roll No., First Name, Last Name, Attendance (P/A) | .XLS | filename = className_DDMM
     function exportAttendanceExcelForCurrentDate() {
       const cls = getCurrentClass();
       const students = cls.students;
@@ -1556,7 +1550,8 @@
         alert("No students in roster for this class.");
         return;
       }
-      const date = currentSession.date || attendanceDateInput.value;
+
+      const date = attendanceDateInput.value || currentSession.date;
       if (!date) {
         alert("Please select a date first.");
         return;
@@ -1570,49 +1565,35 @@
         return;
       }
 
-      const rows = [];
-      rows.push([
-        "S.No",
-        "Roll",
-        "Name",
-        "Status",
-        "Session Remark",
-        "All Remarks (consolidated)",
-        "Session Notes",
-        "Class"
-      ]);
-
       const marksSource = savedSession ? savedSession.marks : currentSession.marks;
-      const notesSource = savedSession ? (savedSession.notes || "") : (currentSession.notes || "");
-      const classLabel = currentClassKey;
 
-      students.forEach((st, index) => {
-        const m = marksSource[st.id] || { present: true, remark: "" };
-        const status = m.present ? "Present" : "Absent";
-        const sessionRemark = m.remark || "";
-        const consolidatedRemarks =
-          (st.remarks || []).length === 0
-            ? ""
-            : st.remarks.map(r => (r.date ? r.date + ": " + r.text : r.text)).join(" | ");
+      const rows = [];
+      rows.push(["Roll No.", "First Name", "Last Name", "Attendance"]);
 
-        rows.push([
-          index + 1,
-          st.roll,
-          st.name,
-          status,
-          sessionRemark,
-          consolidatedRemarks,
-          notesSource,
-          classLabel
-        ]);
+      students.forEach(st => {
+        const m = marksSource[st.id] || { present: true };
+        const att = m.present ? "P" : "A";
+        const { first, last } = splitName(st.name || "");
+        rows.push([st.roll, first, last, att]);
       });
 
       const ws = XLSX.utils.aoa_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Attendance");
 
-      const filename = "attendance_" + classLabel.replace(/\s+/g, "_") + "_" + date + ".xlsx";
-      XLSX.writeFile(wb, filename);
+      // filename: className_DDMM.xls
+      // date comes as YYYY-MM-DD
+      const dParts = date.split("-");
+      let ddmm = date;
+      if (dParts.length === 3) {
+        const dd = dParts[2];
+        const mm = dParts[1];
+        ddmm = dd + mm;
+      }
+      const classLabel = currentClassKey.replace(/\s+/g, "");
+      const filename = classLabel + "_" + ddmm + ".xls";
+
+      XLSX.writeFile(wb, filename, { bookType: "xls" });
     }
 
     exportExcelBtn.onclick = e => {
@@ -2051,6 +2032,7 @@
       reader.readAsText(file);
     };
 
+    // Full class export (kept as before: xlsx, full matrix)
     function exportFullClassExcel() {
       const cls = getCurrentClass();
       const students = cls.students;
@@ -2101,9 +2083,9 @@
         rows.push(row);
       });
 
-      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wsMain = XLSX.utils.aoa_to_sheet(rows);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Class Attendance");
+      XLSX.utils.book_append_sheet(wb, wsMain, "Class Attendance");
 
       const filename =
         "class_attendance_" + classLabel.replace(/\s+/g, "_") + "_" + Date.now() + ".xlsx";
