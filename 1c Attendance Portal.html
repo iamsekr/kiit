@@ -463,7 +463,7 @@
       </div>
     </div>
 
-    <!-- Roster Section (hidden by default) -->
+    <!-- Roster Section -->
     <section id="roster-section" class="card" style="display:none;">
       <div class="card-header">
         <div>
@@ -580,12 +580,12 @@
       </div>
     </section>
 
-    <!-- Mark Attendance Section (default visible) -->
+    <!-- Mark Attendance Section -->
     <section id="attendance-section" class="card" style="display:block;">
       <div class="card-header">
         <div>
           <h2 class="section-title" contenteditable="true" spellcheck="false">Mark Attendance</h2>
-          <p class="card-subtitle">Tap rows to toggle present/absent. Save per date. First column shows last 3 classes (P/A/–).</p>
+          <p class="card-subtitle">Tap rows to toggle present/absent. Save per date. First column shows last 3 classes (P/A/–), newest on the right.</p>
         </div>
         <div class="flex-gap-sm">
           <span class="pill">Quick tips</span>
@@ -737,7 +737,6 @@
       { key: "Section A", label: "Section A" },
       { key: "Section B", label: "Section B" },
       { key: "Section C", label: "Section C" }
-      // Add more: { key: "Section D", label: "Section D" },
     ];
 
     const TEMPLATE_CONFIG_DEFAULTS = {
@@ -868,12 +867,15 @@
       const container = document.querySelector('[data-history-cell="' + st.id + '"]');
       if (!container) return;
       container.innerHTML = "";
+
       let dots;
       if (!history.length) {
         dots = [null];
       } else {
+        // pad LEFT with nulls, so newest is RIGHT-most
         dots = Array(3 - history.length).fill(null).concat(history);
       }
+
       dots.forEach(val => {
         const dot = document.createElement("span");
         if (val === "P") {
@@ -1054,7 +1056,6 @@
     function renderRosterTable() {
       const baseStudents = getStudents();
       rosterTbody.innerHTML = "";
-
       rosterHeaderCheckbox.checked = false;
 
       if (baseStudents.length === 0) {
@@ -1925,7 +1926,7 @@
       window.open(url, "_blank");
     }
 
-    // -------- BACKUP / RESTORE --------
+    // -------- BACKUP / RESTORE + CLASS EXPORT --------
     const backupBtn = document.getElementById("backup-btn");
     const restoreBtn = document.getElementById("restore-btn");
     const restoreFileInput = document.getElementById("restore-file-input");
@@ -2014,7 +2015,6 @@
       reader.readAsText(file);
     };
 
-    // -------- EXPORT FULL CLASS EXCEL (DETAILED P/A MATRIX) --------
     function exportFullClassExcel() {
       const cls = getCurrentClass();
       const students = cls.students;
