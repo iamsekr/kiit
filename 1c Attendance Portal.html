@@ -1,2603 +1,1253 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>KIIT Attendance App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"/>
+  <title>Control Systems: PZ Interactive Response</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+
   <style>
     :root {
-      --color-bg: #f7f7f9;
-      --color-surface: #ffffff;
-      --color-border: #dddddd;
-      --color-border-soft: #e3e3e8;
-      --color-primary: #2563eb;
-      --color-primary-soft: #e0ebff;
-      --color-text: #1f2933;
-      --color-text-muted: #6b7280;
-      --color-danger-soft: #ffe5e5;
-      --color-accent: #059669;
-      --radius-small: 4px;
-      --radius-medium: 8px;
-      --shadow-soft: 0 1px 3px rgba(15, 23, 42, 0.06);
-      --spacing-xs: 0.25rem;
-      --spacing-sm: 0.5rem;
-      --spacing-md: 0.75rem;
-      --spacing-lg: 1rem;
-      --spacing-xl: 1.5rem;
-      --font-base: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --transition-fast: 0.15s ease-in-out;
+      --bg: #000000;
+      --panel-bg: #101214;
+      --panel-bg2: #15181b;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --border: rgba(255,255,255,0.15);
+      --highlight: #38bdf8;
     }
+
     * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
     body {
-      margin: 0;
-      padding: 0;
-      font-family: var(--font-base);
-      background-color: var(--color-bg);
-      color: var(--color-text);
-      -webkit-font-smoothing: antialiased;
-    }
-    .app-shell {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: var(--spacing-lg) var(--spacing-md) var(--spacing-xl);
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    header { margin-bottom: var(--spacing-lg); }
-
-    .header-top-row {
+    .app {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-sm);
-    }
-    .header-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      font-size: 0.75rem;
-      align-items: center;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    .class-bar {
-      margin-top: var(--spacing-xs);
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      font-size: 0.8rem;
-      color: var(--color-text-muted);
-      flex-wrap: wrap;
-    }
-    .class-radios {
-      display: inline-flex;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .class-radio-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.2rem;
-      cursor: pointer;
-      font-size: 0.8rem;
-      padding: 0.1rem 0.35rem;
-      border-radius: 999px;
-      border: 1px solid transparent;
-      transition: background-color var(--transition-fast), border-color var(--transition-fast);
-    }
-    .class-radio-label input[type="radio"] {
-      margin: 0;
-    }
-    .class-radio-label.active {
-      background-color: #eef2ff;
-      border-color: #4f46e5;
-      color: #111827;
+    .left {
+      flex: 1 1 auto;
+      padding-left: 20px;
+      padding-right: 16px;
+      padding-bottom: 20px;
+      padding-top: 20px;
+      overflow: auto;
     }
 
-    .nav-tabs {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: var(--spacing-lg);
-      margin-bottom: var(--spacing-md);
-      gap: var(--spacing-sm);
-      flex-wrap: wrap;
-    }
-    .nav-segments {
-      display: inline-flex;
-      background-color: #e5e7eb;
-      padding: 2px;
-      border-radius: 999px;
-    }
-    .nav-button {
-      border: none;
-      background: transparent;
-      padding: 0.4rem 0.9rem;
-      font-size: 0.875rem;
-      border-radius: 999px;
-      cursor: pointer;
-      color: var(--color-text-muted);
-      transition: background-color var(--transition-fast), color var(--transition-fast);
-      white-space: nowrap;
-    }
-    .nav-button.active {
-      background-color: #ffffff;
-      color: #111827;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .card {
-      background-color: var(--color-surface);
-      border-radius: var(--radius-medium);
-      box-shadow: var(--shadow-soft);
-      padding: var(--spacing-lg);
-      margin-bottom: var(--spacing-lg);
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-md);
-    }
-    .section-title {
-      font-size: 1rem;
-      font-weight: 600;
-      outline: none;
-      padding: 2px 4px;
-      border-radius: var(--radius-small);
-    }
-    .section-title:focus { background-color: #eef2ff; }
-    .card-subtitle {
-      font-size: 0.8rem;
-      color: var(--color-text-muted);
-    }
-
-    .form-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-md);
-    }
-    .form-group {
+    .right {
+      flex: 0 0 300px;
+      width: 300px;
+      background: linear-gradient(180deg, var(--panel-bg) 0%, var(--panel-bg2) 100%);
+      border-left: 1px solid var(--border);
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-      flex: 1;
-    }
-    label {
-      font-size: 0.75rem;
-      color: var(--color-text-muted);
-    }
-    input[type="text"],
-    input[type="date"],
-    input[type="tel"],
-    input[type="file"],
-    textarea,
-    select {
-      border-radius: var(--radius-small);
-      border: 1px solid var(--color-border-soft);
-      padding: 0.35rem 0.5rem;
-      font-size: 0.85rem;
-      font-family: var(--font-base);
-      width: 100%;
-      background-color: #f9fafb;
-      transition: border-color var(--transition-fast),
-        background-color var(--transition-fast), box-shadow var(--transition-fast);
-    }
-    textarea { resize: vertical; min-height: 40px; }
-    input:focus,
-    textarea:focus,
-    select:focus {
-      outline: none;
-      border-color: #2563eb;
-      background-color: #ffffff;
-      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
-    }
-    input[type="file"] {
-      padding: 0.25rem 0.3rem;
-      background-color: #ffffff;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.25rem;
-      border-radius: 999px;
-      border: 1px solid var(--color-border-soft);
-      background-color: #ffffff;
-      padding: 0.35rem 0.8rem;
-      font-size: 0.8rem;
-      cursor: pointer;
-      color: #111827;
-      transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
-      white-space: nowrap;
-    }
-    .btn:hover { background-color: #f3f4f6; }
-    .btn:active { transform: translateY(1px); }
-    .btn-primary {
-      border-color: #2563eb;
-      color: #ffffff;
-      background-color: #2563eb;
-    }
-    .btn-primary:hover { background-color: #1d4ed8; }
-    .btn-outline { border-color: #d1d5db; }
-    .btn-danger-soft {
-      border-color: transparent;
-      background-color: #fee2e2;
-      color: #b91c1c;
-    }
-    .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
-    .btn-icon { padding-inline: 0.5rem; }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.1rem 0.4rem;
-      font-size: 0.7rem;
-      border-radius: 999px;
-      background-color: #e5e7eb;
-      color: #111827;
-      min-width: 1.4rem;
-    }
-    .name-with-percent { color: #059669; font-weight: 500; }
-    .name-main { color: #111827; font-weight: 500; margin-right: 4px; }
-
-    .history-pill {
-      display: inline-flex;
-      gap: 0.1rem;
-      font-size: 0.7rem;
-      align-items: center;
-    }
-    .history-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      font-weight: 600;
-      color: #111827;
-    }
-    .history-p { background-color: #bbf7d0; }
-    .history-a { background-color: #fecaca; }
-    .history-empty { background-color: #e5e7eb; }
-
-    .table-container {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      border-radius: var(--radius-medium);
-      border: 1px solid var(--color-border-soft);
-      background-color: #fff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 650px;
-      font-size: 0.8rem;
-    }
-    thead { background-color: #f3f4f6; }
-    th, td {
-      text-align: left;
-      padding: 0.25rem 0.5rem;
-      border-bottom: 1px solid #f1f1f3;
-      vertical-align: middle;
-      white-space: nowrap;
-      cursor: default;
-    }
-    th.sortable,
-    th.sortable-roster { cursor: pointer; }
-    th {
-      font-weight: 500;
-      font-size: 0.75rem;
-      color: #6b7280;
-      position: sticky;
-      top: 0;
-      background-color: #f3f4f6;
-      z-index: 1;
-    }
-    tbody tr { transition: background-color var(--transition-fast); }
-    tbody tr:hover { background-color: #f9fafb; }
-    tbody tr.absent { background-color: #ffe5e5; }
-    .table-actions {
-      display: inline-flex;
-      gap: 0.25rem;
-      flex-wrap: nowrap;
-    }
-    .checkbox-cell { text-align: center; width: 56px; }
-    .checkbox-large { width: 18px; height: 18px; }
-    .remarks-input { min-width: 120px; }
-    .percent-cell {
-      font-variant-numeric: tabular-nums;
-      font-weight: 500;
-      color: #059669;
-    }
-
-    .help-box {
-      margin-top: var(--spacing-sm);
-      padding: var(--spacing-sm);
-      font-size: 0.75rem;
-      color: #6b7280;
-      background-color: #f9fafb;
-      border-radius: var(--radius-small);
-      border: 1px dashed #e3e3e8;
-    }
-    .help-toggle {
-      font-size: 0.75rem;
-      color: #2563eb;
-      cursor: pointer;
-      text-decoration: underline;
-      background: none;
-      border: none;
-      padding: 0;
-    }
-
-    .roster-top {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-md);
-    }
-    .roster-form { flex: 1.4; min-width: 260px; }
-    .roster-import { flex: 1; min-width: 220px; font-size: 0.78rem; }
-    .roster-help { flex: 1; min-width: 220px; font-size: 0.78rem; }
-    .import-card {
-      border-radius: var(--radius-medium);
-      border: 1px dashed #e3e3e8;
-      padding: var(--spacing-sm);
-      background-color: #f9fafb;
-    }
-    .import-title { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem; }
-    .import-subtitle { font-size: 0.75rem; color: #6b7280; margin-bottom: 0.35rem; }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(15, 23, 42, 0.35);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-      padding: var(--spacing-md);
-    }
-    .modal-backdrop.active { display: flex; }
-    .modal {
-      background-color: #ffffff;
-      border-radius: var(--radius-medium);
-      box-shadow: 0 10px 40px rgba(15, 23, 42, 0.18);
-      max-width: 480px;
-      width: 100%;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .modal-header {
-      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-sm);
-      border-bottom: 1px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-sm);
-    }
-    .modal-title {
-      margin: 0;
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-    .modal-body {
-      padding: var(--spacing-md) var(--spacing-lg);
       overflow-y: auto;
-      font-size: 0.8rem;
-    }
-    .modal-footer {
-      padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-md);
-      border-top: 1px solid #e5e7eb;
-      text-align: right;
-    }
-    .remarks-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .remarks-list li {
-      padding: 0.35rem 0;
-      border-bottom: 1px dashed #e5e7eb;
-    }
-    .remarks-date { font-size: 0.7rem; color:#6b7280; }
-    .remarks-text { margin-top: 2px; }
-    .empty-state {
-      padding: var(--spacing-sm) 0;
-      color: #6b7280;
-      font-size: 0.8rem;
     }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-size: 0.7rem;
-      color: #6b7280;
-      background-color: #f3f4f6;
-      border-radius: 999px;
-      padding: 0.1rem 0.45rem;
+    .plot-group {
+      margin-bottom: 4px;
     }
-    .flex-gap-sm {
-      display: inline-flex;
-      gap: 0.25rem;
-      align-items: center;
+
+    /* Response plot group with fixed height to keep PZ position fixed and reduce gap */
+    .plot-group.response-group {
+      height: 260px; /* slightly tighter */
+    }
+
+    .plot-wrapper {
+      background: #000;
+      border-radius: 8px;
+      width: 600px;
+      overflow: hidden;
+    }
+
+    .plot-wrapper canvas {
+      display: block;
+      width: 600px;
+      height: 260px;
+    }
+
+    .pz-wrapper {
+      background: #000;
+      border-radius: 8px;
+      width: 600px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .pz-wrapper canvas {
+      display: block;
+      width: 600px;
+      height: 260px;
+    }
+
+    h2 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 8px 0 4px 0;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    input[type="number"], input[type="text"], select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(0,0,0,0.4);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    input[type="number"]:focus,
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--highlight);
+      box-shadow: 0 0 0 2px rgba(56,189,248,0.4);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .radio-row, .check-row {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text);
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .radio-row label, .check-row label { margin: 0; }
+
+    input[type="radio"], input[type="checkbox"] {
+      accent-color: var(--highlight);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
       flex-wrap: wrap;
     }
 
-    /* Banded rows only for reports table */
-    #reports-table tbody tr:nth-child(odd) {
-      background-color: #ffffff;
-    }
-    #reports-table tbody tr:nth-child(even) {
-      background-color: #f9fafb;
-    }
-    #reports-table tbody tr:hover {
-      background-color: #e5e7eb;
-    }
-
-    /* Green border for saved attendance day table */
-    .attendance-saved-border {
-      border-color: #16a34a !important;
-      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.25);
+    button {
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size: 12px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-weight: 600;
     }
 
-    @media (max-width: 640px) {
-      .card { padding: var(--spacing-md); }
-      .card-header {
+    button.primary {
+      border-color: rgba(56,189,248,0.7);
+      background: rgba(56,189,248,0.18);
+    }
+
+    button:hover {
+      background: rgba(255,255,255,0.12);
+    }
+
+    button.primary:hover {
+      background: rgba(56,189,248,0.26);
+    }
+
+    .status {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .status span.ok { color: #a7f3d0; }
+    .status span.warn { color: #fde68a; }
+    .status span.err { color: #fecaca; }
+
+    @media (max-width: 900px) {
+      .app {
         flex-direction: column;
-        align-items: flex-start;
       }
-      .nav-tabs {
-        flex-direction: column;
-        align-items: stretch;
+      .right {
+        flex: 0 0 auto;
+        width: 100%;
+        max-height: 50vh;
       }
-      table {
-        font-size: 0.75rem;
-        min-width: 600px;
+      .plot-wrapper,
+      .plot-wrapper canvas,
+      .pz-wrapper,
+      .pz-wrapper canvas {
+        width: 100%;
       }
-      th, td { padding: 0.2rem 0.4rem; }
-      .checkbox-large { width: 20px; height: 20px; }
-      .roster-top { flex-direction: column; }
-      .header-top-row { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <header>
-      <!-- TOP ROW: backup / restore / export / settings all in one row -->
-      <div class="header-top-row">
-        <div><strong>KIIT Attendance App</strong></div>
-        <div class="header-actions">
-          <button id="settings-btn" class="btn btn-sm btn-outline" type="button">Settings</button>
-          <button id="backup-btn" class="btn btn-sm btn-outline" type="button">Backup</button>
-          <input id="restore-file-input" type="file" accept=".json" style="display:none;" />
-          <button id="restore-btn" class="btn btn-sm btn-outline" type="button">Restore</button>
-          <button id="export-class-excel-btn" class="btn btn-sm btn-outline" type="button">Export to Excel</button>
-        </div>
+<div class="app">
+  <div class="left">
+    <!-- Response plot group: fixed-height spacer -->
+    <div class="plot-group response-group">
+      <div class="plot-wrapper" id="responseWrapper">
+        <canvas id="responseCanvas"></canvas>
       </div>
-
-      <!-- Class selection as radio buttons -->
-      <div class="class-bar">
-        <span>Class: </span>
-        <div id="class-radios" class="class-radios"></div>
-        <span id="class-summary"></span>
-      </div>
-    </header>
-
-    <div class="nav-tabs">
-      <div class="nav-segments" id="nav-segments"></div>
     </div>
 
-    <!-- ROSTER SECTION -->
-    <section id="roster-section" class="card" style="display:none;">
-      <div class="card-header">
-        <div>
-          <h2 class="section-title" contenteditable="true" spellcheck="false">Roster</h2>
-          <p class="card-subtitle">Maintain the list of students, import from XLS, and manage contact details.</p>
-        </div>
-        <div class="flex-gap-sm">
-          <button id="roster-select-all-btn" class="btn btn-sm btn-outline" type="button">
-            Select All
-          </button>
-          <button id="roster-delete-selected-btn" class="btn btn-sm btn-danger-soft" type="button">
-            Delete Selected
-          </button>
-        </div>
-      </div>
-
-      <div class="roster-top">
-        <div class="roster-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="roll-input">Roll</label>
-              <input id="roll-input" type="text" placeholder="e.g. 210001" />
-            </div>
-            <div class="form-group">
-              <label for="name-input">Name</label>
-              <input id="name-input" type="text" placeholder="Student name" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="student-phone-input">Student Phone</label>
-              <input id="student-phone-input" type="tel" placeholder="10-digit mobile number" />
-            </div>
-            <div class="form-group">
-              <label for="parent-phone-input">Parent Phone</label>
-              <input id="parent-phone-input" type="tel" placeholder="10-digit mobile number" />
-            </div>
-          </div>
-          <div class="form-row" style="align-items:flex-end;">
-            <div class="form-group">
-              <label for="email-display">Email (auto from roll)</label>
-              <input id="email-display" type="text" placeholder="ROLL@kiit.ac.in" disabled />
-            </div>
-            <div class="form-group" style="flex:0 0 auto;">
-              <button id="save-student-btn" class="btn btn-primary btn-sm">
-                <span id="save-student-label">Add Student</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="roster-import">
-          <div class="import-card">
-            <div class="import-title">Import XLS / XLSX</div>
-            <div class="import-subtitle">
-              Columns: A = Roll, B = Name, C = Student Phone, D = (ignored), E = Parent Phone.
-              Existing rolls updated; new rolls added.
-            </div>
-            <div class="form-row" style="margin-bottom:0.35rem;">
-              <div class="form-group">
-                <label for="xls-file-input">Select XLS / XLSX file</label>
-                <input id="xls-file-input" type="file" accept=".xls,.xlsx" />
-              </div>
-            </div>
-            <button id="import-xls-btn" class="btn btn-outline btn-sm" type="button">
-              Import XLS
-            </button>
-            <div id="import-xls-status" style="margin-top:0.35rem;font-size:0.72rem;color:#6b7280;"></div>
-          </div>
-        </div>
-
-        <div class="roster-help">
-          <div class="flex-gap-sm">
-            <span class="pill">Import help</span>
-            <button id="toggle-help-btn" class="help-toggle" type="button">Show / Hide</button>
-          </div>
-          <div id="help-box" class="help-box" style="display:none;">
-            <strong>How to import:</strong>
-            <p style="margin-top:4px; margin-bottom:4px;">Mapping:</p>
-            <ul style="margin:0 0 4px 1rem; padding:0; font-size:0.75rem;">
-              <li>Column A = Roll</li>
-              <li>Column B = Name</li>
-              <li>Column C = Student Phone</li>
-              <li>Column E = Parent Phone</li>
-              <li>Column D is ignored</li>
-            </ul>
-            <p style="margin:0;">
-              Names -> Title Case. Email -> <em>ROLL@kiit.ac.in</em>.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="table-container">
-        <table id="roster-table">
-          <thead>
-            <tr>
-              <th style="width:40px;">
-                <input type="checkbox" id="roster-header-checkbox" />
-              </th>
-              <th class="sortable-roster" data-sort-field="sno" style="width:50px;">S.No</th>
-              <th class="sortable-roster" data-sort-field="roll" style="width:90px;">Roll</th>
-              <th class="sortable-roster" data-sort-field="name">Name</th>
-              <th>Student Phone</th>
-              <th>Parent Phone</th>
-              <th>Email</th>
-              <th style="width:110px;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="roster-tbody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- MARK ATTENDANCE SECTION -->
-    <section id="attendance-section" class="card" style="display:none;">
-      <!-- Date row + Today's Excel on same row -->
-      <div class="form-row" style="align-items:flex-end;">
-        <div class="form-group" style="flex:0 0 220px;max-width:260px;">
-          <label for="attendance-date-input">Date</label>
-          <input id="attendance-date-input" type="date" />
-          <!-- total classes till selected date -->
-          <div id="attendance-class-count" style="font-size:0.72rem;color:#6b7280;margin-top:2px;"></div>
-          <!-- live total present today -->
-          <div id="attendance-present-today" style="font-size:0.72rem;color:#6b7280;margin-top:2px;"></div>
-        </div>
-        <div class="form-group" style="flex:1; text-align:right;">
-          <button id="export-excel-btn" class="btn btn-sm btn-outline" type="button">
-            Today's Excel
-          </button>
-        </div>
-      </div>
-
-      <!-- Session notes just above table -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="attendance-notes-input">Session notes (optional)</label>
-          <textarea id="attendance-notes-input" placeholder="e.g. Internal test, lab, etc."></textarea>
-        </div>
-      </div>
-
-      <!-- Clear day + save row (clear only when saved) -->
-      <div class="form-row" style="align-items:flex-end; margin-top:-0.5rem;">
-        <div class="form-group" style="flex:1;"></div>
-        <div class="form-group" style="flex:0 0 auto; text-align:right;">
-          <div style="display:flex; gap:0.25rem; justify-content:flex-end; flex-wrap:wrap;">
-            <button id="clear-day-btn" class="btn btn-sm btn-outline" type="button" style="display:none;">
-              Clear This Day
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div id="attendance-table-wrapper" class="table-container">
-        <table id="attendance-table">
-          <thead>
-            <tr>
-              <th style="width:80px;">Last 3</th>
-              <th style="width:90px;">Roll</th>
-              <th>
-                <div style="display:flex; align-items:center; gap:4px;">
-                  <input id="toggle-all-checkbox" type="checkbox" class="checkbox-large" />
-                  <span>Name (with %)</span>
-                </div>
-              </th>
-              <th>Remarks</th>
-              <th class="checkbox-cell">Present?</th>
-            </tr>
-          </thead>
-          <tbody id="attendance-tbody"></tbody>
-        </table>
-      </div>
-
-      <!-- Save at bottom -->
-      <div style="margin-top:0.5rem; text-align:right;">
-        <button id="save-session-btn" class="btn btn-primary btn-sm" type="button">
-          Save Attendance Session
-        </button>
-      </div>
-    </section>
-
-    <!-- REPORTS SECTION (default visible) -->
-    <section id="reports-section" class="card" style="display:block;">
-
-      <div class="table-container">
-        <table id="reports-table">
-          <thead>
-            <tr id="reports-header-row"></tr>
-          </thead>
-          <tbody id="reports-tbody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- MENTOR REPORT SECTION (4th) -->
-    <section id="mentor-section" class="card" style="display:none;">
-
-      <div class="form-row">
-        <div class="form-group" style="flex:1.5;">
-          <label>Report Type</label>
-          <div style="display:flex; flex-wrap:wrap; gap:0.75rem; font-size:0.8rem;">
-            <label style="display:inline-flex; align-items:center; gap:0.25rem; cursor:pointer;">
-              <input type="radio" name="mentor-report-type" value="consecutive" checked />
-              <span>Consecutive absences (last X classes)</span>
-            </label>
-            <label style="display:inline-flex; align-items:center; gap:0.25rem; cursor:pointer;">
-              <input type="radio" name="mentor-report-type" value="percentage" />
-              <span>Below attendance % threshold</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Parameters row -->
-      <div class="form-row">
-        <div class="form-group" id="mentor-consecutive-group">
-          <label for="mentor-consecutive-input">Last X classes (consecutive A)</label>
-          <input id="mentor-consecutive-input" type="number" min="1" value="3" />
-        </div>
-        <div class="form-group" id="mentor-percent-group" style="display:none;">
-          <label for="mentor-percent-input">% threshold (less than)</label>
-          <input id="mentor-percent-input" type="number" min="0" max="100" value="75" />
-        </div>
-        <div class="form-group" style="flex:0 0 auto; align-items:flex-end; display:flex; justify-content:flex-end;">
-          <button id="generate-mentor-report-btn" class="btn btn-primary btn-sm" type="button">
-            Generate Mentor Report
-          </button>
-        </div>
-      </div>
-
-      <!-- Result -->
-      <div id="mentor-summary" style="font-size:0.8rem; color:#4b5563; margin-bottom:0.5rem;"></div>
-
-      <div class="table-container" id="mentor-table-container" style="display:none;">
-        <table id="mentor-table">
-          <thead>
-            <tr>
-              <th style="width:50px;">S.No</th>
-              <th style="width:90px;">Roll</th>
-              <th>Name</th>
-              <th style="width:70px;">Total</th>
-              <th style="width:70px;">P</th>
-              <th style="width:70px;">A</th>
-              <th style="width:70px;">%</th>
-              <th>Details</th>
-            </tr>
-          </thead>
-          <tbody id="mentor-tbody"></tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-
-  <!-- Remarks Modal -->
-  <div id="remarks-modal-backdrop" class="modal-backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="remarks-modal-title">
-      <div class="modal-header">
-        <h3 id="remarks-modal-title" class="modal-title">Remarks</h3>
-        <button type="button" class="btn btn-icon btn-sm" id="close-remarks-modal-btn">Close</button>
-      </div>
-      <div class="modal-body">
-        <div id="remarks-modal-meta" style="margin-bottom:0.5rem; font-size:0.8rem; color:#6b7280;"></div>
-        <ul id="remarks-modal-list" class="remarks-list"></ul>
-        <div id="remarks-modal-empty" class="empty-state" style="display:none;">No remarks recorded for this student.</div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary btn-sm" id="remarks-modal-ok-btn">OK</button>
+    <!-- Pole-zero plot (must not move) -->
+    <div class="plot-group">
+      <div class="pz-wrapper">
+        <canvas id="pzCanvas"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- Settings Modal -->
-  <div id="settings-modal-backdrop" class="modal-backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
-      <div class="modal-header">
-        <h3 id="settings-modal-title" class="modal-title">Templates Settings</h3>
-        <button type="button" class="btn btn-icon btn-sm" id="close-settings-modal-btn">Close</button>
+  <div class="right">
+    <!-- Input type -->
+    <div class="radio-row">
+      <label>
+        <input type="radio" name="inputType" value="step" checked>
+        Step
+      </label>
+      <label>
+        <input type="radio" name="inputType" value="impulse">
+        Impulse (approx.)
+      </label>
+    </div>
+
+    <!-- Visibility controls (1: axis+curve, 2: curve, 3: final value) -->
+    <div class="check-row">
+      <label>
+        <input type="checkbox" id="showResponsePlot">
+        Show response plot (axis + curve)
+      </label>
+    </div>
+    <div class="check-row">
+      <label>
+        <input type="checkbox" id="showResponseCurve" checked>
+        Show response curve C(t)
+      </label>
+    </div>
+    <div class="check-row">
+      <label>
+        <input type="checkbox" id="showFinalValue">
+        Show final value on response plot
+      </label>
+    </div>
+
+    <!-- Time axis + Gain row: tMax | dt | K -->
+    <div class="section-title">Time axis & gain</div>
+    <div class="row-3">
+      <div>
+        <label for="tMax">tMax (s)</label>
+        <input id="tMax" type="number" step="5" min="0.1" value="10.1">
       </div>
-      <div class="modal-body">
-        <p style="margin-top:0;margin-bottom:0.5rem;font-size:0.8rem;color:#6b7280;">
-          Use placeholders:
-          <code>{name}</code>,
-          <code>{roll}</code>,
-          <code>{percent}</code>,
-          <code>{remarks}</code>,
-          <code>{class name}</code>,
-          <code>{total number of classes}</code>,
-          <code>{Classes you are present}</code>.
-        </p>
-
-        <div class="form-group" style="margin-bottom:0.75rem;">
-          <label for="settings-wa-student-template" style="font-weight:600;">WhatsApp template (Student)</label>
-          <textarea id="settings-wa-student-template" style="min-height:60px;"></textarea>
-        </div>
-
-        <div class="form-group" style="margin-bottom:0.75rem;">
-          <label for="settings-wa-parent-template" style="font-weight:600;">WhatsApp template (Parent)</label>
-          <textarea id="settings-wa-parent-template" style="min-height:60px;"></textarea>
-        </div>
-
-        <div class="form-group" style="margin-bottom:0.75rem;">
-          <label for="settings-student-email-template" style="font-weight:600;">Student email template</label>
-          <textarea id="settings-student-email-template" style="min-height:60px;"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="settings-parent-email-template" style="font-weight:600;">Parent email template</label>
-          <textarea id="settings-parent-email-template" style="min-height:60px;"></textarea>
-        </div>
+      <div>
+        <label for="dt">dt (s)</label>
+        <input id="dt" type="number" step="0.001" min="0.0005" value="0.01">
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline btn-sm" id="settings-cancel-btn">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm" id="settings-save-btn">Save</button>
+      <div>
+        <label for="gainK">Gain K</label>
+        <input id="gainK" type="number" step="0.1" value="1">
       </div>
     </div>
+
+    <!-- System definition -->
+    <label for="zerosInput" style="margin-top:6px;">Zeros (comma-separated, Im ≥ 0 only)</label>
+    <input id="zerosInput" type="text" placeholder="-0.5+1j">
+
+    <label for="polesInput" style="margin-top:6px;">Poles (comma-separated, Im ≥ 0 only)</label>
+    <input id="polesInput" type="text" placeholder="-0.5+1j">
+
+    <div style="margin-top:6px;">Canvas add mode:</div>
+    <div class="radio-row">
+      <label>
+        <input type="radio" name="addType" value="zero">
+        Zero
+      </label>
+      <label>
+        <input type="radio" name="addType" value="pole" checked>
+        Pole
+      </label>
+    </div>
+
+    <div class="btn-row">
+      <button id="addAtCenter" type="button">Add at center</button>
+      <button id="resetSystem" type="button">Reset system</button>
+    </div>
+
+    <!-- PZ axis limits -->
+    <div class="section-title">PZ axis limits</div>
+    <div class="row">
+      <div>
+        <label for="reMin">Re(s) min</label>
+        <input id="reMin" type="number" step="0.5" value="-5">
+      </div>
+      <div>
+        <label for="reMax">Re(s) max</label>
+        <input id="reMax" type="number" step="0.5" value="2">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="imMax">|Im(s)| max</label>
+        <input id="imMax" type="number" step="0.5" value="3">
+      </div>
+      <div>
+        <label>Im(s) min</label>
+        <input type="text" id="imMinDisplay" disabled value="-3">
+      </div>
+    </div>
+
+    <!-- Interaction help -->
+    <div class="section-title">PZ interaction</div>
+    <div class="status">
+      • Click near real axis (±10px) to add real pole/zero.<br>
+      • Else, adds conjugate pair (Im ±b) automatically.<br>
+      • Drag a point to move it (real stays on real axis).<br>
+      • Double-click element to delete it.
+    </div>
+
+    <!-- Status -->
+    <div class="section-title">Simulation status</div>
+    <div class="status" id="simStatus"></div>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+/* ============================
+   Utility / Math helpers
+   ============================ */
 
-  <script>
-    const APP_SECTIONS = [
-      { id: "roster-section", label: "Data" },
-      { id: "attendance-section", label: "Mark" },
-      { id: "reports-section", label: "Msgs" },
-      { id: "mentor-section", label: "Mentor" }
-    ];
+function isFiniteNumber(x) {
+  return typeof x === "number" && Number.isFinite(x);
+}
+function fmt(x, d = 4) {
+  if (!isFiniteNumber(x)) return "NaN";
+  const abs = Math.abs(x);
+  if (abs !== 0 && (abs < 1e-3 || abs > 1e4)) return x.toExponential(3);
+  return Number(x.toFixed(d)).toString();
+}
 
-    const CLASS_CONFIG = [
-      { key: "Section A", label: "BEE" },
-      { key: "Section B", label: "Ind 4.0" },
-      { key: "Section C", label: "SDT" }
-    ];
+/* Polynomial from complex roots with conjugate handling */
 
-    const TEMPLATE_CONFIG_DEFAULTS = {
-      whatsappStudentTemplate:
-        "Dear {name} ({roll}), from class {class name}, your current attendance is {percent}% out of {total number of classes} classes, " +
-        "and you were present in {Classes you are present} classes. Remarks: {remarks}",
-      whatsappParentTemplate:
-        "Dear Parent of {name} ({roll}) from class {class name}, your ward's attendance is {percent}% out of {total number of classes} classes, " +
-        "and they were present in {Classes you are present} classes. Remarks: {remarks}",
-      studentEmailTemplate:
-        "Dear {name},\\nYou belong to class {class name}.\\n" +
-        "Your attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\\n" +
-        "Remarks: {remarks}",
-      parentEmailTemplate:
-        "Dear Parent of {name} ({roll}),\\nYour ward is in class {class name}.\\n" +
-        "Their attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\\n" +
-        "Remarks: {remarks}"
-    };
+function polyFromRoots(roots) {
+  let coef = [1];
+  const used = new Array(roots.length).fill(false);
 
-    const WHATSAPP_CONFIG = {
-      buttonLabel: "WhatsApp",
-      apiBase: "https://cloud.wazbulk.in/api/send",
-      instanceId: "xyzxyzxyz",
-      accessToken: "abccabcabcabcabc"
-    };
-
-    const STORAGE_KEY = "kiitAttendanceData_2026_1";
-
-    const classes = {};
-    let currentClassKey = CLASS_CONFIG[0].key;
-    let currentSession = { date: "", notes: "", marks: {} };
-
-    const appSettings = {
-      whatsappStudentTemplate: TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate,
-      whatsappParentTemplate: TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate,
-      studentEmailTemplate: TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate,
-      parentEmailTemplate: TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate
-    };
-
-    let rosterSort = { field: "sno", dir: "asc" };
-    let reportSort = { field: "roll", dir: "asc" };
-
-    function ensureClass(key) {
-      if (!classes[key]) {
-        classes[key] = { students: [], sessionsByDate: {} };
+  for (let i = 0; i < roots.length; i++) {
+    if (used[i]) continue;
+    const r = roots[i];
+    if (Math.abs(r.im) < 1e-8) {
+      const newCoef = new Array(coef.length + 1).fill(0);
+      for (let k = 0; k < coef.length; k++) {
+        newCoef[k]     -= coef[k] * r.re;
+        newCoef[k + 1] += coef[k];
       }
-      return classes[key];
-    }
-    function getCurrentClass() { return ensureClass(currentClassKey); }
-    function getStudents() { return getCurrentClass().students; }
-    function getSessionsByDate() { return getCurrentClass().sessionsByDate; }
-
-    function generateId() { return "s_" + Math.random().toString(36).substr(2, 9); }
-    function toTitleCase(name) {
-      if (!name) return "";
-      return name.toLowerCase().split(/\\s+/).filter(Boolean)
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-    }
-    function findStudentById(id) {
-      return getStudents().find(s => s.id === id) || null;
-    }
-    function findStudentByRoll(roll) {
-      return getStudents().find(s => s.roll === roll) || null;
-    }
-
-    function computePercentWithPreview(student) {
-      const students = getStudents();
-      const st = students.find(s => s.id === student.id) || student;
-      let baseTotal = st.totalSessions || 0;
-      let basePresents = st.presents || 0;
-      const previewMark = currentSession.marks[st.id];
-      if (previewMark && currentSession.date) {
-        baseTotal += 1;
-        if (previewMark.present) basePresents += 1;
-      }
-      if (baseTotal === 0) return 0;
-      return Math.round(100 * basePresents / baseTotal);
-    }
-
-    function updateClassSummary() {
-      const el = document.getElementById("class-summary");
-      const students = getStudents();
-      const total = students.length;
-      if (total === 0) {
-        el.textContent = "(no students loaded)";
-        return;
-      }
-      const avg = Math.round(
-        students.reduce((sum, s) => sum + computePercentWithPreview(s), 0) / total
-      );
-      el.textContent = "(" + total + " students, avg " + avg + "%)";
-    }
-
-    function computeLast3HistoryWithCurrent(st) {
-      const sessionsByDate = getSessionsByDate();
-      const dates = Object.keys(sessionsByDate).sort();
-      const historyPairs = dates.map(d => {
-        const sess = sessionsByDate[d];
-        const mark = sess && sess.marks && sess.marks[st.id];
-        let val = null;
-        if (mark) val = mark.present ? "P" : "A";
-        return { date: d, val };
-      }).filter(p => p.val !== null);
-
-      if (currentSession && currentSession.date) {
-        const d = currentSession.date;
-        const mark = currentSession.marks[st.id];
-        if (mark) {
-          const val = mark.present ? "P" : "A";
-          const idx = historyPairs.findIndex(p => p.date === d);
-          if (idx >= 0) historyPairs[idx].val = val;
-          else historyPairs.push({ date: d, val });
-        }
-      }
-
-      historyPairs.sort((a, b) => a.date.localeCompare(b.date));
-      return historyPairs.slice(-3).map(p => p.val);
-    }
-
-    function updateHistoryCellForStudent(st) {
-      const history = computeLast3HistoryWithCurrent(st);
-      const container = document.querySelector('[data-history-cell="' + st.id + '"]');
-      if (!container) return;
-      container.innerHTML = "";
-
-      let dots;
-      if (!history.length) {
-        dots = [null];
-      } else {
-        dots = Array(3 - history.length).fill(null).concat(history);
-      }
-
-      dots.forEach(val => {
-        const dot = document.createElement("span");
-        if (val === "P") {
-          dot.className = "history-dot history-p";
-          dot.textContent = "P";
-        } else if (val === "A") {
-          dot.className = "history-dot history-a";
-          dot.textContent = "A";
-        } else {
-          dot.className = "history-dot history-empty";
-          dot.textContent = "-";
-        }
-        container.appendChild(dot);
-      });
-    }
-
-    function refreshAllHistoryCells() {
-      const students = getStudents();
-      students.forEach(st => updateHistoryCellForStudent(st));
-    }
-
-    // Storage
-    function saveToLocalStorage() {
-      const data = {
-        classes,
-        currentClassKey,
-        appSettings,
-        savedAt: new Date().toISOString()
-      };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      } catch (e) {
-        console.error("Error saving to localStorage", e);
-      }
-    }
-
-    function loadFromLocalStorage() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return false;
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object") return false;
-        if (!parsed.classes) return false;
-
-        Object.keys(classes).forEach(k => delete classes[k]);
-        Object.assign(classes, parsed.classes);
-
-        const keysFromConfig = CLASS_CONFIG.map(c => c.key);
-        if (parsed.currentClassKey && keysFromConfig.includes(parsed.currentClassKey)) {
-          currentClassKey = parsed.currentClassKey;
-        } else {
-          currentClassKey = keysFromConfig[0];
-        }
-
-        if (parsed.appSettings && typeof parsed.appSettings === "object") {
-          appSettings.whatsappStudentTemplate =
-            parsed.appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
-          appSettings.whatsappParentTemplate =
-            parsed.appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
-          appSettings.studentEmailTemplate =
-            parsed.appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
-          appSettings.parentEmailTemplate =
-            parsed.appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
-        }
-
-        return true;
-      } catch (e) {
-        console.error("Error loading from localStorage", e);
-        return false;
-      }
-    }
-
-    // CLASS RADIO BUTTONS
-    const classRadiosContainer = document.getElementById("class-radios");
-    function initClassRadios() {
-      classRadiosContainer.innerHTML = "";
-      CLASS_CONFIG.forEach(cfg => {
-        const id = "cls-" + cfg.key.replace(/\\s+/g, "-");
-        const label = document.createElement("label");
-        label.className = "class-radio-label";
-        label.htmlFor = id;
-
-        const input = document.createElement("input");
-        input.type = "radio";
-        input.name = "class-select";
-        input.id = id;
-        input.value = cfg.key;
-        if (cfg.key === currentClassKey) {
-          input.checked = true;
-          label.classList.add("active");
-        }
-
-        input.addEventListener("change", () => {
-          if (!input.checked) return;
-          currentClassKey = input.value;
-          document.querySelectorAll(".class-radio-label").forEach(l => l.classList.remove("active"));
-          label.classList.add("active");
-
-          const today = new Date().toISOString().slice(0, 10);
-          if (!currentSession.date) currentSession.date = today;
-          attendanceDateInput.value = currentSession.date;
-          loadSessionForDate(currentSession.date);
-          renderRosterTable();
-          renderAttendanceTable();
-          renderReportsTable();
-          refreshAllPercents();
-          refreshAllHistoryCells();
-          saveToLocalStorage();
-        });
-
-        const spanTxt = document.createElement("span");
-        spanTxt.textContent = cfg.label;
-
-        label.appendChild(input);
-        label.appendChild(spanTxt);
-        classRadiosContainer.appendChild(label);
-      });
-    }
-
-    // ROSTER
-    const rollInput = document.getElementById("roll-input");
-    const nameInput = document.getElementById("name-input");
-    const studentPhoneInput = document.getElementById("student-phone-input");
-    const parentPhoneInput = document.getElementById("parent-phone-input");
-    const emailDisplay = document.getElementById("email-display");
-    const saveStudentBtn = document.getElementById("save-student-btn");
-    const saveStudentLabel = document.getElementById("save-student-label");
-    const rosterTbody = document.getElementById("roster-tbody");
-    const rosterHeaderCheckbox = document.getElementById("roster-header-checkbox");
-    const rosterSelectAllBtn = document.getElementById("roster-select-all-btn");
-    const rosterDeleteSelectedBtn = document.getElementById("roster-delete-selected-btn");
-    let editingStudentId = null;
-
-    function updateEmailDisplay() {
-      const roll = (rollInput.value || "").trim();
-      emailDisplay.value = roll ? roll + "@kiit.ac.in" : "";
-    }
-    rollInput.addEventListener("input", updateEmailDisplay);
-
-    function resetRosterForm() {
-      editingStudentId = null;
-      rollInput.value = "";
-      nameInput.value = "";
-      studentPhoneInput.value = "";
-      parentPhoneInput.value = "";
-      emailDisplay.value = "";
-      saveStudentLabel.textContent = "Add Student";
-    }
-
-    function handleSaveStudent() {
-      const students = getStudents();
-      const roll = (rollInput.value || "").trim();
-      const nameRaw = (nameInput.value || "").trim();
-      const studentPhone = (studentPhoneInput.value || "").trim();
-      const parentPhone = (parentPhoneInput.value || "").trim();
-      if (!roll || !nameRaw) {
-        alert("Please enter at least Roll and Name.");
-        return;
-      }
-      const name = toTitleCase(nameRaw);
-      const email = roll + "@kiit.ac.in";
-
-      if (editingStudentId) {
-        const st = students.find(s => s.id === editingStudentId);
-        if (st) {
-          st.roll = roll;
-          st.name = name;
-          st.studentPhone = studentPhone;
-          st.parentPhone = parentPhone;
-          st.email = email;
-        }
-      } else {
-        students.push({
-          id: generateId(),
-          roll,
-          name,
-          studentPhone,
-          parentPhone,
-          email,
-          totalSessions: 0,
-          presents: 0,
-          remarks: []
-        });
-      }
-
-      resetRosterForm();
-      renderRosterTable();
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      saveToLocalStorage();
-    }
-    saveStudentBtn.addEventListener("click", e => {
-      e.preventDefault();
-      handleSaveStudent();
-    });
-
-    function renderRosterTable() {
-      const baseStudents = getStudents();
-      rosterTbody.innerHTML = "";
-      rosterHeaderCheckbox.checked = false;
-
-      if (baseStudents.length === 0) {
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        td.colSpan = 8;
-        td.className = "empty-state";
-        td.textContent = "No students added yet. Use the form or import XLS.";
-        tr.appendChild(td);
-        rosterTbody.appendChild(tr);
-        updateClassSummary();
-        return;
-      }
-
-      const students = baseStudents.slice();
-
-      if (rosterSort.field === "roll") {
-        students.sort((a, b) => {
-          const cmp = String(a.roll).localeCompare(String(b.roll));
-          return rosterSort.dir === "asc" ? cmp : -cmp;
-        });
-      } else if (rosterSort.field === "name") {
-        students.sort((a, b) => {
-          const cmp = a.name.localeCompare(b.name);
-          return rosterSort.dir === "asc" ? cmp : -cmp;
-        });
-      }
-
-      students.forEach((st, index) => {
-        const tr = document.createElement("tr");
-        tr.dataset.studentId = st.id;
-
-        const tdSel = document.createElement("td");
-        const chk = document.createElement("input");
-        chk.type = "checkbox";
-        chk.className = "roster-row-checkbox";
-        chk.addEventListener("click", e => e.stopPropagation());
-        tdSel.appendChild(chk);
-
-        const tdSno = document.createElement("td");
-        tdSno.textContent = index + 1;
-
-        const tdRoll = document.createElement("td");
-        tdRoll.textContent = st.roll;
-
-        const tdName = document.createElement("td");
-        tdName.textContent = st.name;
-
-        const tdSP = document.createElement("td");
-        tdSP.textContent = st.studentPhone || "-";
-
-        const tdPP = document.createElement("td");
-        tdPP.textContent = st.parentPhone || "-";
-
-        const tdEmail = document.createElement("td");
-        tdEmail.textContent = st.email;
-
-        const tdActions = document.createElement("td");
-        const wrap = document.createElement("div");
-        wrap.className = "table-actions";
-
-        const editBtn = document.createElement("button");
-        editBtn.className = "btn btn-sm btn-outline";
-        editBtn.textContent = "Edit";
-        editBtn.onclick = () => startEditStudent(st.id);
-
-        const delBtn = document.createElement("button");
-        delBtn.className = "btn btn-sm btn-danger-soft";
-        delBtn.textContent = "Delete";
-        delBtn.onclick = () => deleteStudent(st.id);
-
-        wrap.append(editBtn, delBtn);
-        tdActions.appendChild(wrap);
-
-        tr.append(tdSel, tdSno, tdRoll, tdName, tdSP, tdPP, tdEmail, tdActions);
-        rosterTbody.appendChild(tr);
-      });
-
-      updateClassSummary();
-    }
-
-    function startEditStudent(id) {
-      const st = findStudentById(id);
-      if (!st) return;
-      editingStudentId = id;
-      rollInput.value = st.roll;
-      nameInput.value = st.name;
-      studentPhoneInput.value = st.studentPhone;
-      parentPhoneInput.value = st.parentPhone;
-      emailDisplay.value = st.email;
-      saveStudentLabel.textContent = "Update Student";
-      rollInput.focus();
-    }
-
-    function deleteStudent(id) {
-      const cls = getCurrentClass();
-      cls.students = cls.students.filter(s => s.id !== id);
-      delete currentSession.marks[id];
-      renderRosterTable();
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      saveToLocalStorage();
-    }
-
-    rosterHeaderCheckbox.addEventListener("change", () => {
-      const checked = rosterHeaderCheckbox.checked;
-      document.querySelectorAll("#roster-tbody .roster-row-checkbox").forEach(cb => {
-        cb.checked = checked;
-      });
-    });
-
-    rosterSelectAllBtn.onclick = () => {
-      rosterHeaderCheckbox.checked = true;
-      rosterHeaderCheckbox.dispatchEvent(new Event("change"));
-    };
-
-    rosterDeleteSelectedBtn.onclick = () => {
-      const cls = getCurrentClass();
-      const idsToDelete = [];
-      document.querySelectorAll("#roster-tbody tr").forEach(tr => {
-        const cb = tr.querySelector(".roster-row-checkbox");
-        if (cb && cb.checked && tr.dataset.studentId) {
-          idsToDelete.push(tr.dataset.studentId);
-        }
-      });
-      if (idsToDelete.length === 0) {
-        alert("No students selected.");
-        return;
-      }
-      if (!confirm("Delete " + idsToDelete.length + " selected student(s)?"))
-        return;
-
-      cls.students = cls.students.filter(st => !idsToDelete.includes(st.id));
-
-      idsToDelete.forEach(id => {
-        delete currentSession.marks[id];
-        const sessionsByDate = getSessionsByDate();
-        Object.keys(sessionsByDate).forEach(date => {
-          const sess = sessionsByDate[date];
-          if (sess && sess.marks && sess.marks[id]) {
-            delete sess.marks[id];
-          }
-        });
-      });
-
-      renderRosterTable();
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      saveToLocalStorage();
-    };
-
-    document.getElementById("toggle-help-btn").onclick = () => {
-      const box = document.getElementById("help-box");
-      box.style.display = (box.style.display === "none" || !box.style.display) ? "block" : "none";
-    };
-
-    document.querySelectorAll("#roster-table thead th.sortable-roster").forEach(th => {
-      th.onclick = () => {
-        const field = th.dataset.sortField;
-        if (!field) return;
-
-        if (rosterSort.field === field) {
-          rosterSort.dir = rosterSort.dir === "asc" ? "desc" : "asc";
-        } else {
-          rosterSort.field = field;
-          rosterSort.dir = "asc";
-        }
-        renderRosterTable();
-      };
-    });
-
-    // Import XLS
-    const xlsFileInput = document.getElementById("xls-file-input");
-    const importXlsBtn = document.getElementById("import-xls-btn");
-    const importXlsStatus = document.getElementById("import-xls-status");
-
-    function isHeaderRollCell(val) {
-      if (val === null || val === undefined) return true;
-      const text = String(val).trim();
-      if (!text) return true;
-      return text.toLowerCase() === "roll";
-    }
-
-    function importStudentsFromWorkbook(workbook) {
-      const cls = getCurrentClass();
-      const students = cls.students;
-      const firstSheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[firstSheetName];
-      if (!sheet) {
-        importXlsStatus.textContent = "Could not read the first sheet.";
-        return;
-      }
-      const range = XLSX.utils.decode_range(sheet["!ref"]);
-      let added = 0, updated = 0;
-
-      for (let r = range.s.r; r <= range.e.r; r++) {
-        const cellARef = XLSX.utils.encode_cell({ c: 0, r });
-        const cellA = sheet[cellARef];
-        const rollRaw = cellA ? String(cellA.v).trim() : "";
-        if (r === range.s.r && isHeaderRollCell(rollRaw)) continue;
-        if (!rollRaw) continue;
-        const roll = rollRaw;
-
-        const cellBRef = XLSX.utils.encode_cell({ c: 1, r });
-        const cellB = sheet[cellBRef];
-        const name = toTitleCase(cellB ? String(cellB.v).trim() : "");
-
-        const cellCRef = XLSX.utils.encode_cell({ c: 2, r });
-        const cellC = sheet[cellCRef];
-        const studentPhone = cellC ? String(cellC.v).trim() : "";
-
-        const cellERef = XLSX.utils.encode_cell({ c: 4, r });
-        const cellE = sheet[cellERef];
-        const parentPhone = cellE ? String(cellE.v).trim() : "";
-
-        const email = roll + "@kiit.ac.in";
-        const existing = findStudentByRoll(roll);
-        if (existing) {
-          existing.name = name || existing.name;
-          existing.studentPhone = studentPhone || existing.studentPhone;
-          existing.parentPhone = parentPhone || existing.parentPhone;
-          existing.email = email;
-          updated++;
-        } else {
-          students.push({
-            id: generateId(),
-            roll,
-            name: name || roll,
-            studentPhone,
-            parentPhone,
-            email,
-            totalSessions: 0,
-            presents: 0,
-            remarks: []
-          });
-          added++;
-        }
-      }
-
-      renderRosterTable();
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      saveToLocalStorage();
-      importXlsStatus.textContent = "Import complete: " + added + " added, " + updated + " updated.";
-    }
-
-    importXlsBtn.onclick = () => {
-      importXlsStatus.textContent = "";
-      const file = xlsFileInput.files && xlsFileInput.files[0];
-      if (!file) {
-        alert("Please select an XLS/XLSX file first.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
-          importStudentsFromWorkbook(workbook);
-        } catch (err) {
-          console.error(err);
-          importXlsStatus.textContent = "Error parsing file.";
-        } finally {
-          xlsFileInput.value = "";
-        }
-      };
-      reader.onerror = () => importXlsStatus.textContent = "Error reading file.";
-      reader.readAsArrayBuffer(file);
-    };
-
-    // Attendance
-    const attendanceTbody = document.getElementById("attendance-tbody");
-    const attendanceDateInput = document.getElementById("attendance-date-input");
-    const attendanceNotesInput = document.getElementById("attendance-notes-input");
-    const classCountEl = document.getElementById("attendance-class-count");
-    const presentTodayEl = document.getElementById("attendance-present-today");
-    const saveSessionBtn = document.getElementById("save-session-btn");
-    const clearDayBtn = document.getElementById("clear-day-btn");
-    const exportExcelBtn = document.getElementById("export-excel-btn");
-    const attendanceTableWrapper = document.getElementById("attendance-table-wrapper");
-    const toggleAllCheckbox = document.getElementById("toggle-all-checkbox");
-
-    function formatDateDisplay(isoDate) {
-      if (!isoDate) return "";
-      const [y, m, d] = isoDate.split("-");
-      if (!y || !m || !d) return isoDate;
-      return d + "-" + m + "-" + y;
-    }
-
-    function updateClassCountLabel() {
-      const sessionsByDate = getSessionsByDate();
-      const selected = attendanceDateInput.value || currentSession.date || "";
-      if (!selected) {
-        classCountEl.textContent = "";
-        return;
-      }
-      const dates = Object.keys(sessionsByDate)
-        .filter(d => d <= selected)
-        .sort();
-      const totalClasses = dates.length;
-      classCountEl.textContent =
-        totalClasses === 0
-          ? "No classes saved on or before this date."
-          : "Total classes till this date: " + totalClasses;
-
-      if (sessionsByDate[selected]) {
-        clearDayBtn.style.display = "inline-flex";
-        attendanceTableWrapper.classList.add("attendance-saved-border");
-      } else {
-        clearDayBtn.style.display = "none";
-        attendanceTableWrapper.classList.remove("attendance-saved-border");
-      }
-    }
-
-    function updatePresentToday() {
-      const students = getStudents();
-      if (!students.length) {
-        presentTodayEl.textContent = "";
-        return;
-      }
-      let totalPresent = 0;
-      students.forEach(st => {
-        const mark = currentSession.marks[st.id];
-        if (mark && mark.present) totalPresent++;
-      });
-      presentTodayEl.textContent =
-        "Total present today: " + totalPresent + " of " + students.length;
-    }
-
-    attendanceDateInput.addEventListener("change", () => {
-      const date = attendanceDateInput.value || "";
-      loadSessionForDate(date);
-    });
-    attendanceNotesInput.addEventListener("input", () => {
-      currentSession.notes = attendanceNotesInput.value || "";
-    });
-
-    function loadSessionForDate(date) {
-      const sessionsByDate = getSessionsByDate();
-      currentSession = { date, notes: "", marks: {} };
-      const saved = sessionsByDate[date];
-      if (saved) {
-        currentSession.notes = saved.notes || "";
-        currentSession.marks = JSON.parse(JSON.stringify(saved.marks || {}));
-      }
-      attendanceNotesInput.value = currentSession.notes || "";
-      renderAttendanceTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateClassCountLabel();
-      updatePresentToday();
-    }
-
-    function renderHistoryCell(st) {
-      const history = computeLast3HistoryWithCurrent(st);
-      const td = document.createElement("td");
-      const pill = document.createElement("div");
-      pill.className = "history-pill";
-      pill.dataset.historyCell = st.id;
-
-      let dots;
-      if (!history.length) {
-        dots = [null];
-      } else {
-        dots = Array(3 - history.length).fill(null).concat(history);
-      }
-
-      dots.forEach(val => {
-        const dot = document.createElement("span");
-        if (val === "P") {
-          dot.className = "history-dot history-p";
-          dot.textContent = "P";
-        } else if (val === "A") {
-          dot.className = "history-dot history-a";
-          dot.textContent = "A";
-        } else {
-          dot.className = "history-dot history-empty";
-          dot.textContent = "-";
-        }
-        pill.appendChild(dot);
-      });
-
-      td.appendChild(pill);
-      return td;
-    }
-
-    function renderAttendanceTable() {
-      const students = getStudents();
-      attendanceTbody.innerHTML = "";
-      toggleAllCheckbox.checked = false;
-
-      if (students.length === 0) {
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        td.colSpan = 5;
-        td.className = "empty-state";
-        td.textContent = "No students in roster for this class.";
-        tr.appendChild(td);
-        attendanceTbody.appendChild(tr);
-        updatePresentToday();
-        return;
-      }
-
-      students.forEach(st => {
-        if (!currentSession.marks[st.id]) {
-          currentSession.marks[st.id] = { present: true, remark: "" };
-        }
-        const mark = currentSession.marks[st.id];
-        const percent = computePercentWithPreview(st);
-
-        const tr = document.createElement("tr");
-        tr.dataset.studentId = st.id;
-        if (!mark.present) tr.classList.add("absent");
-
-        tr.addEventListener("click", e => {
-          const t = e.target;
-          if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "BUTTON") return;
-          toggleAttendanceForStudent(st.id);
-        });
-
-        const tdHistory = renderHistoryCell(st);
-
-        const tdRoll = document.createElement("td");
-        tdRoll.textContent = st.roll;
-
-        const tdName = document.createElement("td");
-        const span = document.createElement("span");
-        span.className = "name-with-percent";
-        span.dataset.attName = st.id;
-        span.innerHTML = '<span class="name-main">' + st.name + '</span>(' + percent + '%)';
-        tdName.appendChild(span);
-
-        const tdRemarks = document.createElement("td");
-        const inpRem = document.createElement("input");
-        inpRem.type = "text";
-        inpRem.className = "remarks-input";
-        inpRem.placeholder = "Add remark";
-        inpRem.value = mark.remark || "";
-        inpRem.onclick = e => e.stopPropagation();
-        inpRem.oninput = () => {
-          currentSession.marks[st.id].remark = inpRem.value;
-        };
-        tdRemarks.appendChild(inpRem);
-
-        const tdPres = document.createElement("td");
-        tdPres.className = "checkbox-cell";
-        const chk = document.createElement("input");
-        chk.type = "checkbox";
-        chk.className = "checkbox-large";
-        chk.checked = !!mark.present;
-        chk.onclick = e => {
-          e.stopPropagation();
-          setPresentForStudent(st.id, chk.checked);
-        };
-        tdPres.appendChild(chk);
-
-        tr.append(tdHistory, tdRoll, tdName, tdRemarks, tdPres);
-        attendanceTbody.appendChild(tr);
-      });
-
-      updatePresentToday();
-    }
-
-    function applyRowState(studentId, isPresent) {
-      const row = attendanceTbody.querySelector('tr[data-student-id="' + studentId + '"]');
-      if (!row) return;
-      const checkbox = row.querySelector("input[type=checkbox]");
-      if (checkbox) checkbox.checked = isPresent;
-      if (isPresent) row.classList.remove("absent");
-      else row.classList.add("absent");
-    }
-
-    function toggleAttendanceForStudent(studentId) {
-      const mark = currentSession.marks[studentId] || { present: true, remark: "" };
-      mark.present = !mark.present;
-      currentSession.marks[studentId] = mark;
-      applyRowState(studentId, mark.present);
-      refreshAllPercents();
-      const st = findStudentById(studentId);
-      if (st) updateHistoryCellForStudent(st);
-      updatePresentToday();
-    }
-
-    function setPresentForStudent(studentId, isPresent) {
-      const mark = currentSession.marks[studentId] || { present: isPresent, remark: "" };
-      mark.present = isPresent;
-      currentSession.marks[studentId] = mark;
-      applyRowState(studentId, isPresent);
-      refreshAllPercents();
-      const st = findStudentById(studentId);
-      if (st) updateHistoryCellForStudent(st);
-      updatePresentToday();
-    }
-
-    // Header checkbox to check/uncheck all
-    toggleAllCheckbox.addEventListener("change", () => {
-      const check = toggleAllCheckbox.checked;
-      const students = getStudents();
-      students.forEach(st => {
-        if (!currentSession.marks[st.id]) {
-          currentSession.marks[st.id] = { present: check, remark: "" };
-        } else {
-          currentSession.marks[st.id].present = check;
-        }
-        applyRowState(st.id, check);
-        updateHistoryCellForStudent(st);
-      });
-      refreshAllPercents();
-      updatePresentToday();
-    });
-
-    function splitName(fullName) {
-      const parts = (fullName || "").trim().split(/\\s+/).filter(Boolean);
-      if (parts.length === 0) return { first: "", last: "" };
-      if (parts.length === 1) return { first: parts[0], last: "" };
-      const first = parts[0];
-      const last = parts.slice(1).join(" ");
-      return { first, last };
-    }
-
-    function exportAttendanceExcelForCurrentDate() {
-      const cls = getCurrentClass();
-      const students = cls.students;
-      if (!students || students.length === 0) {
-        alert("No students in roster for this class.");
-        return;
-      }
-
-      const date = attendanceDateInput.value || currentSession.date;
-      if (!date) {
-        alert("Please select a date first.");
-        return;
-      }
-
-      const sessionsByDate = cls.sessionsByDate || {};
-      const savedSession = sessionsByDate[date];
-
-      if (!savedSession && (!currentSession.marks || Object.keys(currentSession.marks).length === 0)) {
-        alert("No attendance data for this date.");
-        return;
-      }
-
-      const marksSource = savedSession ? savedSession.marks : currentSession.marks;
-
-      const rows = [];
-      rows.push(["Roll No.", "First Name", "Last Name", "Attendance"]);
-
-      students.forEach(st => {
-        const m = marksSource[st.id] || { present: true };
-        const att = m.present ? "P" : "A";
-        const { first, last } = splitName(st.name || "");
-        rows.push([st.roll, first, last, att]);
-      });
-
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Attendance");
-
-      const dParts = date.split("-");
-      let ddmm = date;
-      if (dParts.length === 3) {
-        const dd = dParts[2];
-        const mm = dParts[1];
-        ddmm = dd + mm;
-      }
-      const classLabel = currentClassKey.replace(/\\s+/g, "");
-      const filename = classLabel + "_" + ddmm + ".xls";
-
-      XLSX.writeFile(wb, filename, { bookType: "xls" });
-    }
-
-    exportExcelBtn.onclick = e => {
-      e.preventDefault();
-      exportAttendanceExcelForCurrentDate();
-    };
-
-    // NAV handling (we need references early for switching)
-    const navSegments = document.getElementById("nav-segments");
-    const sections = {};
-    const navButtons = [];
-
-    APP_SECTIONS.forEach((sec) => {
-      const btn = document.createElement("button");
-      const isDefault = (sec.id === "reports-section"); // default visible
-      btn.className = "nav-button" + (isDefault ? " active" : "");
-      btn.dataset.section = sec.id;
-      btn.textContent = sec.label;
-      navSegments.appendChild(btn);
-      navButtons.push(btn);
-      sections[sec.id] = document.getElementById(sec.id);
-    });
-
-    function showSectionSectionId(id) {
-      Object.keys(sections).forEach(sid => {
-        sections[sid].style.display = sid === id ? "block" : "none";
-      });
-      navButtons.forEach(b => b.classList.toggle("active", b.dataset.section === id));
-      if (id === "attendance-section") {
-        renderAttendanceTable();
-        refreshAllPercents();
-        refreshAllHistoryCells();
-        updateClassCountLabel();
-        updatePresentToday();
-      } else if (id === "reports-section") {
-        renderReportsTable();
-        refreshAllPercents();
-      } else if (id === "roster-section") {
-        renderRosterTable();
-        refreshAllPercents();
-      } else if (id === "mentor-section") {
-        // nothing special needed on open now
-      }
-    }
-
-    navButtons.forEach(btn => {
-      btn.onclick = () => {
-        const id = btn.dataset.section;
-        showSectionSectionId(id);
-      };
-    });
-
-    function saveAttendanceSession() {
-      const students = getStudents();
-      if (students.length === 0) {
-        alert("No students to save. Add students in the Roster tab first.");
-        return;
-      }
-      if (!currentSession.date) {
-        alert("Please select a date for this session.");
-        return;
-      }
-      const cls = getCurrentClass();
-      const sessionsByDate = cls.sessionsByDate;
-      const prev = sessionsByDate[currentSession.date];
-
-      if (prev && prev.marks) {
-        students.forEach(st => {
-          const oldMark = prev.marks[st.id];
-          if (!oldMark) return;
-          if (st.totalSessions > 0) st.totalSessions -= 1;
-          if (oldMark.present && st.presents > 0) st.presents -= 1;
-        });
-      }
-
-      sessionsByDate[currentSession.date] = {
-        notes: currentSession.notes || "",
-        marks: JSON.parse(JSON.stringify(currentSession.marks))
-      };
-
-      students.forEach(st => {
-        let mark = currentSession.marks[st.id];
-        if (!mark) {
-          mark = { present: true, remark: "" };
-          currentSession.marks[st.id] = mark;
-        }
-        st.totalSessions = (st.totalSessions || 0) + 1;
-        if (mark.present) st.presents = (st.presents || 0) + 1;
-        const remarkText = (mark.remark || "").trim();
-        if (remarkText) {
-          st.remarks.push({ date: currentSession.date, text: remarkText });
-        }
-      });
-
-      Object.keys(currentSession.marks).forEach(id => currentSession.marks[id].remark = "");
-      attendanceNotesInput.value = "";
-      currentSession.notes = "";
-
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateClassCountLabel();
-      updatePresentToday();
-      saveToLocalStorage();
-
-      alert("Attendance saved successfully for " + formatDateDisplay(currentSession.date) + ".");
-
-      // After saving, switch to Reports section
-      showSectionSectionId("reports-section");
-    }
-    saveSessionBtn.onclick = e => {
-      e.preventDefault();
-      saveAttendanceSession();
-    };
-
-    function clearAttendanceForCurrentDate() {
-      const date = currentSession.date;
-      if (!date) {
-        alert("Select a date first.");
-        return;
-      }
-      const cls = getCurrentClass();
-      const sessionsByDate = cls.sessionsByDate;
-      const session = sessionsByDate[date];
-      if (!session) {
-        currentSession = { date, notes: "", marks: {} };
-        attendanceNotesInput.value = "";
-        renderAttendanceTable();
-        refreshAllPercents();
-        refreshAllHistoryCells();
-        updateClassCountLabel();
-        updatePresentToday();
-        saveToLocalStorage();
-        return;
-      }
-
-      if (!confirm("This will remove saved attendance for " + formatDateDisplay(date) + " and adjust totals. Continue?")) {
-        return;
-      }
-
-      const students = getStudents();
-      students.forEach(st => {
-        const mark = session.marks[st.id];
-        if (!mark) return;
-        if (st.totalSessions > 0) st.totalSessions -= 1;
-        if (mark.present && st.presents > 0) st.presents -= 1;
-      });
-
-      delete sessionsByDate[date];
-
-      currentSession = { date, notes: "", marks: {} };
-      attendanceNotesInput.value = "";
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateClassCountLabel();
-      updatePresentToday();
-      saveToLocalStorage();
-    }
-
-    clearDayBtn.ondblclick = e => {
-      e.preventDefault();
-      clearAttendanceForCurrentDate();
-    };
-
-    // REPORTS
-    const reportsTbody = document.getElementById("reports-tbody");
-    const reportsHeaderRow = document.getElementById("reports-header-row");
-
-    function renderReportsTable() {
-      const cls = getCurrentClass();
-      const students = [...cls.students];
-      const sessionsByDate = cls.sessionsByDate || {};
-      const dates = Object.keys(sessionsByDate).sort(); // saved only
-
-      reportsHeaderRow.innerHTML = "";
-      const thSno = document.createElement("th");
-      thSno.className = "sortable";
-      thSno.dataset.sortField = "sno";
-      thSno.style.width = "50px";
-      thSno.textContent = "S.No";
-
-      const thRoll = document.createElement("th");
-      thRoll.className = "sortable";
-      thRoll.dataset.sortField = "roll";
-      thRoll.style.width = "90px";
-      thRoll.textContent = "Roll";
-
-      const thPercent = document.createElement("th");
-      thPercent.className = "sortable";
-      thPercent.dataset.sortField = "percent";
-      thPercent.style.width = "70px";
-      thPercent.textContent = "%";
-
-      const thName = document.createElement("th");
-      thName.className = "sortable";
-      thName.dataset.sortField = "name";
-      thName.textContent = "Name";
-
-      reportsHeaderRow.appendChild(thSno);
-      reportsHeaderRow.appendChild(thRoll);
-      reportsHeaderRow.appendChild(thPercent);
-      reportsHeaderRow.appendChild(thName);
-
-      dates.forEach(d => {
-        const th = document.createElement("th");
-        th.textContent = formatDateDisplay(d);
-        th.title = "Attendance on " + formatDateDisplay(d) + " (P/A)";
-        reportsHeaderRow.appendChild(th);
-      });
-
-      const thTotP = document.createElement("th");
-      thTotP.textContent = "Total P";
-      thTotP.style.width = "60px";
-      const thTotA = document.createElement("th");
-      thTotA.textContent = "Total A";
-      thTotA.style.width = "60px";
-      const thRemarksCount = document.createElement("th");
-      thRemarksCount.className = "sortable";
-      thRemarksCount.dataset.sortField = "remarksCount";
-      thRemarksCount.style.width = "80px";
-      thRemarksCount.textContent = "#Remarks";
-      const thActions = document.createElement("th");
-      thActions.style.width = "200px";
-      thActions.textContent = "Actions";
-
-      reportsHeaderRow.appendChild(thTotP);
-      reportsHeaderRow.appendChild(thTotA);
-      reportsHeaderRow.appendChild(thRemarksCount);
-      reportsHeaderRow.appendChild(thActions);
-
-      students.sort((a, b) => {
-        if (reportSort.field === "roll") {
-          return reportSort.dir === "asc"
-            ? String(a.roll).localeCompare(String(b.roll))
-            : String(b.roll).localeCompare(String(a.roll));
-        }
-        if (reportSort.field === "name") {
-          return reportSort.dir === "asc"
-            ? a.name.localeCompare(b.name)
-            : b.name.localeCompare(a.name);
-        }
-        if (reportSort.field === "percent") {
-          const pa = a.totalSessions ? Math.round(100 * (a.presents || 0) / a.totalSessions) : 0;
-          const pb = b.totalSessions ? Math.round(100 * (b.presents || 0) / b.totalSessions) : 0;
-          return reportSort.dir === "asc" ? pa - pb : pb - pa;
-        }
-        if (reportSort.field === "remarksCount") {
-          const ra = (a.remarks || []).length;
-          const rb = (b.remarks || []).length;
-          return reportSort.dir === "asc" ? ra - rb : rb - ra;
-        }
-        return 0;
-      });
-
-      reportsTbody.innerHTML = "";
-      if (students.length === 0) {
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        td.colSpan = 4 + dates.length + 3;
-        td.className = "empty-state";
-        td.textContent = "No students in roster.";
-        tr.appendChild(td);
-        reportsTbody.appendChild(tr);
-        return;
-      }
-
-      students.forEach((st, index) => {
-        const tr = document.createElement("tr");
-
-        const tdSno = document.createElement("td"); tdSno.textContent = index + 1;
-        const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
-
-        const totalSess = st.totalSessions || 0;
-        const totalP = st.presents || 0;
-        const totalA = totalSess - totalP;
-        const percent = totalSess === 0 ? 0 : Math.round(100 * totalP / totalSess);
-
-        const tdPercent = document.createElement("td");
-        tdPercent.className = "percent-cell";
-        tdPercent.dataset.percentCellReport = st.id;
-        tdPercent.textContent = percent + "%";
-
-        const tdName = document.createElement("td"); tdName.textContent = st.name;
-
-        tr.appendChild(tdSno);
-        tr.appendChild(tdRoll);
-        tr.appendChild(tdPercent);
-        tr.appendChild(tdName);
-
-        dates.forEach(d => {
-          const sess = sessionsByDate[d];
-          const mark = sess && sess.marks && sess.marks[st.id];
-          const td = document.createElement("td");
-          let val = "";
-          if (mark) {
-            if (mark.present) val = "P";
-            else val = "A";
-          }
-          td.textContent = val;
-          tr.appendChild(td);
-        });
-
-        const tdTotP = document.createElement("td");
-        tdTotP.textContent = totalP;
-        const tdTotA = document.createElement("td");
-        tdTotA.textContent = totalA;
-
-        const tdRemarksCount = document.createElement("td");
-        const badge = document.createElement("span");
-        badge.className = "badge";
-        badge.textContent = st.remarks.length;
-        tdRemarksCount.appendChild(badge);
-        tdRemarksCount.style.cursor = "pointer";
-        tdRemarksCount.onclick = () => openRemarksModal(st.id);
-
-        const tdActions = document.createElement("td");
-        const wrap = document.createElement("div");
-        wrap.className = "table-actions";
-
-        const waBtn = document.createElement("button");
-        waBtn.className = "btn btn-sm btn-primary";
-        waBtn.textContent = WHATSAPP_CONFIG.buttonLabel;
-        waBtn.onclick = () => sendWhatsAppToStudent(st.id, "student");
-
-        const waParentBtn = document.createElement("button");
-        waParentBtn.className = "btn btn-sm btn-outline";
-        waParentBtn.textContent = "WA Parent";
-        waParentBtn.onclick = () => sendWhatsAppToStudent(st.id, "parent");
-
-        wrap.append(waBtn, waParentBtn);
-        tdActions.appendChild(wrap);
-
-        tr.appendChild(tdTotP);
-        tr.appendChild(tdTotA);
-        tr.appendChild(tdRemarksCount);
-        tr.appendChild(tdActions);
-
-        reportsTbody.appendChild(tr);
-      });
-      updateClassSummary();
-
-      document.querySelectorAll("#reports-table thead th.sortable").forEach(th => {
-        th.onclick = () => {
-          const field = th.dataset.sortField;
-          if (!field) return;
-          if (reportSort.field === field) {
-            reportSort.dir = reportSort.dir === "asc" ? "desc" : "asc";
-          } else {
-            reportSort.field = field;
-            reportSort.dir = "asc";
-          }
-          renderReportsTable();
-        };
-      });
-    }
-
-    // Remarks modal
-    const remarksModalBackdrop = document.getElementById("remarks-modal-backdrop");
-    const remarksModalMeta = document.getElementById("remarks-modal-meta");
-    const remarksModalList = document.getElementById("remarks-modal-list");
-    const remarksModalEmpty = document.getElementById("remarks-modal-empty");
-    const closeRemarksModalBtn = document.getElementById("close-remarks-modal-btn");
-    const remarksModalOkBtn = document.getElementById("remarks-modal-ok-btn");
-    const remarksModalTitle = document.getElementById("remarks-modal-title");
-
-    function openRemarksModal(studentId) {
-      const st = findStudentById(studentId);
-      if (!st) return;
-      remarksModalTitle.textContent = "Remarks for " + st.name + " (" + st.roll + ")";
-      remarksModalMeta.textContent = "Total remarks: " + st.remarks.length;
-      remarksModalList.innerHTML = "";
-      if (st.remarks.length === 0) {
-        remarksModalEmpty.style.display = "block";
-      } else {
-        remarksModalEmpty.style.display = "none";
-        st.remarks.forEach(r => {
-          const li = document.createElement("li");
-          const d = document.createElement("div");
-          d.className = "remarks-date";
-          d.textContent = r.date ? formatDateDisplay(r.date) : "(no date)";
-          const t = document.createElement("div");
-          t.className = "remarks-text";
-          t.textContent = r.text;
-          li.append(d, t);
-          remarksModalList.appendChild(li);
-        });
-      }
-      remarksModalBackdrop.classList.add("active");
-      remarksModalBackdrop.setAttribute("aria-hidden", "false");
-    }
-
-    function closeRemarksModal() {
-      remarksModalBackdrop.classList.remove("active");
-      remarksModalBackdrop.setAttribute("aria-hidden", "true");
-    }
-    closeRemarksModalBtn.onclick = closeRemarksModal;
-    remarksModalOkBtn.onclick = closeRemarksModal;
-    remarksModalBackdrop.onclick = e => {
-      if (e.target === remarksModalBackdrop) closeRemarksModal();
-    };
-
-    // Settings modal
-    const settingsBtn = document.getElementById("settings-btn");
-    const settingsModalBackdrop = document.getElementById("settings-modal-backdrop");
-    const closeSettingsModalBtn = document.getElementById("close-settings-modal-btn");
-    const settingsCancelBtn = document.getElementById("settings-cancel-btn");
-    const settingsSaveBtn = document.getElementById("settings-save-btn");
-    const settingsWaStudentTextarea = document.getElementById("settings-wa-student-template");
-    const settingsWaParentTextarea = document.getElementById("settings-wa-parent-template");
-    const settingsStudentEmailTextarea = document.getElementById("settings-student-email-template");
-    const settingsParentEmailTextarea = document.getElementById("settings-parent-email-template");
-
-    function openSettingsModal() {
-      settingsWaStudentTextarea.value =
-        appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
-      settingsWaParentTextarea.value =
-        appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
-      settingsStudentEmailTextarea.value =
-        appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
-      settingsParentEmailTextarea.value =
-        appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
-
-      settingsModalBackdrop.classList.add("active");
-      settingsModalBackdrop.setAttribute("aria-hidden", "false");
-    }
-
-    function closeSettingsModal() {
-      settingsModalBackdrop.classList.remove("active");
-      settingsModalBackdrop.setAttribute("aria-hidden", "true");
-    }
-
-    settingsBtn.onclick = () => openSettingsModal();
-    closeSettingsModalBtn.onclick = () => closeSettingsModal();
-    settingsCancelBtn.onclick = () => closeSettingsModal();
-    settingsModalBackdrop.onclick = e => {
-      if (e.target === settingsModalBackdrop) closeSettingsModal();
-    };
-
-    settingsSaveBtn.onclick = () => {
-      appSettings.whatsappStudentTemplate =
-        settingsWaStudentTextarea.value || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
-      appSettings.whatsappParentTemplate =
-        settingsWaParentTextarea.value || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
-      appSettings.studentEmailTemplate =
-        settingsStudentEmailTextarea.value || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
-      appSettings.parentEmailTemplate =
-        settingsParentEmailTextarea.value || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
-
-      saveToLocalStorage();
-      closeSettingsModal();
-    };
-
-    // WhatsApp
-    function sendWhatsAppToStudent(studentId, to = "student") {
-      const st = findStudentById(studentId);
-      if (!st) return;
-
-      const phone =
-        to === "parent"
-          ? (st.parentPhone || "").trim()
-          : (st.studentPhone || "").trim();
-
-      if (!phone) {
-        alert((to === "parent" ? "Parent" : "Student") + " phone number is missing.");
-        return;
-      }
-
-      const totalSessions = st.totalSessions || 0;
-      const presents = st.presents || 0;
-      const percent = totalSessions
-        ? Math.round(100 * presents / totalSessions)
-        : 0;
-
-      const remarksSummary = st.remarks.length === 0
-        ? "None"
-        : st.remarks.slice(-3).map(r => r.text).join("; ");
-
-      const classLabelObj = CLASS_CONFIG.find(c => c.key === currentClassKey);
-      const className = classLabelObj ? classLabelObj.label : currentClassKey;
-
-      const template =
-        to === "parent"
-          ? appSettings.whatsappParentTemplate
-          : appSettings.whatsappStudentTemplate;
-
-      let message = template
-        .replace("{name}", st.name)
-        .replace("{roll}", st.roll)
-        .replace("{percent}", percent)
-        .replace("{remarks}", remarksSummary)
-        .replace("{class name}", className)
-        .replace("{total number of classes}", totalSessions)
-        .replace("{Classes you are present}", presents);
-
-      const encodedMessage = encodeURIComponent(message);
-      const url = WHATSAPP_CONFIG.apiBase
-        + "?number=" + encodeURIComponent(phone)
-        + "&type=text"
-        + "&message=" + encodedMessage
-        + "&instance_id=" + encodeURIComponent(WHATSAPP_CONFIG.instanceId)
-        + "&access_token=" + encodeURIComponent(WHATSAPP_CONFIG.accessToken);
-
-      window.open(url, "_blank");
-    }
-
-    // Backup / Restore / Export class
-    const backupBtn = document.getElementById("backup-btn");
-    const restoreBtn = document.getElementById("restore-btn");
-    const restoreFileInput = document.getElementById("restore-file-input");
-    const exportClassExcelBtn = document.getElementById("export-class-excel-btn");
-
-    function downloadTextFile(filename, text) {
-      const blob = new Blob([text], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    backupBtn.onclick = () => {
-      const data = {
-        classes,
-        currentClassKey,
-        appSettings,
-        exportedAt: new Date().toISOString()
-      };
-      const json = JSON.stringify(data, null, 2);
-
-      const now = new Date();
-      const dd = String(now.getDate()).padStart(2, "0");
-      const mm = String(now.getMonth() + 1).padStart(2, "0");
-      const yyyy = now.getFullYear();
-      const dateStr = dd + "-" + mm + "-" + yyyy;
-
-      const filename = "K_Att_BU" + dateStr + ".json";
-      downloadTextFile(filename, json);
-    };
-
-    restoreBtn.onclick = () => {
-      restoreFileInput.click();
-    };
-
-    restoreFileInput.onchange = () => {
-      const file = restoreFileInput.files && restoreFileInput.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          if (!parsed || !parsed.classes) {
-            alert("Invalid backup file.");
-            return;
-          }
-          Object.keys(classes).forEach(k => delete classes[k]);
-          Object.assign(classes, parsed.classes);
-
-          const keysFromConfig = CLASS_CONFIG.map(c => c.key);
-          if (parsed.currentClassKey && keysFromConfig.includes(parsed.currentClassKey)) {
-            currentClassKey = parsed.currentClassKey;
-          } else {
-            currentClassKey = keysFromConfig[0];
-          }
-
-          if (parsed.appSettings && typeof parsed.appSettings === "object") {
-            appSettings.whatsappStudentTemplate =
-              parsed.appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
-            appSettings.whatsappParentTemplate =
-              parsed.appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
-            appSettings.studentEmailTemplate =
-              parsed.appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
-            appSettings.parentEmailTemplate =
-              parsed.appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
-          }
-
-          initClassRadios();
-
-          const today = new Date().toISOString().slice(0, 10);
-          currentSession = { date: today, notes: "", marks: {} };
-          attendanceDateInput.value = today;
-          loadSessionForDate(today);
-          renderRosterTable();
-          renderAttendanceTable();
-          renderReportsTable();
-          refreshAllPercents();
-          refreshAllHistoryCells();
-
-          alert("Data restored successfully.");
-          saveToLocalStorage();
-        } catch (err) {
-          console.error(err);
-          alert("Error reading backup file.");
-        } finally {
-          restoreFileInput.value = "";
-        }
-      };
-      reader.readAsText(file);
-    };
-
-    function exportFullClassExcel() {
-      const cls = getCurrentClass();
-      const students = cls.students;
-      const sessionsByDate = cls.sessionsByDate || {};
-      const classLabel = currentClassKey;
-
-      if (!students || students.length === 0) {
-        alert("No students in roster for this class.");
-        return;
-      }
-
-      const sessionDates = Object.keys(sessionsByDate).sort();
-      if (sessionDates.length === 0) {
-        alert("No saved attendance sessions for this class.");
-        return;
-      }
-
-      const rows = [];
-      const header = ["Roll", "Name"];
-      sessionDates.forEach(d => header.push(formatDateDisplay(d)));
-      header.push("Total P", "Total A", "%");
-      rows.push(header);
-
-      students.forEach(st => {
-        let totalSessions = 0;
-        let presents = 0;
-        const row = [st.roll, st.name];
-
-        sessionDates.forEach(d => {
-          const sess = sessionsByDate[d];
-          const mark = sess && sess.marks && sess.marks[st.id];
-          if (mark) {
-            totalSessions += 1;
-            if (mark.present) {
-              presents += 1;
-              row.push("P");
-            } else {
-              row.push("A");
-            }
-          } else {
-            row.push("");
-          }
-        });
-
-        const absents = totalSessions - presents;
-        const percent = totalSessions === 0 ? 0 : Math.round(100 * presents / totalSessions);
-        row.push(presents, absents, percent + "%");
-        rows.push(row);
-      });
-
-      const wsMain = XLSX.utils.aoa_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, wsMain, "Class Attendance");
-
-      const filename =
-        "class_attendance_" + classLabel.replace(/\\s+/g, "_") + "_" + Date.now() + ".xlsx";
-      XLSX.writeFile(wb, filename);
-    }
-
-    exportClassExcelBtn.onclick = () => {
-      exportFullClassExcel();
-    };
-
-    // Percent refresh (attendance + reports)
-    function refreshAllPercents() {
-      const students = getStudents();
-      students.forEach(st => {
-        const percent = computePercentWithPreview(st);
-        const el = document.querySelector('[data-att-name="' + st.id + '"]');
-        if (el) {
-          el.innerHTML = '<span class="name-main">' + st.name + '</span>(' + percent + '%)';
-        }
-      });
-
-      const cls = getCurrentClass();
-      const sessionsByDate = cls.sessionsByDate || {};
-      const dates = Object.keys(sessionsByDate).sort();
-      students.forEach(st => {
-        const totalSess = st.totalSessions || 0;
-        const totalP = st.presents || 0;
-        const percent = totalSess === 0 ? 0 : Math.round(100 * totalP / totalSess);
-        const el = document.querySelector('[data-percent-cell-report="' + st.id + '"]');
-        if (el) el.textContent = percent + "%";
-      });
-    }
-
-    // MENTOR REPORT LOGIC
-    const mentorConsecutiveGroup = document.getElementById("mentor-consecutive-group");
-    const mentorPercentGroup = document.getElementById("mentor-percent-group");
-    const mentorConsecutiveInput = document.getElementById("mentor-consecutive-input");
-    const mentorPercentInput = document.getElementById("mentor-percent-input");
-    const mentorSummaryEl = document.getElementById("mentor-summary");
-    const mentorTableContainer = document.getElementById("mentor-table-container");
-    const mentorTbody = document.getElementById("mentor-tbody");
-    const mentorTypeRadios = document.getElementsByName("mentor-report-type");
-    const generateMentorReportBtn = document.getElementById("generate-mentor-report-btn");
-
-    function getSelectedMentorType() {
-      for (let i = 0; i < mentorTypeRadios.length; i++) {
-        if (mentorTypeRadios[i].checked) return mentorTypeRadios[i].value;
-      }
-      return "consecutive";
-    }
-
-    mentorTypeRadios.forEach(r => {
-      r.addEventListener("change", () => {
-        const t = getSelectedMentorType();
-        if (t === "consecutive") {
-          mentorConsecutiveGroup.style.display = "block";
-          mentorPercentGroup.style.display = "none";
-        } else {
-          mentorConsecutiveGroup.style.display = "none";
-          mentorPercentGroup.style.display = "block";
-        }
-      });
-    });
-
-    function computeConsecutiveAbsencesFromEnd(student, sessionsByDate) {
-      const dates = Object.keys(sessionsByDate).sort();
-      let count = 0;
-      for (let i = dates.length - 1; i >= 0; i--) {
-        const d = dates[i];
-        const sess = sessionsByDate[d];
-        const mark = sess.marks && sess.marks[student.id];
-        if (!mark) {
+      coef = newCoef;
+      used[i] = true;
+    } else {
+      let jConj = -1;
+      for (let j = i + 1; j < roots.length; j++) {
+        if (used[j]) continue;
+        const r2 = roots[j];
+        if (Math.abs(r2.re - r.re) < 1e-6 &&
+            Math.abs(r2.im + r.im) < 1e-6) {
+          jConj = j;
           break;
         }
-        if (mark.present) {
-          break;
-        } else {
-          count++;
+      }
+      const a = r.re, b = r.im;
+      const q = [a*a + b*b, -2*a, 1];
+      const newCoef = new Array(coef.length + 2).fill(0);
+      for (let k = 0; k < coef.length; k++) {
+        for (let m = 0; m < q.length; m++) {
+          newCoef[k + m] += coef[k] * q[m];
         }
       }
-      return count;
+      coef = newCoef;
+      used[i] = true;
+      if (jConj >= 0) used[jConj] = true;
     }
+  }
+  return coef;
+}
 
-    function generateMentorReport() {
-      const cls = getCurrentClass();
-      const students = cls.students || [];
-      const sessionsByDate = cls.sessionsByDate || {};
-      const sessionDates = Object.keys(sessionsByDate).sort();
+function buildTransferFunction(zeros, poles, K) {
+  const num = polyFromRoots(zeros);
+  const den = polyFromRoots(poles);
+  while (den.length <= num.length) den.unshift(0);
+  const numK = num.map(c => c * K);
+  return { num: numK, den };
+}
 
-      if (students.length === 0) {
-        alert("No students in roster.");
-        return;
-      }
-      if (sessionDates.length === 0) {
-        alert("No saved attendance sessions available.");
-        return;
-      }
+function tfToStateSpace(num, den) {
+  const n = den.length - 1;
+  if (n <= 0) return { A: [[0]], B: [[0]], C: [[0]], D: [[0]] };
 
-      const type = getSelectedMentorType();
-      let filtered = [];
-      if (type === "consecutive") {
-        const x = parseInt(mentorConsecutiveInput.value, 10) || 1;
-        students.forEach(st => {
-          const consecA = computeConsecutiveAbsencesFromEnd(st, sessionsByDate);
-          if (consecA >= x) {
-            const total = st.totalSessions || 0;
-            const p = st.presents || 0;
-            const a = total - p;
-            const percent = total === 0 ? 0 : Math.round(100 * p / total);
-            filtered.push({
-              student: st,
-              total, p, a, percent,
-              detail: "Absent " + consecA + " classes consecutively (last " + x + "+)"
-            });
-          }
-        });
-        mentorSummaryEl.textContent =
-          "Report: Students absent for at least " + x +
-          " consecutive classes. Found " + filtered.length +
-          " students out of " + students.length + ".";
-      } else {
-        const thr = parseInt(mentorPercentInput.value, 10) || 0;
-        students.forEach(st => {
-          const total = st.totalSessions || 0;
-          const p = st.presents || 0;
-          const a = total - p;
-          const percent = total === 0 ? 0 : Math.round(100 * p / total);
-          if (percent < thr) {
-            filtered.push({
-              student: st,
-              total, p, a, percent,
-              detail: "Attendance " + percent + "% (< " + thr + "%)"
-            });
-          }
-        });
-        mentorSummaryEl.textContent =
-          "Report: Students whose attendance is less than " + thr +
-          "%. Found " + filtered.length + " students out of " + students.length + ".";
-      }
+  const alpha = den[n];
+  const a = den.map(c => c / alpha);
+  const b = num.map(c => c / alpha);
 
-      mentorTbody.innerHTML = "";
-      if (filtered.length === 0) {
-        mentorTableContainer.style.display = "none";
-        return;
-      }
+  const bPad = new Array(den.length).fill(0);
+  for (let i = 0; i < num.length; i++) bPad[i] = b[i];
 
-      mentorTableContainer.style.display = "block";
-      filtered.sort((a, b) => a.student.roll.localeCompare(b.student.roll));
+  const A = Array.from({length: n}, () => Array(n).fill(0));
+  for (let i = 0; i < n - 1; i++) A[i][i+1] = 1;
+  for (let j = 0; j < n; j++) A[n-1][j] = -a[j];
 
-      filtered.forEach((item, idx) => {
-        const st = item.student;
-        const tr = document.createElement("tr");
+  const B = Array(n).fill(0); B[n-1] = 1;
+  const C = Array(n).fill(0);
+  for (let i = 0; i < n; i++) C[i] = bPad[i] - a[i] * bPad[n];
+  const D = bPad[n];
 
-        const tdSno = document.createElement("td"); tdSno.textContent = idx + 1;
-        const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
-        const tdName = document.createElement("td"); tdName.textContent = st.name;
+  return {
+    A,
+    B: B.map(x => [x]),
+    C: [C],
+    D: [[D]]
+  };
+}
 
-        const tdTotal = document.createElement("td"); tdTotal.textContent = item.total;
-        const tdP = document.createElement("td"); tdP.textContent = item.p;
-        const tdA = document.createElement("td"); tdA.textContent = item.a;
-        const tdPercent = document.createElement("td"); tdPercent.textContent = item.percent + "%";
+function simulateSystem(ss, tMax, dt, inputType) {
+  const { A, B, C, D } = ss;
+  const n = A.length;
+  const steps = Math.max(2, Math.floor(tMax / dt) + 1);
+  const t = new Float64Array(steps);
+  const y = new Float64Array(steps);
+  const r = new Float64Array(steps);
 
-        const tdDetails = document.createElement("td");
-        tdDetails.textContent = item.detail;
+  for (let k = 0; k < steps; k++) {
+    t[k] = k * dt;
+    r[k] = (inputType === "step") ? 1 : (k === 0 ? 1/dt : 0);
+  }
 
-        tr.append(tdSno, tdRoll, tdName, tdTotal, tdP, tdA, tdPercent, tdDetails);
-        mentorTbody.appendChild(tr);
-      });
+  const x = new Float64Array(n);
+
+  function Ax_plus_Bu(xVec, u) {
+    const dx = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      let s = 0;
+      for (let j = 0; j < n; j++) s += A[i][j] * xVec[j];
+      dx[i] = s + B[i][0] * u;
     }
+    return dx;
+  }
 
-    generateMentorReportBtn.onclick = () => {
-      generateMentorReport();
-    };
+  for (let k = 0; k < steps; k++) {
+    const u = r[k];
+    let yk = 0;
+    for (let i = 0; i < n; i++) yk += C[0][i] * x[i];
+    yk += D[0][0] * u;
+    y[k] = yk;
 
-    // INIT
-    (function init() {
-      const hadStored = loadFromLocalStorage();
-      if (!hadStored) {
-        ensureClass(currentClassKey);
+    if (k < steps - 1) {
+      const k1 = Ax_plus_Bu(x, u);
+      const x2 = new Float64Array(n);
+      for (let i = 0; i < n; i++) x2[i] = x[i] + 0.5*dt*k1[i];
+
+      const k2 = Ax_plus_Bu(x2, u);
+      const x3 = new Float64Array(n);
+      for (let i = 0; i < n; i++) x3[i] = x[i] + 0.5*dt*k2[i];
+
+      const k3 = Ax_plus_Bu(x3, u);
+      const x4 = new Float64Array(n);
+      for (let i = 0; i < n; i++) x4[i] = x[i] + dt*k3[i];
+
+      const k4 = Ax_plus_Bu(x4, u);
+      for (let i = 0; i < n; i++) {
+        x[i] += dt*(k1[i] + 2*k2[i] + 2*k3[i] + k4[i])/6;
       }
+    }
+  }
 
-      initClassRadios();
+  return { t, y, r };
+}
 
-      const today = new Date().toISOString().slice(0, 10);
-      if (!currentSession.date) currentSession.date = today;
-      attendanceDateInput.value = currentSession.date;
-      loadSessionForDate(currentSession.date);
+function computeMinMax(arr) {
+  let min = Infinity, max = -Infinity;
+  for (let v of arr) {
+    if (!isFiniteNumber(v)) continue;
+    if (v < min) min = v;
+    if (v > max) max = v;
+  }
+  if (min === Infinity) return {min: -1, max: 1};
+  if (Math.abs(max - min) < 1e-9) {
+    const pad = (Math.abs(min) + 1)*0.5;
+    return {min: min - pad, max: max + pad};
+  }
+  return {min, max};
+}
 
-      renderRosterTable();
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateClassSummary();
-      updateClassCountLabel();
-      updatePresentToday();
+/* ============================
+   State
+   ============================ */
 
-      // default visible section: reports
-      showSectionSectionId("reports-section");
-    })();
-  </script>
+const state = {
+  inputType: "step",
+  tMax: 10,
+  dt: 0.01,
+  K: 1,
+  zeros: [],
+  poles: [],
+  showFinalValue: false,
+  showResponsePlot: false,   // default unchecked
+  showResponseCurve: true,
+  pzAxis: { reMin: -5, reMax: 1, imMax: 3 },
+};
+
+/* Default system */
+function resetSystem() {
+  state.K = 1;
+  state.zeros = [];
+  state.poles = [
+    { re: -0.5, im: 1 },
+    { re: -0.5, im: -1 }
+  ];
+}
+
+/* ============================
+   DOM
+   ============================ */
+
+const responseWrapper = document.getElementById("responseWrapper");
+const responseCanvas  = document.getElementById("responseCanvas");
+const pzCanvas        = document.getElementById("pzCanvas");
+
+const tMaxInput = document.getElementById("tMax");
+const dtInput   = document.getElementById("dt");
+const gainInput = document.getElementById("gainK");
+const simStatus = document.getElementById("simStatus");
+
+const inputTypeRadios = document.querySelectorAll("input[name='inputType']");
+const addTypeRadios   = document.querySelectorAll("input[name='addType']");
+const addAtCenterBtn  = document.getElementById("addAtCenter");
+const resetSystemBtn  = document.getElementById("resetSystem");
+const showFinalValueCheckbox    = document.getElementById("showFinalValue");
+const showResponsePlotCheckbox  = document.getElementById("showResponsePlot");
+const showResponseCurveCheckbox = document.getElementById("showResponseCurve");
+
+const zerosInput = document.getElementById("zerosInput");
+const polesInput = document.getElementById("polesInput");
+
+const reMinInput = document.getElementById("reMin");
+const reMaxInput = document.getElementById("reMax");
+const imMaxInput = document.getElementById("imMax");
+const imMinDisplay = document.getElementById("imMinDisplay");
+
+function setupCanvas(c, cssWidth, cssHeight) {
+  const dpr = window.devicePixelRatio || 1;
+  c.width = cssWidth * dpr;
+  c.height = cssHeight * dpr;
+}
+
+/* ============================
+   Plotting
+   ============================ */
+
+function plotResponseWithInput(canvas, t, y, r, tMax, yMin, yMax, options) {
+  const { showFinal, finalValue, showCurve } = options || {};
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.width;
+  const H = canvas.height;
+
+  ctx.save();
+  ctx.scale(dpr, dpr);
+
+  const w = W / dpr;
+  const h = H / dpr;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, w, h);
+
+  const padL = 50, padR = 10, padT = 10, padB = 28;
+  const x0 = padL, x1 = w - padR;
+  const y0 = padT, y1 = h - padB;
+
+  // grid
+  ctx.strokeStyle = "rgba(255,255,255,0.15)";
+  ctx.lineWidth = 1;
+  const gx = 10, gy = 6;
+  for (let i = 0; i <= gx; i++) {
+    const x = x0 + (x1 - x0)*(i/gx);
+    ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(x,y1); ctx.stroke();
+  }
+  for (let j = 0; j <= gy; j++) {
+    const yy = y0 + (y1 - y0)*(j/gy);
+    ctx.beginPath(); ctx.moveTo(x0,yy); ctx.lineTo(x1,yy); ctx.stroke();
+  }
+
+  // axes
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.lineWidth = 1.5;
+  const yZeroFrac = (0 - yMin)/(yMax - yMin);
+  const yZeroPix  = y1 - (y1 - y0)*yZeroFrac;
+  const xAxisY    = (yZeroPix >= y0 && yZeroPix <= y1) ? yZeroPix : y1;
+
+  ctx.beginPath(); ctx.moveTo(x0, xAxisY); ctx.lineTo(x1, xAxisY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x0, y0);     ctx.lineTo(x0, y1);     ctx.stroke();
+
+  // Show zero marking on response x-axis at t = 0
+  const zeroX = x0;
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.beginPath();
+  ctx.moveTo(zeroX, xAxisY - 4);
+  ctx.lineTo(zeroX, xAxisY + 4);
+  ctx.stroke();
+
+  // ticks
+  ctx.fillStyle = "rgba(255,255,255,0.8)";
+  ctx.font = "11px system-ui";
+  ctx.textBaseline = "middle";
+
+  const yLabCount = 4;
+  for (let i = 0; i <= yLabCount; i++) {
+    const frac = i / yLabCount;
+    const v = yMax - (yMax - yMin)*frac;
+    const yy = y0 + (y1 - y0)*frac;
+    ctx.textAlign = "right";
+    ctx.fillText(fmt(v,3), x0 - 4, yy);
+  }
+
+  const xLabCount = 6;
+  ctx.textBaseline = "top";
+  for (let i = 0; i <= xLabCount; i++) {
+    const frac = i / xLabCount;
+    const tt = tMax*frac;
+    const xx = x0 + (x1 - x0)*frac;
+    ctx.textAlign = "center";
+    ctx.fillText(fmt(tt,3), xx, y1 + 2);
+  }
+
+  const N = Math.min(t.length, y.length);
+
+  // Response C(t) in magenta (if enabled)
+  if (showCurve) {
+    ctx.strokeStyle = "rgba(236,72,153,1)";
+    ctx.lineWidth   = 1.8;
+    ctx.beginPath();
+    for (let i = 0; i < N; i++) {
+      const xx = x0 + (x1 - x0)*(t[i]/tMax);
+      const yy = y1 - (y1 - y0)*((y[i]-yMin)/(yMax-yMin));
+      if (i === 0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+    }
+    ctx.stroke();
+  }
+
+  // Optional final value line (green dotted)
+  if (showFinal && isFiniteNumber(finalValue)) {
+    const frac = (finalValue - yMin)/(yMax - yMin);
+    const fy = y1 - (y1 - y0)*frac;
+    ctx.strokeStyle = "rgba(34,197,94,1)";
+    ctx.lineWidth = 1.5;
+    if (ctx.setLineDash) ctx.setLineDash([6,4]);
+    ctx.beginPath();
+    ctx.moveTo(x0, fy);
+    ctx.lineTo(x1, fy);
+    ctx.stroke();
+    if (ctx.setLineDash) ctx.setLineDash([]);
+  }
+
+  // labels
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "bottom";
+  ctx.fillText("t (s)", x1, y1 - 2);
+
+  ctx.save();
+  ctx.translate(12, (y0 + y1)/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText("Response C(t)", 0, -5);
+  ctx.restore();
+
+  ctx.restore();
+}
+
+/* PZ config and drawing */
+
+const pzConfig = {
+  get reMin() { return state.pzAxis.reMin; },
+  get reMax() { return state.pzAxis.reMax; },
+  get imMin() { return -state.pzAxis.imMax; },
+  get imMax() { return state.pzAxis.imMax; },
+  radius: 8,
+};
+
+function pzToCanvas(x, y) {
+  const dpr = window.devicePixelRatio || 1;
+  const W = pzCanvas.width / dpr;
+  const H = pzCanvas.height / dpr;
+  const padL = 40, padR = 10, padT = 10, padB = 30;
+  const x0 = padL, x1 = W - padR;
+  const y0 = padT, y1 = H - padB;
+
+  const xr = (x - pzConfig.reMin)/(pzConfig.reMax - pzConfig.reMin);
+  const yr = (y - pzConfig.imMin)/(pzConfig.imMax - pzConfig.imMin);
+  return { px: x0 + xr*(x1 - x0), py: y1 - yr*(y1 - y0) };
+}
+
+function canvasToPZ(px, py) {
+  const dpr = window.devicePixelRatio || 1;
+  const W = pzCanvas.width / dpr;
+  const H = pzCanvas.height / dpr;
+  const padL = 40, padR = 10, padT = 10, padB = 30;
+  const x0 = padL, x1 = W - padR;
+  const y0 = padT, y1 = H - padB;
+
+  const xr = (px - x0)/(x1 - x0);
+  const yr = (y1 - py)/(y1 - y0);
+
+  const re = pzConfig.reMin + xr*(pzConfig.reMax - pzConfig.reMin);
+  const im = pzConfig.imMin + yr*(pzConfig.imMax - pzConfig.imMin);
+  return { re, im };
+}
+
+function drawPZ() {
+  const ctx = pzCanvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const W = pzCanvas.width;
+  const H = pzCanvas.height;
+
+  ctx.save();
+  ctx.scale(dpr, dpr);
+  const w = W / dpr;
+  const h = H / dpr;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, w, h);
+
+  const padL = 40, padR = 10, padT = 10, padB = 30;
+  const x0 = padL, x1 = w - padR;
+  const y0 = padT, y1 = h - padB;
+
+  // integer grid
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.lineWidth = 1;
+
+  const reMin = Math.ceil(pzConfig.reMin);
+  const reMax = Math.floor(pzConfig.reMax);
+  for (let xv = reMin; xv <= reMax; xv++) {
+    const { px } = pzToCanvas(xv, 0);
+    ctx.beginPath(); ctx.moveTo(px, y0); ctx.lineTo(px, y1); ctx.stroke();
+  }
+
+  const imMin = Math.ceil(pzConfig.imMin);
+  const imMax = Math.floor(pzConfig.imMax);
+  for (let yv = imMin; yv <= imMax; yv++) {
+    const { py } = pzToCanvas(0, yv);
+    ctx.beginPath(); ctx.moveTo(x0, py); ctx.lineTo(x1, py); ctx.stroke();
+  }
+
+  // axes
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.lineWidth = 1.5;
+  const zeroReFrac = (0 - pzConfig.reMin)/(pzConfig.reMax - pzConfig.reMin);
+  const zeroReX = x0 + zeroReFrac*(x1 - x0);
+  ctx.beginPath(); ctx.moveTo(zeroReX,y0); ctx.lineTo(zeroReX,y1); ctx.stroke();
+
+  const zeroImFrac = (0 - pzConfig.imMin)/(pzConfig.imMax - pzConfig.imMin);
+  const zeroImY = y1 - zeroImFrac*(y1 - y0);
+  ctx.beginPath(); ctx.moveTo(x0,zeroImY); ctx.lineTo(x1,zeroImY); ctx.stroke();
+
+  // integer tick labels
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.font = "11px system-ui";
+  ctx.textBaseline = "top";
+  ctx.textAlign = "center";
+  for (let xv = reMin; xv <= reMax; xv++) {
+    const { px } = pzToCanvas(xv, 0);
+    ctx.fillText(xv.toString(), px, y1 + 2);
+  }
+
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "right";
+  for (let yv = imMin; yv <= imMax; yv++) {
+    const { py } = pzToCanvas(0, yv);
+    ctx.fillText(yv.toString(), x0 - 4, py);
+  }
+
+  // labels
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText("Re(s)", (x0 + x1)/1.5+150, y1/2+12);
+  ctx.save();
+  ctx.translate(12, (y0 + y1)/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.textBaseline = "top";
+  ctx.fillText("Im(s)", 0, 0);
+  ctx.restore();
+
+  // zeros
+  for (const z of state.zeros) {
+    const {px,py} = pzToCanvas(z.re,z.im);
+    ctx.strokeStyle = "rgba(239,68,68,1)";
+    ctx.lineWidth   = 3.4;
+    ctx.beginPath();
+    ctx.arc(px,py,pzConfig.radius,0,Math.PI*2);
+    ctx.stroke();
+  }
+
+  // poles
+  for (const p of state.poles) {
+    const {px,py} = pzToCanvas(p.re,p.im);
+    ctx.strokeStyle = "rgba(34,197,94,1)";
+    ctx.lineWidth = 3.4;
+    const r = pzConfig.radius;
+    ctx.beginPath();
+    ctx.moveTo(px-r,py-r); ctx.lineTo(px+r,py+r);
+    ctx.moveTo(px-r,py+r); ctx.lineTo(px+r,py-r);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+/* ============================
+   PZ interaction
+   ============================ */
+
+let dragInfo = null;
+
+function findNearestElement(px, py, maxPxDist = 12) {
+  const threshold2 = maxPxDist*maxPxDist;
+  let best = null;
+
+  function test(list, type) {
+    for (let i = 0; i < list.length; i++) {
+      const {px: cx, py: cy} = pzToCanvas(list[i].re, list[i].im);
+      const dx = cx - px, dy = cy - py;
+      const d2 = dx*dx + dy*dy;
+      if (d2 <= threshold2 && (!best || d2 < best.dist2)) {
+        best = {type, index: i, dist2: d2};
+      }
+    }
+  }
+
+  test(state.zeros, "zero");
+  test(state.poles, "pole");
+  return best;
+}
+
+pzCanvas.addEventListener("mousedown", e => {
+  const rect = pzCanvas.getBoundingClientRect();
+  const cssPx = e.clientX - rect.left;
+  const cssPy = e.clientY - rect.top;
+
+  const hit = findNearestElement(cssPx, cssPy, 12);
+  if (!hit) return;
+
+  const list = (hit.type === "zero") ? state.zeros : state.poles;
+  const elem = list[hit.index];
+  let conjIndex = null;
+  if (Math.abs(elem.im) > 1e-8) {
+    for (let i = 0; i < list.length; i++) {
+      if (i === hit.index) continue;
+      if (Math.abs(list[i].re - elem.re) < 1e-6 &&
+          Math.abs(list[i].im + elem.im) < 1e-6) {
+        conjIndex = i;
+        break;
+      }
+    }
+  }
+  dragInfo = { type: hit.type, index: hit.index, conjIndex };
+  e.preventDefault();
+});
+
+pzCanvas.addEventListener("mousemove", e => {
+  if (!dragInfo) return;
+  const rect = pzCanvas.getBoundingClientRect();
+  const cssPx = e.clientX - rect.left;
+  const cssPy = e.clientY - rect.top;
+  const world = canvasToPZ(cssPx, cssPy);
+  const list = dragInfo.type === "zero" ? state.zeros : state.poles;
+  const main = list[dragInfo.index];
+
+  const startedReal = Math.abs(main.im) < 1e-8 && dragInfo.conjIndex == null;
+
+  if (startedReal) {
+    main.re = world.re;
+    main.im = 0;
+  } else {
+    main.re = world.re;
+    main.im = world.im;
+    if (dragInfo.conjIndex != null) {
+      const conj = list[dragInfo.conjIndex];
+      conj.re = world.re;
+      conj.im = -world.im;
+    }
+  }
+
+  drawPZ();
+  updateTextFromPZ();
+  scheduleUpdate();
+});
+
+pzCanvas.addEventListener("mouseup", () => dragInfo = null);
+pzCanvas.addEventListener("mouseleave", () => dragInfo = null);
+
+pzCanvas.addEventListener("dblclick", e => {
+  const rect = pzCanvas.getBoundingClientRect();
+  const cssPx = e.clientX - rect.left;
+  const cssPy = e.clientY - rect.top;
+
+  const hit = findNearestElement(cssPx, cssPy, 10);
+  if (hit) {
+    const list = hit.type === "zero" ? state.zeros : state.poles;
+    const elem = list[hit.index];
+    if (Math.abs(elem.im) > 1e-8) {
+      for (let i = list.length - 1; i >= 0; i--) {
+        if (Math.abs(list[i].re - elem.re) < 1e-6 &&
+            Math.abs(list[i].im + elem.im) < 1e-6) {
+          list.splice(i, 1);
+        }
+      }
+    }
+    list.splice(hit.index, 1);
+    drawPZ();
+    updateTextFromPZ();
+    scheduleUpdate();
+    return;
+  }
+
+  const {re, im} = canvasToPZ(cssPx, cssPy);
+  const addType = [...addTypeRadios].find(r => r.checked)?.value || "pole";
+
+  const realAxis = pzToCanvas(0, 0).py;
+  const dy = Math.abs(cssPy - realAxis);
+  const nearReal = dy <= 10;
+
+  if (nearReal) {
+    if (addType === "zero") {
+      state.zeros.push({re: re, im: 0});
+    } else {
+      state.poles.push({re: re, im: 0});
+    }
+  } else {
+    const imag = Math.abs(im); // ensure positive imag in internal representation
+    if (addType === "zero") {
+      state.zeros.push({re, im: imag});
+      state.zeros.push({re, im: -imag});
+    } else {
+      state.poles.push({re, im: imag});
+      state.poles.push({re, im: -imag});
+    }
+  }
+
+  drawPZ();
+  updateTextFromPZ();
+  scheduleUpdate();
+});
+
+/* ============================
+   Text <-> PZ parsing (Im ≥ 0 only in text)
+   ============================ */
+
+function parseComplexList(str) {
+  const out = [];
+  if (!str.trim()) return out;
+  const parts = str.split(",");
+  for (let p of parts) {
+    p = p.trim();
+    if (!p) continue;
+    let re = 0, im = 0;
+    const m = p.match(/^([+-]?[0-9]*\.?[0-9]+)?([+-][0-9]*\.?[0-9]+)?[ij]?$/i);
+    if (m) {
+      if (m[1]) re = parseFloat(m[1]);
+      if (m[2]) im = parseFloat(m[2]);
+    } else {
+      const v = Number(p);
+      if (!Number.isNaN(v)) re = v;
+    }
+    if (im < 0) im = -im; // enforce Im ≥ 0 for text
+    out.push({re, im});
+  }
+  return out;
+}
+
+/* Given list where each entry has Im ≥ 0, create full set with conjugates.
+   Also, when user edits one complex root, we keep its conjugate consistent. */
+function ensureConjugatePairsFromUpper(list) {
+  const result = [];
+  for (const z of list) {
+    if (Math.abs(z.im) < 1e-8) {
+      result.push({re: z.re, im: 0});
+    } else {
+      result.push({re: z.re, im: z.im});
+      result.push({re: z.re, im: -z.im});
+    }
+  }
+  return result;
+}
+
+function formatUpperHalfListFromFull(list) {
+  // Build map keyed by (re, |im|) and keep Im ≥ 0
+  const seen = [];
+  for (const z of list) {
+    const re = z.re;
+    const imAbs = Math.abs(z.im);
+    let found = false;
+    for (const e of seen) {
+      if (Math.abs(e.re - re) < 1e-6 && Math.abs(e.im - imAbs) < 1e-6) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      seen.push({re, im: imAbs});
+    }
+  }
+  return seen.map(z => {
+    if (Math.abs(z.im) < 1e-9) return fmt(z.re,4);
+    return `${fmt(z.re,4)}+${fmt(z.im,4)}j`;
+  }).join(", ");
+}
+
+function updateTextFromPZ() {
+  zerosInput.value = formatUpperHalfListFromFull(state.zeros);
+  polesInput.value = formatUpperHalfListFromFull(state.poles);
+}
+
+function applyZerosFromText() {
+  const upper = parseComplexList(zerosInput.value);
+  state.zeros = ensureConjugatePairsFromUpper(upper);
+  zerosInput.value = formatUpperHalfListFromFull(state.zeros);
+}
+function applyPolesFromText() {
+  const upper = parseComplexList(polesInput.value);
+  state.poles = ensureConjugatePairsFromUpper(upper);
+  polesInput.value = formatUpperHalfListFromFull(state.poles);
+}
+
+/* ============================
+   Main update / simulation
+   ============================ */
+
+let pending = false;
+function scheduleUpdate() {
+  if (pending) return;
+  pending = true;
+  requestAnimationFrame(() => { pending = false; updateAll(); });
+}
+
+function validate() {
+  const problems = [];
+  if (!(state.tMax > 0)) problems.push("tMax must be > 0.");
+  if (!(state.dt > 0)) problems.push("dt must be > 0.");
+  if (state.dt > state.tMax) problems.push("Use dt ≤ tMax.");
+  if (!isFiniteNumber(state.K)) problems.push("Gain K must be finite.");
+  if (!(state.pzAxis.reMax > state.pzAxis.reMin)) problems.push("Re max must be > Re min.");
+  if (!(state.pzAxis.imMax > 0)) problems.push("|Im max| must be > 0.");
+
+  // Unstable only if a POLE has Re > 0
+  let unstable = false;
+  for (const p of state.poles) if (p.re > 0) { unstable = true; break; }
+  return { problems, unstable };
+}
+
+function updateAll() {
+  state.tMax = Number(tMaxInput.value) || state.tMax;
+  state.dt   = Number(dtInput.value)   || state.dt;
+  state.K    = Number(gainInput.value) || state.K;
+  state.showFinalValue     = !!showFinalValueCheckbox.checked;
+  state.showResponsePlot   = !!showResponsePlotCheckbox.checked;
+  state.showResponseCurve  = !!showResponseCurveCheckbox.checked;
+
+  // Keep response area in layout; hide visually only
+  responseWrapper.style.visibility = state.showResponsePlot ? "visible" : "hidden";
+
+  if (!state.showResponsePlot) {
+    const ctx = responseCanvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const w = responseCanvas.width / dpr;
+    const h = responseCanvas.height / dpr;
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+    ctx.restore();
+  }
+
+  state.pzAxis.reMin = Number(reMinInput.value) || state.pzAxis.reMin;
+  state.pzAxis.reMax = Number(reMaxInput.value) || state.pzAxis.reMax;
+  state.pzAxis.imMax = Math.abs(Number(imMaxInput.value) || state.pzAxis.imMax);
+  imMinDisplay.value = "-" + fmt(state.pzAxis.imMax,4);
+
+  const {problems, unstable} = validate();
+  if (problems.length) {
+    simStatus.innerHTML = `<span class="err">${problems.join(" ")}</span>`;
+  } else if (unstable) {
+    simStatus.innerHTML = `<span class="warn">System has poles with Re > 0 (unstable).</span>`;
+  } else {
+    simStatus.innerHTML = `<span class="ok">Simulation OK.</span>`;
+  }
+
+  drawPZ();
+
+  const tf = buildTransferFunction(state.zeros, state.poles, state.K);
+  const ss = tfToStateSpace(tf.num, tf.den);
+  const {t, y, r} = simulateSystem(ss, state.tMax, state.dt, state.inputType);
+
+  const yExt = computeMinMax(y);
+  let dataMin = yExt.min;
+  let dataMax = yExt.max;
+
+  const axisMax = dataMax * 1.05;
+  const span    = axisMax - dataMin || 1;
+  const padLow  = span * 0.1;
+  const axisMin = dataMin - padLow;
+
+  const finalValue = y[y.length - 1];
+
+  if (state.showResponsePlot) {
+    plotResponseWithInput(
+      responseCanvas, t, y, r,
+      state.tMax, axisMin, axisMax,
+      {
+        showFinal: state.showFinalValue,
+        finalValue,
+        showCurve: state.showResponseCurve
+      }
+    );
+  }
+}
+
+/* ============================
+   Wire controls
+   ============================ */
+
+inputTypeRadios.forEach(r => {
+  r.addEventListener("change", () => {
+    if (r.checked) {
+      state.inputType = r.value;
+      scheduleUpdate();
+    }
+  });
+});
+
+showFinalValueCheckbox.addEventListener("change", scheduleUpdate);
+showResponsePlotCheckbox.addEventListener("change", scheduleUpdate);
+showResponseCurveCheckbox.addEventListener("change", scheduleUpdate);
+
+tMaxInput.addEventListener("input", scheduleUpdate);
+dtInput.addEventListener("input", scheduleUpdate);
+gainInput.addEventListener("input", scheduleUpdate);
+
+zerosInput.addEventListener("change", () => {
+  applyZerosFromText();
+  drawPZ();
+  scheduleUpdate();
+});
+polesInput.addEventListener("change", () => {
+  applyPolesFromText();
+  drawPZ();
+  scheduleUpdate();
+});
+
+reMinInput.addEventListener("input", scheduleUpdate);
+reMaxInput.addEventListener("input", scheduleUpdate);
+imMaxInput.addEventListener("input", scheduleUpdate);
+
+addAtCenterBtn.addEventListener("click", () => {
+  const re = (state.pzAxis.reMin + state.pzAxis.reMax)/2;
+  const addType = [...addTypeRadios].find(r => r.checked)?.value || "pole";
+
+  if (addType === "zero") {
+    state.zeros.push({re, im: 0});
+  } else {
+    state.poles.push({re, im: 0});
+  }
+  drawPZ();
+  updateTextFromPZ();
+  scheduleUpdate();
+});
+
+resetSystemBtn.addEventListener("click", () => {
+  resetSystem();
+  tMaxInput.value = "10.1";
+  dtInput.value   = "0.01";
+  gainInput.value = "1";
+  [...inputTypeRadios].forEach(r => r.checked = (r.value === "step"));
+  state.inputType = "step";
+
+  // defaults: plot hidden, curve on, final value off
+  showFinalValueCheckbox.checked    = true;
+  showResponsePlotCheckbox.checked  = true;
+  showResponseCurveCheckbox.checked = true;
+  state.showFinalValue    = false;
+  state.showResponsePlot  = false;
+  state.showResponseCurve = true;
+  responseWrapper.style.visibility = "hidden";
+
+  reMinInput.value = "-5";
+  reMaxInput.value = "2";
+  imMaxInput.value = "3";
+
+  [...addTypeRadios].forEach(r => {
+    r.checked = (r.value === "pole");
+  });
+
+  updateTextFromPZ();
+  scheduleUpdate();
+});
+
+/* ============================
+   Initialization
+   ============================ */
+
+(function init() {
+  resetSystem();
+  setupCanvas(responseCanvas, 600, 260);
+  setupCanvas(pzCanvas,       600, 260);
+
+  [...addTypeRadios].forEach(r => {
+    r.checked = (r.value === "pole");
+  });
+
+  // Initial checkbox states: plot hidden
+  showResponsePlotCheckbox.checked  = false;
+  showResponseCurveCheckbox.checked = true;
+  showFinalValueCheckbox.checked    = false;
+  responseWrapper.style.visibility  = "hidden";
+
+  updateTextFromPZ();
+  scheduleUpdate();
+
+  window.addEventListener("resize", () => {
+    setupCanvas(responseCanvas, 600, 260);
+    setupCanvas(pzCanvas,       600, 260);
+    scheduleUpdate();
+  });
+})();
+</script>
 </body>
 </html>
