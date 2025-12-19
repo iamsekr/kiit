@@ -227,7 +227,7 @@
     .btn-outline { border-color: #d1d5db; }
     .btn-danger-soft {
       border-color: transparent;
-      background-color: #fee2e2;
+      background-color: #ffe5e5;
       color: #b91c1c;
     }
     .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
@@ -487,7 +487,7 @@
         </div>
       </div>
 
-      <!-- Class selection as radio buttons -->
+      <!-- Class selection as radio buttons, with class code & SAP key -->
       <div class="class-bar">
         <span>Class: </span>
         <div id="class-radios" class="class-radios"></div>
@@ -740,11 +740,11 @@
               <th style="width:50px;">S.No</th>
               <th style="width:90px;">Roll</th>
               <th>Name</th>
+              <th>Details</th>
               <th style="width:70px;">Total</th>
               <th style="width:70px;">P</th>
               <th style="width:70px;">A</th>
               <th style="width:70px;">%</th>
-              <th>Details</th>
             </tr>
           </thead>
           <tbody id="mentor-tbody"></tbody>
@@ -827,10 +827,11 @@
       { id: "mentor-section", label: "Mentor" }
     ];
 
+    // Added classCode and sapKey for each class
     const CLASS_CONFIG = [
-      { key: "Section A", label: "BEE" },
-      { key: "Section B", label: "Ind 4.0" },
-      { key: "Section C", label: "SDT" }
+      { key: "Section A", label: "BEE", classCode: "EE10002", sapKey: "0900" },
+      { key: "Section B", label: "Ind 4.0", classCode: "EX20001", sapKey: "1100" },
+      { key: "Section C", label: "SDT", classCode: "EE30021", sapKey: "" }
     ];
 
     const TEMPLATE_CONFIG_DEFAULTS = {
@@ -886,7 +887,7 @@
     function generateId() { return "s_" + Math.random().toString(36).substr(2, 9); }
     function toTitleCase(name) {
       if (!name) return "";
-      return name.toLowerCase().split(/\\s+/).filter(Boolean)
+      return name.toLowerCase().split(/\s+/).filter(Boolean)
         .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     }
     function findStudentById(id) {
@@ -894,6 +895,10 @@
     }
     function findStudentByRoll(roll) {
       return getStudents().find(s => s.roll === roll) || null;
+    }
+
+    function getCurrentClassMeta() {
+      return CLASS_CONFIG.find(c => c.key === currentClassKey) || null;
     }
 
     function computePercentWithPreview(student) {
@@ -914,14 +919,20 @@
       const el = document.getElementById("class-summary");
       const students = getStudents();
       const total = students.length;
+      const meta = getCurrentClassMeta();
+      const code = meta ? meta.classCode : "";
+      const name = meta ? meta.label : currentClassKey;
+      const sap = meta ? meta.sapKey : "";
+      const classInfo = "";
+
       if (total === 0) {
-        el.textContent = "(no students loaded)";
+        el.textContent = classInfo + " (no students loaded)";
         return;
       }
       const avg = Math.round(
         students.reduce((sum, s) => sum + computePercentWithPreview(s), 0) / total
       );
-      el.textContent = "(" + total + " students, avg " + avg + "%)";
+      el.textContent = classInfo + " (" + total + " students, avg " + avg + "%)";
     }
 
     function computeLast3HistoryWithCurrent(st) {
@@ -1040,7 +1051,7 @@
     function initClassRadios() {
       classRadiosContainer.innerHTML = "";
       CLASS_CONFIG.forEach(cfg => {
-        const id = "cls-" + cfg.key.replace(/\\s+/g, "-");
+        const id = "cls-" + cfg.key.replace(/\s+/g, "-");
         const label = document.createElement("label");
         label.className = "class-radio-label";
         label.htmlFor = id;
@@ -1074,6 +1085,7 @@
         });
 
         const spanTxt = document.createElement("span");
+        // Show code + name + SAP in radio label
         spanTxt.textContent = cfg.label;
 
         label.appendChild(input);
@@ -1682,7 +1694,7 @@
     });
 
     function splitName(fullName) {
-      const parts = (fullName || "").trim().split(/\\s+/).filter(Boolean);
+      const parts = (fullName || "").trim().split(/\s+/).filter(Boolean);
       if (parts.length === 0) return { first: "", last: "" };
       if (parts.length === 1) return { first: parts[0], last: "" };
       const first = parts[0];
@@ -1690,6 +1702,7 @@
       return { first, last };
     }
 
+    // Today's Excel filename: classcode_{DDMM}_{SAPkey}
     function exportAttendanceExcelForCurrentDate() {
       const cls = getCurrentClass();
       const students = cls.students;
@@ -1735,8 +1748,11 @@
         const mm = dParts[1];
         ddmm = dd + mm;
       }
-      const classLabel = currentClassKey.replace(/\\s+/g, "");
-      const filename = classLabel + "_" + ddmm + ".xls";
+      const meta = getCurrentClassMeta();
+      const code = meta ? meta.classCode : currentClassKey.replace(/\s+/g, "");
+      const sap = meta ? meta.sapKey : "SAP";
+
+      const filename = code + "_" + ddmm + "_" + sap + ".xls";
 
       XLSX.writeFile(wb, filename, { bookType: "xls" });
     }
@@ -2219,7 +2235,7 @@
         ? "None"
         : st.remarks.slice(-3).map(r => r.text).join("; ");
 
-      const classLabelObj = CLASS_CONFIG.find(c => c.key === currentClassKey);
+      const classLabelObj = getCurrentClassMeta();
       const className = classLabelObj ? classLabelObj.label : currentClassKey;
 
       const template =
@@ -2280,7 +2296,8 @@
       const yyyy = now.getFullYear();
       const dateStr = dd + "-" + mm + "-" + yyyy;
 
-      const filename = "K_Att_BU" + dateStr + ".json";
+      // backup filename can remain as is
+      const filename = "K_Att_BU_" + dateStr + ".json";
       downloadTextFile(filename, json);
     };
 
@@ -2345,11 +2362,15 @@
       reader.readAsText(file);
     };
 
+    // Export to Excel (full class)
+    // Filename: {class code}_{class name}_{date of export in DD-MM-YYYY}.xlsx
     function exportFullClassExcel() {
       const cls = getCurrentClass();
       const students = cls.students;
       const sessionsByDate = cls.sessionsByDate || {};
-      const classLabel = currentClassKey;
+      const meta = getCurrentClassMeta();
+      const classCode = meta ? meta.classCode : currentClassKey.replace(/\s+/g, "_");
+      const className = meta ? meta.label : currentClassKey;
 
       if (!students || students.length === 0) {
         alert("No students in roster for this class.");
@@ -2399,8 +2420,15 @@
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, wsMain, "Class Attendance");
 
-      const filename =
-        "class_attendance_" + classLabel.replace(/\\s+/g, "_") + "_" + Date.now() + ".xlsx";
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, "0");
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const yyyy = now.getFullYear();
+      const dateStr = dd + "-" + mm + "-" + yyyy;
+
+      const safeName = className.replace(/\s+/g, "_");
+      const filename = classCode + "_" + safeName + "_" + dateStr + ".xlsx";
+
       XLSX.writeFile(wb, filename);
     }
 
@@ -2481,6 +2509,11 @@
       return count;
     }
 
+    function stripBracketPart(text) {
+      if (!text) return "";
+      return text.replace(/\(.*?\)/g, "").trim();
+    }
+
     function generateMentorReport() {
       const cls = getCurrentClass();
       const students = cls.students || [];
@@ -2510,7 +2543,7 @@
             filtered.push({
               student: st,
               total, p, a, percent,
-              detail: "Absent " + consecA + " classes consecutively (last " + x + "+)"
+              detail: "Absent " + consecA + " classes consecutively"
             });
           }
         });
@@ -2529,7 +2562,7 @@
             filtered.push({
               student: st,
               total, p, a, percent,
-              detail: "Attendance " + percent + "% (< " + thr + "%)"
+              detail: "Attendance " + percent + "% < " + thr + "%"
             });
           }
         });
@@ -2555,15 +2588,15 @@
         const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
         const tdName = document.createElement("td"); tdName.textContent = st.name;
 
+        const tdDetails = document.createElement("td");
+        tdDetails.textContent = stripBracketPart(item.detail);
+
         const tdTotal = document.createElement("td"); tdTotal.textContent = item.total;
         const tdP = document.createElement("td"); tdP.textContent = item.p;
         const tdA = document.createElement("td"); tdA.textContent = item.a;
         const tdPercent = document.createElement("td"); tdPercent.textContent = item.percent + "%";
 
-        const tdDetails = document.createElement("td");
-        tdDetails.textContent = item.detail;
-
-        tr.append(tdSno, tdRoll, tdName, tdTotal, tdP, tdA, tdPercent, tdDetails);
+        tr.append(tdSno, tdRoll, tdName, tdDetails, tdTotal, tdP, tdA, tdPercent);
         mentorTbody.appendChild(tr);
       });
     }
