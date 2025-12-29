@@ -302,8 +302,14 @@
       background-color: #f3f4f6;
       z-index: 1;
     }
+
     tbody tr { transition: background-color var(--transition-fast); }
-    tbody tr:hover { background-color: #f9fafb; }
+
+    /* Yellow highlight on hover for Msgs (reports) table ONLY */
+    #reports-table tbody tr:hover {
+      background-color: #fde68a;
+    }
+
     tbody tr.absent { background-color: #ffe5e5; }
     .table-actions {
       display: inline-flex;
@@ -441,14 +447,16 @@
     #reports-table tbody tr:nth-child(even) {
       background-color: #f9fafb;
     }
-    #reports-table tbody tr:hover {
-      background-color: #e5e7eb;
-    }
 
     /* Green border for saved attendance day table */
     .attendance-saved-border {
       border-color: #16a34a !important;
       box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.25);
+    }
+
+    /* Mentor sortable header cursor */
+    #mentor-table thead th.sortable-mentor {
+      cursor: pointer;
     }
 
     @media (max-width: 640px) {
@@ -487,7 +495,8 @@
         </div>
       </div>
 
-      <!-- Class selection as radio buttons, with class code & SAP key -->
+      <!-- Class selection as radio buttons,
+           with class code & SAP key -->
       <div class="class-bar">
         <span>Class: </span>
         <div id="class-radios" class="class-radios"></div>
@@ -681,8 +690,13 @@
       </div>
     </section>
 
-    <!-- REPORTS SECTION (default visible) -->
+    <!-- REPORTS SECTION (Msgs – default visible) -->
     <section id="reports-section" class="card" style="display:block;">
+
+      <!-- New summary line for total classes till today -->
+      <div id="reports-classes-summary" style="font-size:0.8rem;color:#4b5563;margin-bottom:0.5rem;">
+        <!-- Filled by JS -->
+      </div>
 
       <div class="table-container">
         <table id="reports-table">
@@ -723,9 +737,12 @@
           <label for="mentor-percent-input">% threshold (less than)</label>
           <input id="mentor-percent-input" type="number" min="0" max="100" value="75" />
         </div>
-        <div class="form-group" style="flex:0 0 auto; align-items:flex-end; display:flex; justify-content:flex-end;">
+        <div class="form-group" style="flex:0 0 auto; align-items:flex-end; display:flex; justify-content:flex-end; gap:0.25rem;">
           <button id="generate-mentor-report-btn" class="btn btn-primary btn-sm" type="button">
             Generate Mentor Report
+          </button>
+          <button id="export-mentor-report-btn" class="btn btn-outline btn-sm" type="button">
+            Export Mentor Report
           </button>
         </div>
       </div>
@@ -737,14 +754,14 @@
         <table id="mentor-table">
           <thead>
             <tr>
-              <th style="width:50px;">S.No</th>
-              <th style="width:90px;">Roll</th>
-              <th>Name</th>
-              <th>Details</th>
-              <th style="width:70px;">Total</th>
-              <th style="width:70px;">P</th>
-              <th style="width:70px;">A</th>
-              <th style="width:70px;">%</th>
+              <th class="sortable-mentor" data-sort-field="sno" style="width:50px;">S.No</th>
+              <th class="sortable-mentor" data-sort-field="roll" style="width:90px;">Roll</th>
+              <th class="sortable-mentor" data-sort-field="name">Name</th>
+              <th class="sortable-mentor" data-sort-field="detail">Details</th>
+              <th class="sortable-mentor" data-sort-field="total" style="width:70px;">Total</th>
+              <th class="sortable-mentor" data-sort-field="p" style="width:70px;">P</th>
+              <th class="sortable-mentor" data-sort-field="a" style="width:70px;">A</th>
+              <th class="sortable-mentor" data-sort-field="percent" style="width:70px;">%</th>
             </tr>
           </thead>
           <tbody id="mentor-tbody"></tbody>
@@ -831,7 +848,9 @@
     const CLASS_CONFIG = [
       { key: "Section A", label: "BEE", classCode: "EE10002", sapKey: "0900" },
       { key: "Section B", label: "Ind 4.0", classCode: "EX20001", sapKey: "1100" },
-      { key: "Section C", label: "SDT", classCode: "EE30021", sapKey: "" }
+      { key: "Section C", label: "SDT", classCode: "EE30021", sapKey: "" },
+      { key: "Section D", label: "Drives Lab", classCode: "EE39004", sapKey: "0900" },
+      { key: "Section E", label: "MP lab", classCode: "EE39006", sapKey: "1200" }
     ];
 
     const TEMPLATE_CONFIG_DEFAULTS = {
@@ -873,6 +892,10 @@
 
     let rosterSort = { field: "sno", dir: "asc" };
     let reportSort = { field: "roll", dir: "asc" };
+
+    // Mentor sorting + last data for export
+    let mentorSort = { field: "roll", dir: "asc" };
+    let lastMentorReport = [];
 
     function ensureClass(key) {
       if (!classes[key]) {
@@ -923,7 +946,9 @@
       const code = meta ? meta.classCode : "";
       const name = meta ? meta.label : currentClassKey;
       const sap = meta ? meta.sapKey : "";
-      const classInfo = "";
+      const classInfo = code
+        ? name + " (" + code + (sap ? ", SAP " + sap : "") + ")"
+        : name;
 
       if (total === 0) {
         el.textContent = classInfo + " (no students loaded)";
@@ -1081,11 +1106,12 @@
           renderReportsTable();
           refreshAllPercents();
           refreshAllHistoryCells();
+          updateReportsClassesSummary();
           saveToLocalStorage();
         });
 
         const spanTxt = document.createElement("span");
-        // Show code + name + SAP in radio label
+        // Show just the short label (BEE, etc.) in radio label
         spanTxt.textContent = cfg.label;
 
         label.appendChild(input);
@@ -1166,6 +1192,7 @@
       renderReportsTable();
       refreshAllPercents();
       refreshAllHistoryCells();
+      updateReportsClassesSummary();
       saveToLocalStorage();
     }
     saveStudentBtn.addEventListener("click", e => {
@@ -1279,6 +1306,7 @@
       renderReportsTable();
       refreshAllPercents();
       refreshAllHistoryCells();
+      updateReportsClassesSummary();
       saveToLocalStorage();
     }
 
@@ -1307,8 +1335,7 @@
         alert("No students selected.");
         return;
       }
-      if (!confirm("Delete " + idsToDelete.length + " selected student(s)?"))
-        return;
+      if (!confirm("Delete " + idsToDelete.length + " selected student(s)?")) return;
 
       cls.students = cls.students.filter(st => !idsToDelete.includes(st.id));
 
@@ -1328,6 +1355,7 @@
       renderReportsTable();
       refreshAllPercents();
       refreshAllHistoryCells();
+      updateReportsClassesSummary();
       saveToLocalStorage();
     };
 
@@ -1424,6 +1452,7 @@
       renderReportsTable();
       refreshAllPercents();
       refreshAllHistoryCells();
+      updateReportsClassesSummary();
       saveToLocalStorage();
       importXlsStatus.textContent = "Import complete: " + added + " added, " + updated + " updated.";
     }
@@ -1792,6 +1821,7 @@
       } else if (id === "reports-section") {
         renderReportsTable();
         refreshAllPercents();
+        updateReportsClassesSummary();
       } else if (id === "roster-section") {
         renderRosterTable();
         refreshAllPercents();
@@ -1859,6 +1889,7 @@
       refreshAllHistoryCells();
       updateClassCountLabel();
       updatePresentToday();
+      updateReportsClassesSummary();
       saveToLocalStorage();
 
       alert("Attendance saved successfully for " + formatDateDisplay(currentSession.date) + ".");
@@ -1888,6 +1919,7 @@
         refreshAllHistoryCells();
         updateClassCountLabel();
         updatePresentToday();
+        updateReportsClassesSummary();
         saveToLocalStorage();
         return;
       }
@@ -1914,6 +1946,7 @@
       refreshAllHistoryCells();
       updateClassCountLabel();
       updatePresentToday();
+      updateReportsClassesSummary();
       saveToLocalStorage();
     }
 
@@ -1922,13 +1955,13 @@
       clearAttendanceForCurrentDate();
     };
 
-    // REPORTS
+    // REPORTS (Msgs)
     const reportsTbody = document.getElementById("reports-tbody");
     const reportsHeaderRow = document.getElementById("reports-header-row");
 
     function renderReportsTable() {
       const cls = getCurrentClass();
-      const students = [...cls.students];
+      const students = cls.students.slice();
       const sessionsByDate = cls.sessionsByDate || {};
       const dates = Object.keys(sessionsByDate).sort(); // saved only
 
@@ -1956,17 +1989,9 @@
       thName.dataset.sortField = "name";
       thName.textContent = "Name";
 
-      reportsHeaderRow.appendChild(thSno);
-      reportsHeaderRow.appendChild(thRoll);
-      reportsHeaderRow.appendChild(thPercent);
-      reportsHeaderRow.appendChild(thName);
-
-      dates.forEach(d => {
-        const th = document.createElement("th");
-        th.textContent = formatDateDisplay(d);
-        th.title = "Attendance on " + formatDateDisplay(d) + " (P/A)";
-        reportsHeaderRow.appendChild(th);
-      });
+      const thActions = document.createElement("th");
+      thActions.style.width = "200px";
+      thActions.textContent = "Actions";
 
       const thTotP = document.createElement("th");
       thTotP.textContent = "Total P";
@@ -1979,14 +2004,24 @@
       thRemarksCount.dataset.sortField = "remarksCount";
       thRemarksCount.style.width = "80px";
       thRemarksCount.textContent = "#Remarks";
-      const thActions = document.createElement("th");
-      thActions.style.width = "200px";
-      thActions.textContent = "Actions";
+
+      // Append headers in new order: basics, then actions, then date columns, then totals/remarks
+      reportsHeaderRow.appendChild(thSno);
+      reportsHeaderRow.appendChild(thRoll);
+      reportsHeaderRow.appendChild(thPercent);
+      reportsHeaderRow.appendChild(thName);
+      reportsHeaderRow.appendChild(thActions);
+
+      dates.forEach(d => {
+        const th = document.createElement("th");
+        th.textContent = formatDateDisplay(d);
+        th.title = "Attendance on " + formatDateDisplay(d) + " (P/A)";
+        reportsHeaderRow.appendChild(th);
+      });
 
       reportsHeaderRow.appendChild(thTotP);
       reportsHeaderRow.appendChild(thTotA);
       reportsHeaderRow.appendChild(thRemarksCount);
-      reportsHeaderRow.appendChild(thActions);
 
       students.sort((a, b) => {
         if (reportSort.field === "roll") {
@@ -2016,7 +2051,8 @@
       if (students.length === 0) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 4 + dates.length + 3;
+        // S.No, Roll, %, Name, Actions, dates..., TotP, TotA, #Remarks
+        td.colSpan = 5 + dates.length + 3;
         td.className = "empty-state";
         td.textContent = "No students in roster.";
         tr.appendChild(td);
@@ -2042,10 +2078,29 @@
 
         const tdName = document.createElement("td"); tdName.textContent = st.name;
 
+        // Actions (WhatsApp + WA Parent) – moved next to Name
+        const tdActions = document.createElement("td");
+        const wrap = document.createElement("div");
+        wrap.className = "table-actions";
+
+        const waBtn = document.createElement("button");
+        waBtn.className = "btn btn-sm btn-primary";
+        waBtn.textContent = WHATSAPP_CONFIG.buttonLabel;
+        waBtn.onclick = () => sendWhatsAppToStudent(st.id, "student");
+
+        const waParentBtn = document.createElement("button");
+        waParentBtn.className = "btn btn-sm btn-outline";
+        waParentBtn.textContent = "WA Parent";
+        waParentBtn.onclick = () => sendWhatsAppToStudent(st.id, "parent");
+
+        wrap.append(waBtn, waParentBtn);
+        tdActions.appendChild(wrap);
+
         tr.appendChild(tdSno);
         tr.appendChild(tdRoll);
         tr.appendChild(tdPercent);
         tr.appendChild(tdName);
+        tr.appendChild(tdActions);
 
         dates.forEach(d => {
           const sess = sessionsByDate[d];
@@ -2073,27 +2128,9 @@
         tdRemarksCount.style.cursor = "pointer";
         tdRemarksCount.onclick = () => openRemarksModal(st.id);
 
-        const tdActions = document.createElement("td");
-        const wrap = document.createElement("div");
-        wrap.className = "table-actions";
-
-        const waBtn = document.createElement("button");
-        waBtn.className = "btn btn-sm btn-primary";
-        waBtn.textContent = WHATSAPP_CONFIG.buttonLabel;
-        waBtn.onclick = () => sendWhatsAppToStudent(st.id, "student");
-
-        const waParentBtn = document.createElement("button");
-        waParentBtn.className = "btn btn-sm btn-outline";
-        waParentBtn.textContent = "WA Parent";
-        waParentBtn.onclick = () => sendWhatsAppToStudent(st.id, "parent");
-
-        wrap.append(waBtn, waParentBtn);
-        tdActions.appendChild(wrap);
-
         tr.appendChild(tdTotP);
         tr.appendChild(tdTotA);
         tr.appendChild(tdRemarksCount);
-        tr.appendChild(tdActions);
 
         reportsTbody.appendChild(tr);
       });
@@ -2112,6 +2149,25 @@
           renderReportsTable();
         };
       });
+    }
+
+    // Show total number of classes till today above Msgs table
+    function updateReportsClassesSummary() {
+      const summaryEl = document.getElementById("reports-classes-summary");
+      if (!summaryEl) return;
+
+      const sessionsByDate = getSessionsByDate();
+      const allDates = Object.keys(sessionsByDate);
+      if (allDates.length === 0) {
+        summaryEl.textContent = "No classes have been saved yet.";
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      const countTillToday = allDates.filter(d => d <= today).length;
+
+      summaryEl.textContent =
+        "Total number of classes till today: " + countTillToday;
     }
 
     // Remarks modal
@@ -2296,7 +2352,7 @@
       const yyyy = now.getFullYear();
       const dateStr = dd + "-" + mm + "-" + yyyy;
 
-      // backup filename can remain as is
+      // backup filename
       const filename = "K_Att_BU_" + dateStr + ".json";
       downloadTextFile(filename, json);
     };
@@ -2349,6 +2405,7 @@
           renderReportsTable();
           refreshAllPercents();
           refreshAllHistoryCells();
+          updateReportsClassesSummary();
 
           alert("Data restored successfully.");
           saveToLocalStorage();
@@ -2411,7 +2468,8 @@
         });
 
         const absents = totalSessions - presents;
-        const percent = totalSessions === 0 ? 0 : Math.round(100 * presents / totalSessions);
+        const percent = totalSessions === 0 ?
+          0 : Math.round(100 * presents / totalSessions);
         row.push(presents, absents, percent + "%");
         rows.push(row);
       });
@@ -2453,7 +2511,8 @@
       students.forEach(st => {
         const totalSess = st.totalSessions || 0;
         const totalP = st.presents || 0;
-        const percent = totalSess === 0 ? 0 : Math.round(100 * totalP / totalSess);
+        const percent = totalSess === 0 ?
+          0 : Math.round(100 * totalP / totalSess);
         const el = document.querySelector('[data-percent-cell-report="' + st.id + '"]');
         if (el) el.textContent = percent + "%";
       });
@@ -2469,6 +2528,7 @@
     const mentorTbody = document.getElementById("mentor-tbody");
     const mentorTypeRadios = document.getElementsByName("mentor-report-type");
     const generateMentorReportBtn = document.getElementById("generate-mentor-report-btn");
+    const exportMentorReportBtn = document.getElementById("export-mentor-report-btn");
 
     function getSelectedMentorType() {
       for (let i = 0; i < mentorTypeRadios.length; i++) {
@@ -2477,7 +2537,8 @@
       return "consecutive";
     }
 
-    mentorTypeRadios.forEach(r => {
+    // change type -> show relevant input + dynamic report
+    Array.from(mentorTypeRadios).forEach(r => {
       r.addEventListener("change", () => {
         const t = getSelectedMentorType();
         if (t === "consecutive") {
@@ -2487,8 +2548,13 @@
           mentorConsecutiveGroup.style.display = "none";
           mentorPercentGroup.style.display = "block";
         }
+        generateMentorReport();
       });
     });
+
+    // dynamic changes with inputs
+    mentorConsecutiveInput.addEventListener("input", generateMentorReport);
+    mentorPercentInput.addEventListener("input", generateMentorReport);
 
     function computeConsecutiveAbsencesFromEnd(student, sessionsByDate) {
       const dates = Object.keys(sessionsByDate).sort();
@@ -2514,6 +2580,28 @@
       return text.replace(/\(.*?\)/g, "").trim();
     }
 
+    function sortMentorFiltered(filtered) {
+      const dir = mentorSort.dir === "asc" ? 1 : -1;
+      const field = mentorSort.field;
+
+      const asText = (v) => String(v ?? "").toLowerCase();
+      const asNum = (v) => Number(v ?? 0);
+
+      filtered.sort((x, y) => {
+        if (field === "roll") return dir * asText(x.student.roll).localeCompare(asText(y.student.roll));
+        if (field === "name") return dir * asText(x.student.name).localeCompare(asText(y.student.name));
+        if (field === "detail") return dir * asText(x.detail).localeCompare(asText(y.detail));
+
+        if (field === "total") return dir * (asNum(x.total) - asNum(y.total));
+        if (field === "p") return dir * (asNum(x.p) - asNum(y.p));
+        if (field === "a") return dir * (asNum(x.a) - asNum(y.a));
+        if (field === "percent") return dir * (asNum(x.percent) - asNum(y.percent));
+
+        // default: roll
+        return dir * asText(x.student.roll).localeCompare(asText(y.student.roll));
+      });
+    }
+
     function generateMentorReport() {
       const cls = getCurrentClass();
       const students = cls.students || [];
@@ -2521,11 +2609,15 @@
       const sessionDates = Object.keys(sessionsByDate).sort();
 
       if (students.length === 0) {
-        alert("No students in roster.");
+        mentorSummaryEl.textContent = "No students in roster.";
+        mentorTableContainer.style.display = "none";
+        lastMentorReport = [];
         return;
       }
       if (sessionDates.length === 0) {
-        alert("No saved attendance sessions available.");
+        mentorSummaryEl.textContent = "No saved attendance sessions available.";
+        mentorTableContainer.style.display = "none";
+        lastMentorReport = [];
         return;
       }
 
@@ -2571,14 +2663,17 @@
           "%. Found " + filtered.length + " students out of " + students.length + ".";
       }
 
+      lastMentorReport = filtered.slice();
       mentorTbody.innerHTML = "";
+
       if (filtered.length === 0) {
         mentorTableContainer.style.display = "none";
         return;
       }
 
       mentorTableContainer.style.display = "block";
-      filtered.sort((a, b) => a.student.roll.localeCompare(b.student.roll));
+
+      sortMentorFiltered(filtered);
 
       filtered.forEach((item, idx) => {
         const st = item.student;
@@ -2605,6 +2700,63 @@
       generateMentorReport();
     };
 
+    // Mentor header sorting (A-Z / Z-A)
+    document.querySelectorAll("#mentor-table thead th.sortable-mentor").forEach(th => {
+      th.onclick = () => {
+        const field = th.dataset.sortField;
+        if (!field) return;
+        if (mentorSort.field === field) {
+          mentorSort.dir = mentorSort.dir === "asc" ? "desc" : "asc";
+        } else {
+          mentorSort.field = field;
+          mentorSort.dir = "asc";
+        }
+        generateMentorReport();
+      };
+    });
+
+    // Export mentor report to Excel
+    function exportMentorReportExcel() {
+      if (!lastMentorReport || lastMentorReport.length === 0) {
+        alert("No mentor report data to export.");
+        return;
+      }
+
+      const meta = getCurrentClassMeta();
+      const classCode = meta ? meta.classCode : currentClassKey.replace(/\s+/g, "_");
+      const className = meta ? meta.label : currentClassKey;
+
+      const rows = [];
+      rows.push(["Roll", "Name", "Details", "Total", "P", "A", "%"]);
+
+      lastMentorReport.forEach(item => {
+        rows.push([
+          item.student.roll,
+          item.student.name,
+          stripBracketPart(item.detail),
+          item.total,
+          item.p,
+          item.a,
+          item.percent + "%"
+        ]);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Mentor Report");
+
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, "0");
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const yyyy = now.getFullYear();
+      const dateStr = dd + "-" + mm + "-" + yyyy;
+
+      const filename = "Mentor_Report_" + classCode + "_" + className.replace(/\s+/g, "_") + "_" + dateStr + ".xlsx";
+      XLSX.writeFile(wb, filename);
+    }
+
+    exportMentorReportBtn.onclick = exportMentorReportExcel;
+
     // INIT
     (function init() {
       const hadStored = loadFromLocalStorage();
@@ -2627,6 +2779,7 @@
       updateClassSummary();
       updateClassCountLabel();
       updatePresentToday();
+      updateReportsClassesSummary();
 
       // default visible section: reports
       showSectionSectionId("reports-section");
