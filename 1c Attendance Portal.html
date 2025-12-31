@@ -1,56 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>KIIT Attendance App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     :root {
       --color-bg: #f7f7f9;
       --color-surface: #ffffff;
-      --color-border: #dddddd;
       --color-border-soft: #e3e3e8;
-      --color-primary: #2563eb;
-      --color-primary-soft: #e0ebff;
-      --color-text: #1f2933;
-      --color-text-muted: #6b7280;
-      --color-danger-soft: #ffe5e5;
-      --color-accent: #059669;
+      --color-text: #111827;
+      --color-muted: #6b7280;
+      --shadow-soft: 0 1px 3px rgba(15, 23, 42, 0.06);
       --radius-small: 4px;
       --radius-medium: 8px;
-      --shadow-soft: 0 1px 3px rgba(15, 23, 42, 0.06);
-      --spacing-xs: 0.25rem;
-      --spacing-sm: 0.5rem;
-      --spacing-md: 0.75rem;
-      --spacing-lg: 1rem;
-      --spacing-xl: 1.5rem;
-      --font-base: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       --transition-fast: 0.15s ease-in-out;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 0;
-      font-family: var(--font-base);
-      background-color: var(--color-bg);
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--color-bg);
       color: var(--color-text);
-      -webkit-font-smoothing: antialiased;
     }
     .app-shell {
       max-width: 1100px;
       margin: 0 auto;
-      padding: var(--spacing-lg) var(--spacing-md) var(--spacing-xl);
+      padding: 1rem 0.75rem 1.5rem;
     }
-
-    header { margin-bottom: var(--spacing-lg); }
+    header { margin-bottom: 1rem; }
 
     .header-top-row {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-sm);
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
     }
     .header-actions {
       display: flex;
@@ -59,14 +46,19 @@
       font-size: 0.75rem;
       align-items: center;
     }
+    #sync-status {
+      font-size: 0.75rem;
+      color: var(--color-muted);
+      margin-top: 2px;
+    }
+    #sync-status strong { color: #111827; }
 
     .class-bar {
-      margin-top: var(--spacing-xs);
       display: flex;
       align-items: center;
-      gap: var(--spacing-sm);
+      gap: 0.5rem;
       font-size: 0.8rem;
-      color: var(--color-text-muted);
+      color: var(--color-muted);
       flex-wrap: wrap;
     }
     .class-radios {
@@ -78,7 +70,7 @@
     .class-radio-label {
       display: inline-flex;
       align-items: center;
-      gap: 0.2rem;
+      gap: 0.25rem;
       cursor: pointer;
       font-size: 0.8rem;
       padding: 0.1rem 0.35rem;
@@ -86,11 +78,9 @@
       border: 1px solid transparent;
       transition: background-color var(--transition-fast), border-color var(--transition-fast);
     }
-    .class-radio-label input[type="radio"] {
-      margin: 0;
-    }
+    .class-radio-label input { margin: 0; }
     .class-radio-label.active {
-      background-color: #eef2ff;
+      background: #eef2ff;
       border-color: #4f46e5;
       color: #111827;
     }
@@ -99,14 +89,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: var(--spacing-lg);
-      margin-bottom: var(--spacing-md);
-      gap: var(--spacing-sm);
+      margin-top: 1rem;
+      margin-bottom: 0.75rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
     }
     .nav-segments {
       display: inline-flex;
-      background-color: #e5e7eb;
+      background: #e5e7eb;
       padding: 2px;
       border-radius: 999px;
     }
@@ -117,29 +107,29 @@
       font-size: 0.875rem;
       border-radius: 999px;
       cursor: pointer;
-      color: var(--color-text-muted);
+      color: var(--color-muted);
       transition: background-color var(--transition-fast), color var(--transition-fast);
       white-space: nowrap;
     }
     .nav-button.active {
-      background-color: #ffffff;
+      background: #ffffff;
       color: #111827;
       box-shadow: var(--shadow-soft);
     }
 
     .card {
-      background-color: var(--color-surface);
+      background: var(--color-surface);
       border-radius: var(--radius-medium);
       box-shadow: var(--shadow-soft);
-      padding: var(--spacing-lg);
-      margin-bottom: var(--spacing-lg);
+      padding: 1rem;
+      margin-bottom: 1rem;
     }
     .card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-md);
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
     }
     .section-title {
       font-size: 1rem;
@@ -147,18 +137,16 @@
       outline: none;
       padding: 2px 4px;
       border-radius: var(--radius-small);
+      margin: 0;
     }
-    .section-title:focus { background-color: #eef2ff; }
-    .card-subtitle {
-      font-size: 0.8rem;
-      color: var(--color-text-muted);
-    }
+    .section-title:focus { background: #eef2ff; }
+    .card-subtitle { font-size: 0.8rem; color: var(--color-muted); margin: 0.25rem 0 0; }
 
     .form-row {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-md);
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
     }
     .form-group {
       display: flex;
@@ -167,38 +155,22 @@
       min-width: 0;
       flex: 1;
     }
-    label {
-      font-size: 0.75rem;
-      color: var(--color-text-muted);
-    }
-    input[type="text"],
-    input[type="date"],
-    input[type="tel"],
-    input[type="file"],
-    textarea,
-    select {
+    label { font-size: 0.75rem; color: var(--color-muted); }
+    input[type="text"], input[type="date"], input[type="tel"], input[type="file"], textarea {
       border-radius: var(--radius-small);
       border: 1px solid var(--color-border-soft);
       padding: 0.35rem 0.5rem;
       font-size: 0.85rem;
-      font-family: var(--font-base);
       width: 100%;
-      background-color: #f9fafb;
-      transition: border-color var(--transition-fast),
-        background-color var(--transition-fast), box-shadow var(--transition-fast);
+      background: #f9fafb;
+      transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
     }
     textarea { resize: vertical; min-height: 40px; }
-    input:focus,
-    textarea:focus,
-    select:focus {
+    input:focus, textarea:focus {
       outline: none;
       border-color: #2563eb;
-      background-color: #ffffff;
+      background: #fff;
       box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
-    }
-    input[type="file"] {
-      padding: 0.25rem 0.3rem;
-      background-color: #ffffff;
     }
 
     .btn {
@@ -207,74 +179,29 @@
       justify-content: center;
       gap: 0.25rem;
       border-radius: 999px;
-      border: 1px solid var(--color-border-soft);
-      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      background: #fff;
       padding: 0.35rem 0.8rem;
       font-size: 0.8rem;
       cursor: pointer;
       color: #111827;
-      transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+      transition: background-color var(--transition-fast), transform var(--transition-fast);
       white-space: nowrap;
     }
-    .btn:hover { background-color: #f3f4f6; }
+    .btn:hover { background: #f3f4f6; }
     .btn:active { transform: translateY(1px); }
-    .btn-primary {
-      border-color: #2563eb;
-      color: #ffffff;
-      background-color: #2563eb;
-    }
-    .btn-primary:hover { background-color: #1d4ed8; }
+    .btn-primary { border-color: #2563eb; color: #fff; background: #2563eb; }
+    .btn-primary:hover { background: #1d4ed8; }
     .btn-outline { border-color: #d1d5db; }
-    .btn-danger-soft {
-      border-color: transparent;
-      background-color: #ffe5e5;
-      color: #b91c1c;
-    }
+    .btn-danger-soft { border-color: transparent; background: #ffe5e5; color: #b91c1c; }
     .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
-    .btn-icon { padding-inline: 0.5rem; }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.1rem 0.4rem;
-      font-size: 0.7rem;
-      border-radius: 999px;
-      background-color: #e5e7eb;
-      color: #111827;
-      min-width: 1.4rem;
-    }
-    .name-with-percent { color: #059669; font-weight: 500; }
-    .name-main { color: #111827; font-weight: 500; margin-right: 4px; }
-
-    .history-pill {
-      display: inline-flex;
-      gap: 0.1rem;
-      font-size: 0.7rem;
-      align-items: center;
-    }
-    .history-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      font-weight: 600;
-      color: #111827;
-    }
-    .history-p { background-color: #bbf7d0; }
-    .history-a { background-color: #fecaca; }
-    .history-empty { background-color: #e5e7eb; }
 
     .table-container {
       width: 100%;
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
       border-radius: var(--radius-medium);
-      border: 1px solid var(--color-border-soft);
-      background-color: #fff;
+      border: 1px solid #e5e7eb;
+      background: #fff;
     }
     table {
       width: 100%;
@@ -282,210 +209,120 @@
       min-width: 650px;
       font-size: 0.8rem;
     }
-    thead { background-color: #f3f4f6; }
+    thead { background: #f3f4f6; }
     th, td {
       text-align: left;
       padding: 0.25rem 0.5rem;
       border-bottom: 1px solid #f1f1f3;
-      vertical-align: middle;
       white-space: nowrap;
-      cursor: default;
+      vertical-align: middle;
     }
-    th.sortable,
-    th.sortable-roster { cursor: pointer; }
     th {
       font-weight: 500;
       font-size: 0.75rem;
       color: #6b7280;
       position: sticky;
       top: 0;
-      background-color: #f3f4f6;
+      background: #f3f4f6;
       z-index: 1;
     }
-
+    th.sortable, th.sortable-roster, #mentor-table thead th.sortable-mentor { cursor: pointer; }
     tbody tr { transition: background-color var(--transition-fast); }
 
-    /* Yellow highlight on hover for Msgs (reports) table ONLY */
-    #reports-table tbody tr:hover {
-      background-color: #fde68a;
-    }
+    /* Msgs table hover highlight */
+    #reports-table tbody tr:hover { background: #fde68a; }
+    #reports-table tbody tr:nth-child(even) { background: #f9fafb; }
 
-    tbody tr.absent { background-color: #ffe5e5; }
-    .table-actions {
-      display: inline-flex;
-      gap: 0.25rem;
-      flex-wrap: nowrap;
-    }
+    tbody tr.absent { background: #ffe5e5; }
+
+    .table-actions { display: inline-flex; gap: 0.25rem; }
     .checkbox-cell { text-align: center; width: 56px; }
     .checkbox-large { width: 18px; height: 18px; }
-    .remarks-input { min-width: 120px; }
-    .percent-cell {
-      font-variant-numeric: tabular-nums;
-      font-weight: 500;
-      color: #059669;
+
+    .percent-cell { font-variant-numeric: tabular-nums; font-weight: 600; color: #059669; }
+    .badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0.1rem 0.4rem; font-size: 0.7rem;
+      border-radius: 999px; background: #e5e7eb; min-width: 1.4rem;
     }
 
-    .help-box {
-      margin-top: var(--spacing-sm);
-      padding: var(--spacing-sm);
-      font-size: 0.75rem;
-      color: #6b7280;
-      background-color: #f9fafb;
-      border-radius: var(--radius-small);
-      border: 1px dashed #e3e3e8;
-    }
-    .help-toggle {
-      font-size: 0.75rem;
-      color: #2563eb;
-      cursor: pointer;
-      text-decoration: underline;
-      background: none;
-      border: none;
-      padding: 0;
-    }
+    .name-with-percent { color: #059669; font-weight: 600; }
+    .name-main { color: #111827; font-weight: 600; margin-right: 4px; }
 
-    .roster-top {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-md);
+    .history-pill { display: inline-flex; gap: 0.1rem; font-size: 0.7rem; align-items: center; }
+    .history-dot {
+      width: 14px; height: 14px; border-radius: 999px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; color: #111827;
     }
-    .roster-form { flex: 1.4; min-width: 260px; }
-    .roster-import { flex: 1; min-width: 220px; font-size: 0.78rem; }
-    .roster-help { flex: 1; min-width: 220px; font-size: 0.78rem; }
-    .import-card {
-      border-radius: var(--radius-medium);
-      border: 1px dashed #e3e3e8;
-      padding: var(--spacing-sm);
-      background-color: #f9fafb;
+    .history-p { background: #bbf7d0; }
+    .history-a { background: #fecaca; }
+    .history-empty { background: #e5e7eb; }
+
+    .empty-state { padding: 0.5rem 0; color: var(--color-muted); font-size: 0.8rem; }
+
+    .attendance-saved-border {
+      border-color: #16a34a !important;
+      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.25);
     }
-    .import-title { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem; }
-    .import-subtitle { font-size: 0.75rem; color: #6b7280; margin-bottom: 0.35rem; }
 
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background-color: rgba(15, 23, 42, 0.35);
+      background: rgba(15, 23, 42, 0.35);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 50;
-      padding: var(--spacing-md);
+      padding: 0.75rem;
     }
-    .modal-backdrop.active { display: flex; }
     .modal {
-      background-color: #ffffff;
+      background: #ffffff;
       border-radius: var(--radius-medium);
       box-shadow: 0 10px 40px rgba(15, 23, 42, 0.18);
-      max-width: 480px;
+      max-width: 520px;
       width: 100%;
       max-height: 80vh;
       display: flex;
       flex-direction: column;
     }
     .modal-header {
-      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-sm);
+      padding: 0.75rem 1rem 0.5rem;
       border-bottom: 1px solid #e5e7eb;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: var(--spacing-sm);
+      gap: 0.5rem;
     }
-    .modal-title {
-      margin: 0;
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-    .modal-body {
-      padding: var(--spacing-md) var(--spacing-lg);
-      overflow-y: auto;
-      font-size: 0.8rem;
-    }
+    .modal-title { margin: 0; font-size: 0.95rem; font-weight: 600; }
+    .modal-body { padding: 0.75rem 1rem; overflow-y: auto; font-size: 0.8rem; }
     .modal-footer {
-      padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-md);
+      padding: 0.5rem 1rem 0.75rem;
       border-top: 1px solid #e5e7eb;
       text-align: right;
     }
-    .remarks-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .remarks-list li {
-      padding: 0.35rem 0;
-      border-bottom: 1px dashed #e5e7eb;
-    }
-    .remarks-date { font-size: 0.7rem; color:#6b7280; }
+    .remarks-list { list-style: none; padding: 0; margin: 0; }
+    .remarks-list li { padding: 0.35rem 0; border-bottom: 1px dashed #e5e7eb; }
+    .remarks-date { font-size: 0.7rem; color: #6b7280; }
     .remarks-text { margin-top: 2px; }
-    .empty-state {
-      padding: var(--spacing-sm) 0;
-      color: #6b7280;
-      font-size: 0.8rem;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-size: 0.7rem;
-      color: #6b7280;
-      background-color: #f3f4f6;
-      border-radius: 999px;
-      padding: 0.1rem 0.45rem;
-    }
-    .flex-gap-sm {
-      display: inline-flex;
-      gap: 0.25rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    /* Banded rows only for reports table */
-    #reports-table tbody tr:nth-child(odd) {
-      background-color: #ffffff;
-    }
-    #reports-table tbody tr:nth-child(even) {
-      background-color: #f9fafb;
-    }
-
-    /* Green border for saved attendance day table */
-    .attendance-saved-border {
-      border-color: #16a34a !important;
-      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.25);
-    }
-
-    /* Mentor sortable header cursor */
-    #mentor-table thead th.sortable-mentor {
-      cursor: pointer;
-    }
 
     @media (max-width: 640px) {
-      .card { padding: var(--spacing-md); }
-      .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .nav-tabs {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      table {
-        font-size: 0.75rem;
-        min-width: 600px;
-      }
-      th, td { padding: 0.2rem 0.4rem; }
-      .checkbox-large { width: 20px; height: 20px; }
-      .roster-top { flex-direction: column; }
+      .card { padding: 0.75rem; }
       .header-top-row { flex-direction: column; align-items: flex-start; }
+      table { min-width: 600px; }
     }
   </style>
 </head>
+
 <body>
   <div class="app-shell">
     <header>
-      <!-- TOP ROW: backup / restore / export / settings all in one row -->
       <div class="header-top-row">
-        <div><strong>KIIT Attendance App</strong></div>
+        <div>
+          <strong>KIIT Attendance App</strong>
+          <div id="sync-status">Sync: <strong>starting…</strong></div>
+        </div>
+
         <div class="header-actions">
           <button id="settings-btn" class="btn btn-sm btn-outline" type="button">Settings</button>
           <button id="backup-btn" class="btn btn-sm btn-outline" type="button">Backup</button>
@@ -495,10 +332,8 @@
         </div>
       </div>
 
-      <!-- Class selection as radio buttons,
-           with class code & SAP key -->
       <div class="class-bar">
-        <span>Class: </span>
+        <span>Class:</span>
         <div id="class-radios" class="class-radios"></div>
         <span id="class-summary"></span>
       </div>
@@ -508,107 +343,67 @@
       <div class="nav-segments" id="nav-segments"></div>
     </div>
 
-    <!-- ROSTER SECTION -->
+    <!-- ROSTER -->
     <section id="roster-section" class="card" style="display:none;">
       <div class="card-header">
         <div>
           <h2 class="section-title" contenteditable="true" spellcheck="false">Roster</h2>
           <p class="card-subtitle">Maintain the list of students, import from XLS, and manage contact details.</p>
         </div>
-        <div class="flex-gap-sm">
-          <button id="roster-select-all-btn" class="btn btn-sm btn-outline" type="button">
-            Select All
-          </button>
-          <button id="roster-delete-selected-btn" class="btn btn-sm btn-danger-soft" type="button">
-            Delete Selected
-          </button>
+        <div class="table-actions">
+          <button id="roster-select-all-btn" class="btn btn-sm btn-outline" type="button">Select All</button>
+          <button id="roster-delete-selected-btn" class="btn btn-sm btn-danger-soft" type="button">Delete Selected</button>
         </div>
       </div>
 
-      <div class="roster-top">
-        <div class="roster-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="roll-input">Roll</label>
-              <input id="roll-input" type="text" placeholder="e.g. 210001" />
-            </div>
-            <div class="form-group">
-              <label for="name-input">Name</label>
-              <input id="name-input" type="text" placeholder="Student name" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="student-phone-input">Student Phone</label>
-              <input id="student-phone-input" type="tel" placeholder="10-digit mobile number" />
-            </div>
-            <div class="form-group">
-              <label for="parent-phone-input">Parent Phone</label>
-              <input id="parent-phone-input" type="tel" placeholder="10-digit mobile number" />
-            </div>
-          </div>
-          <div class="form-row" style="align-items:flex-end;">
-            <div class="form-group">
-              <label for="email-display">Email (auto from roll)</label>
-              <input id="email-display" type="text" placeholder="ROLL@kiit.ac.in" disabled />
-            </div>
-            <div class="form-group" style="flex:0 0 auto;">
-              <button id="save-student-btn" class="btn btn-primary btn-sm">
-                <span id="save-student-label">Add Student</span>
-              </button>
-            </div>
-          </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="roll-input">Roll</label>
+          <input id="roll-input" type="text" placeholder="e.g. 210001" />
         </div>
-
-        <div class="roster-import">
-          <div class="import-card">
-            <div class="import-title">Import XLS / XLSX</div>
-            <div class="import-subtitle">
-              Columns: A = Roll, B = Name, C = Student Phone, D = (ignored), E = Parent Phone.
-              Existing rolls updated; new rolls added.
-            </div>
-            <div class="form-row" style="margin-bottom:0.35rem;">
-              <div class="form-group">
-                <label for="xls-file-input">Select XLS / XLSX file</label>
-                <input id="xls-file-input" type="file" accept=".xls,.xlsx" />
-              </div>
-            </div>
-            <button id="import-xls-btn" class="btn btn-outline btn-sm" type="button">
-              Import XLS
-            </button>
-            <div id="import-xls-status" style="margin-top:0.35rem;font-size:0.72rem;color:#6b7280;"></div>
-          </div>
-        </div>
-
-        <div class="roster-help">
-          <div class="flex-gap-sm">
-            <span class="pill">Import help</span>
-            <button id="toggle-help-btn" class="help-toggle" type="button">Show / Hide</button>
-          </div>
-          <div id="help-box" class="help-box" style="display:none;">
-            <strong>How to import:</strong>
-            <p style="margin-top:4px; margin-bottom:4px;">Mapping:</p>
-            <ul style="margin:0 0 4px 1rem; padding:0; font-size:0.75rem;">
-              <li>Column A = Roll</li>
-              <li>Column B = Name</li>
-              <li>Column C = Student Phone</li>
-              <li>Column E = Parent Phone</li>
-              <li>Column D is ignored</li>
-            </ul>
-            <p style="margin:0;">
-              Names -> Title Case. Email -> <em>ROLL@kiit.ac.in</em>.
-            </p>
-          </div>
+        <div class="form-group">
+          <label for="name-input">Name</label>
+          <input id="name-input" type="text" placeholder="Student name" />
         </div>
       </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="student-phone-input">Student Phone</label>
+          <input id="student-phone-input" type="tel" placeholder="10-digit mobile number" />
+        </div>
+        <div class="form-group">
+          <label for="parent-phone-input">Parent Phone</label>
+          <input id="parent-phone-input" type="tel" placeholder="10-digit mobile number" />
+        </div>
+      </div>
+
+      <div class="form-row" style="align-items:flex-end;">
+        <div class="form-group">
+          <label for="email-display">Email (auto from roll)</label>
+          <input id="email-display" type="text" placeholder="ROLL@kiit.ac.in" disabled />
+        </div>
+        <div class="form-group" style="flex:0 0 auto;">
+          <button id="save-student-btn" class="btn btn-primary btn-sm"><span id="save-student-label">Add Student</span></button>
+        </div>
+      </div>
+
+      <div class="form-row" style="align-items:flex-end;">
+        <div class="form-group">
+          <label for="xls-file-input">Import XLS / XLSX (A=Roll, B=Name, C=Student Phone, E=Parent Phone)</label>
+          <input id="xls-file-input" type="file" accept=".xls,.xlsx" />
+        </div>
+        <div class="form-group" style="flex:0 0 auto;">
+          <button id="import-xls-btn" class="btn btn-outline btn-sm" type="button">Import XLS</button>
+        </div>
+      </div>
+      <div id="import-xls-status" style="margin-top:-0.35rem;font-size:0.75rem;color:#6b7280;"></div>
 
       <div class="table-container">
         <table id="roster-table">
           <thead>
             <tr>
-              <th style="width:40px;">
-                <input type="checkbox" id="roster-header-checkbox" />
-              </th>
+              <th style="width:40px;"><input type="checkbox" id="roster-header-checkbox" /></th>
               <th class="sortable-roster" data-sort-field="sno" style="width:50px;">S.No</th>
               <th class="sortable-roster" data-sort-field="roll" style="width:90px;">Roll</th>
               <th class="sortable-roster" data-sort-field="name">Name</th>
@@ -623,26 +418,20 @@
       </div>
     </section>
 
-    <!-- MARK ATTENDANCE SECTION -->
+    <!-- MARK -->
     <section id="attendance-section" class="card" style="display:none;">
-      <!-- Date row + Today's Excel on same row -->
       <div class="form-row" style="align-items:flex-end;">
         <div class="form-group" style="flex:0 0 220px;max-width:260px;">
           <label for="attendance-date-input">Date</label>
           <input id="attendance-date-input" type="date" />
-          <!-- total classes till selected date -->
           <div id="attendance-class-count" style="font-size:0.72rem;color:#6b7280;margin-top:2px;"></div>
-          <!-- live total present today -->
           <div id="attendance-present-today" style="font-size:0.72rem;color:#6b7280;margin-top:2px;"></div>
         </div>
-        <div class="form-group" style="flex:1; text-align:right;">
-          <button id="export-excel-btn" class="btn btn-sm btn-outline" type="button">
-            Today's Excel
-          </button>
+        <div class="form-group" style="flex:1;text-align:right;">
+          <button id="export-excel-btn" class="btn btn-sm btn-outline" type="button">Today's Excel</button>
         </div>
       </div>
 
-      <!-- Session notes just above table -->
       <div class="form-row">
         <div class="form-group">
           <label for="attendance-notes-input">Session notes (optional)</label>
@@ -650,15 +439,10 @@
         </div>
       </div>
 
-      <!-- Clear day + save row (clear only when saved) -->
-      <div class="form-row" style="align-items:flex-end; margin-top:-0.5rem;">
+      <div class="form-row" style="align-items:flex-end;margin-top:-0.5rem;">
         <div class="form-group" style="flex:1;"></div>
-        <div class="form-group" style="flex:0 0 auto; text-align:right;">
-          <div style="display:flex; gap:0.25rem; justify-content:flex-end; flex-wrap:wrap;">
-            <button id="clear-day-btn" class="btn btn-sm btn-outline" type="button" style="display:none;">
-              Clear This Day
-            </button>
-          </div>
+        <div class="form-group" style="flex:0 0 auto;text-align:right;">
+          <button id="clear-day-btn" class="btn btn-sm btn-outline" type="button" style="display:none;">Clear This Day</button>
         </div>
       </div>
 
@@ -669,7 +453,7 @@
               <th style="width:80px;">Last 3</th>
               <th style="width:90px;">Roll</th>
               <th>
-                <div style="display:flex; align-items:center; gap:4px;">
+                <div style="display:flex;align-items:center;gap:4px;">
                   <input id="toggle-all-checkbox" type="checkbox" class="checkbox-large" />
                   <span>Name (with %)</span>
                 </div>
@@ -682,44 +466,33 @@
         </table>
       </div>
 
-      <!-- Save at bottom -->
-      <div style="margin-top:0.5rem; text-align:right;">
-        <button id="save-session-btn" class="btn btn-primary btn-sm" type="button">
-          Save Attendance Session
-        </button>
+      <div style="margin-top:0.5rem;text-align:right;">
+        <button id="save-session-btn" class="btn btn-primary btn-sm" type="button">Save Attendance Session</button>
       </div>
     </section>
 
-    <!-- REPORTS SECTION (Msgs – default visible) -->
+    <!-- MSGS -->
     <section id="reports-section" class="card" style="display:block;">
-
-      <!-- New summary line for total classes till today -->
-      <div id="reports-classes-summary" style="font-size:0.8rem;color:#4b5563;margin-bottom:0.5rem;">
-        <!-- Filled by JS -->
-      </div>
-
+      <div id="reports-classes-summary" style="font-size:0.8rem;color:#4b5563;margin-bottom:0.5rem;"></div>
       <div class="table-container">
         <table id="reports-table">
-          <thead>
-            <tr id="reports-header-row"></tr>
-          </thead>
+          <thead><tr id="reports-header-row"></tr></thead>
           <tbody id="reports-tbody"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- MENTOR REPORT SECTION (4th) -->
+    <!-- MENTOR -->
     <section id="mentor-section" class="card" style="display:none;">
-
       <div class="form-row">
         <div class="form-group" style="flex:1.5;">
           <label>Report Type</label>
-          <div style="display:flex; flex-wrap:wrap; gap:0.75rem; font-size:0.8rem;">
-            <label style="display:inline-flex; align-items:center; gap:0.25rem; cursor:pointer;">
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;font-size:0.8rem;">
+            <label style="display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;">
               <input type="radio" name="mentor-report-type" value="consecutive" checked />
               <span>Consecutive absences (last X classes)</span>
             </label>
-            <label style="display:inline-flex; align-items:center; gap:0.25rem; cursor:pointer;">
+            <label style="display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;">
               <input type="radio" name="mentor-report-type" value="percentage" />
               <span>Below attendance % threshold</span>
             </label>
@@ -727,7 +500,6 @@
         </div>
       </div>
 
-      <!-- Parameters row -->
       <div class="form-row">
         <div class="form-group" id="mentor-consecutive-group">
           <label for="mentor-consecutive-input">Last X classes (consecutive A)</label>
@@ -737,18 +509,13 @@
           <label for="mentor-percent-input">% threshold (less than)</label>
           <input id="mentor-percent-input" type="number" min="0" max="100" value="75" />
         </div>
-        <div class="form-group" style="flex:0 0 auto; align-items:flex-end; display:flex; justify-content:flex-end; gap:0.25rem;">
-          <button id="generate-mentor-report-btn" class="btn btn-primary btn-sm" type="button">
-            Generate Mentor Report
-          </button>
-          <button id="export-mentor-report-btn" class="btn btn-outline btn-sm" type="button">
-            Export Mentor Report
-          </button>
+        <div class="form-group" style="flex:0 0 auto;align-items:flex-end;display:flex;justify-content:flex-end;gap:0.25rem;">
+          <button id="generate-mentor-report-btn" class="btn btn-primary btn-sm" type="button">Generate Mentor Report</button>
+          <button id="export-mentor-report-btn" class="btn btn-outline btn-sm" type="button">Export Mentor Report</button>
         </div>
       </div>
 
-      <!-- Result -->
-      <div id="mentor-summary" style="font-size:0.8rem; color:#4b5563; margin-bottom:0.5rem;"></div>
+      <div id="mentor-summary" style="font-size:0.8rem;color:#4b5563;margin-bottom:0.5rem;"></div>
 
       <div class="table-container" id="mentor-table-container" style="display:none;">
         <table id="mentor-table">
@@ -775,10 +542,10 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="remarks-modal-title">
       <div class="modal-header">
         <h3 id="remarks-modal-title" class="modal-title">Remarks</h3>
-        <button type="button" class="btn btn-icon btn-sm" id="close-remarks-modal-btn">Close</button>
+        <button type="button" class="btn btn-sm" id="close-remarks-modal-btn">Close</button>
       </div>
       <div class="modal-body">
-        <div id="remarks-modal-meta" style="margin-bottom:0.5rem; font-size:0.8rem; color:#6b7280;"></div>
+        <div id="remarks-modal-meta" style="margin-bottom:0.5rem;font-size:0.8rem;color:#6b7280;"></div>
         <ul id="remarks-modal-list" class="remarks-list"></ul>
         <div id="remarks-modal-empty" class="empty-state" style="display:none;">No remarks recorded for this student.</div>
       </div>
@@ -793,18 +560,13 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
       <div class="modal-header">
         <h3 id="settings-modal-title" class="modal-title">Templates Settings</h3>
-        <button type="button" class="btn btn-icon btn-sm" id="close-settings-modal-btn">Close</button>
+        <button type="button" class="btn btn-sm" id="close-settings-modal-btn">Close</button>
       </div>
       <div class="modal-body">
         <p style="margin-top:0;margin-bottom:0.5rem;font-size:0.8rem;color:#6b7280;">
           Use placeholders:
-          <code>{name}</code>,
-          <code>{roll}</code>,
-          <code>{percent}</code>,
-          <code>{remarks}</code>,
-          <code>{class name}</code>,
-          <code>{total number of classes}</code>,
-          <code>{Classes you are present}</code>.
+          <code>{name}</code>, <code>{roll}</code>, <code>{percent}</code>, <code>{remarks}</code>,
+          <code>{class name}</code>, <code>{total number of classes}</code>, <code>{Classes you are present}</code>.
         </p>
 
         <div class="form-group" style="margin-bottom:0.75rem;">
@@ -837,6 +599,9 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
+    // =========================
+    // CONFIG
+    // =========================
     const APP_SECTIONS = [
       { id: "roster-section", label: "Data" },
       { id: "attendance-section", label: "Mark" },
@@ -844,30 +609,24 @@
       { id: "mentor-section", label: "Mentor" }
     ];
 
-    // Added classCode and sapKey for each class
     const CLASS_CONFIG = [
       { key: "Section A", label: "BEE", classCode: "EE10002", sapKey: "0900" },
       { key: "Section B", label: "Ind 4.0", classCode: "EX20001", sapKey: "1100" },
       { key: "Section C", label: "SDT", classCode: "EE30021", sapKey: "" },
       { key: "Section D", label: "Drives Lab", classCode: "EE39004", sapKey: "0900" },
-      { key: "Section E", label: "MP lab", classCode: "EE39006", sapKey: "1200" }
+      { key: "Section E", label: "MP lab", classCode: "EE39006", sapKey: "1200" },
+      { key: "Section F", label: "Vocational Lab", classCode: "EE28017", sapKey: "1200" }
     ];
 
     const TEMPLATE_CONFIG_DEFAULTS = {
       whatsappStudentTemplate:
-        "Dear {name} ({roll}), from class {class name}, your current attendance is {percent}% out of {total number of classes} classes, " +
-        "and you were present in {Classes you are present} classes. Remarks: {remarks}",
+        "Dear {name} ({roll}), from class {class name}, your current attendance is {percent}% out of {total number of classes} classes, and you were present in {Classes you are present} classes. Remarks: {remarks}",
       whatsappParentTemplate:
-        "Dear Parent of {name} ({roll}) from class {class name}, your ward's attendance is {percent}% out of {total number of classes} classes, " +
-        "and they were present in {Classes you are present} classes. Remarks: {remarks}",
+        "Dear Parent of {name} ({roll}) from class {class name}, your ward's attendance is {percent}% out of {total number of classes} classes, and they were present in {Classes you are present} classes. Remarks: {remarks}",
       studentEmailTemplate:
-        "Dear {name},\\nYou belong to class {class name}.\\n" +
-        "Your attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\\n" +
-        "Remarks: {remarks}",
+        "Dear {name},\\nYou belong to class {class name}.\\nYour attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\\nRemarks: {remarks}",
       parentEmailTemplate:
-        "Dear Parent of {name} ({roll}),\\nYour ward is in class {class name}.\\n" +
-        "Their attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\\n" +
-        "Remarks: {remarks}"
+        "Dear Parent of {name} ({roll}),\\nYour ward is in class {class name}.\\nTheir attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\\nRemarks: {remarks}"
     };
 
     const WHATSAPP_CONFIG = {
@@ -879,6 +638,24 @@
 
     const STORAGE_KEY = "kiitAttendanceData_2026_1";
 
+    // =========================
+    // SERVER (sekr.in)
+    // =========================
+    const REMOTE_API_URL   = "https://sekr.in/wp-json/kiit-att/v1/data";
+    const REMOTE_PING_URL  = "https://sekr.in/wp-json/kiit-att/v1/ping";
+    const REMOTE_TEST_URL  = "https://sekr.in/wp-json/kiit-att/v1/token-test";
+
+    // IMPORTANT: paste your token here
+    const REMOTE_API_TOKEN = "tROGebnby7DfGh7qpn24M0mKA5OiBrW5b3e7xqGT";
+
+    const syncStatusEl = document.getElementById("sync-status");
+    function setSyncStatus(text) {
+      if (syncStatusEl) syncStatusEl.innerHTML = 'Sync: <strong>' + text + '</strong>';
+    }
+
+    // =========================
+    // DATA MODEL
+    // =========================
     const classes = {};
     let currentClassKey = CLASS_CONFIG[0].key;
     let currentSession = { date: "", notes: "", marks: {} };
@@ -892,15 +669,11 @@
 
     let rosterSort = { field: "sno", dir: "asc" };
     let reportSort = { field: "roll", dir: "asc" };
-
-    // Mentor sorting + last data for export
     let mentorSort = { field: "roll", dir: "asc" };
     let lastMentorReport = [];
 
     function ensureClass(key) {
-      if (!classes[key]) {
-        classes[key] = { students: [], sessionsByDate: {} };
-      }
+      if (!classes[key]) classes[key] = { students: [], sessionsByDate: {} };
       return classes[key];
     }
     function getCurrentClass() { return ensureClass(currentClassKey); }
@@ -910,23 +683,17 @@
     function generateId() { return "s_" + Math.random().toString(36).substr(2, 9); }
     function toTitleCase(name) {
       if (!name) return "";
-      return name.toLowerCase().split(/\s+/).filter(Boolean)
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+      return name.toLowerCase().split(/\s+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     }
-    function findStudentById(id) {
-      return getStudents().find(s => s.id === id) || null;
-    }
-    function findStudentByRoll(roll) {
-      return getStudents().find(s => s.roll === roll) || null;
-    }
+    function findStudentById(id) { return getStudents().find(s => s.id === id) || null; }
+    function findStudentByRoll(roll) { return getStudents().find(s => s.roll === roll) || null; }
+    function getCurrentClassMeta() { return CLASS_CONFIG.find(c => c.key === currentClassKey) || null; }
 
-    function getCurrentClassMeta() {
-      return CLASS_CONFIG.find(c => c.key === currentClassKey) || null;
-    }
-
+    // =========================
+    // COMPUTATIONS
+    // =========================
     function computePercentWithPreview(student) {
-      const students = getStudents();
-      const st = students.find(s => s.id === student.id) || student;
+      const st = getStudents().find(s => s.id === student.id) || student;
       let baseTotal = st.totalSessions || 0;
       let basePresents = st.presents || 0;
       const previewMark = currentSession.marks[st.id];
@@ -946,17 +713,10 @@
       const code = meta ? meta.classCode : "";
       const name = meta ? meta.label : currentClassKey;
       const sap = meta ? meta.sapKey : "";
-      const classInfo = code
-        ? name + " (" + code + (sap ? ", SAP " + sap : "") + ")"
-        : name;
+      const classInfo = code ? (name + " (" + code + ")") : name;
 
-      if (total === 0) {
-        el.textContent = classInfo + " (no students loaded)";
-        return;
-      }
-      const avg = Math.round(
-        students.reduce((sum, s) => sum + computePercentWithPreview(s), 0) / total
-      );
+      if (total === 0) { el.textContent = classInfo + " (no students loaded)"; return; }
+      const avg = Math.round(students.reduce((sum, s) => sum + computePercentWithPreview(s), 0) / total);
       el.textContent = classInfo + " (" + total + " students, avg " + avg + "%)";
     }
 
@@ -992,47 +752,44 @@
       if (!container) return;
       container.innerHTML = "";
 
-      let dots;
-      if (!history.length) {
-        dots = [null];
-      } else {
-        dots = Array(3 - history.length).fill(null).concat(history);
-      }
-
+      const dots = (!history.length) ? [null] : Array(3 - history.length).fill(null).concat(history);
       dots.forEach(val => {
         const dot = document.createElement("span");
-        if (val === "P") {
-          dot.className = "history-dot history-p";
-          dot.textContent = "P";
-        } else if (val === "A") {
-          dot.className = "history-dot history-a";
-          dot.textContent = "A";
-        } else {
-          dot.className = "history-dot history-empty";
-          dot.textContent = "-";
-        }
+        if (val === "P") { dot.className = "history-dot history-p"; dot.textContent = "P"; }
+        else if (val === "A") { dot.className = "history-dot history-a"; dot.textContent = "A"; }
+        else { dot.className = "history-dot history-empty"; dot.textContent = "-"; }
         container.appendChild(dot);
       });
     }
 
-    function refreshAllHistoryCells() {
-      const students = getStudents();
-      students.forEach(st => updateHistoryCellForStudent(st));
+    function refreshAllHistoryCells() { getStudents().forEach(st => updateHistoryCellForStudent(st)); }
+
+    // =========================
+    // STORAGE (Local + Server)
+    // =========================
+    function buildAppDataObject() {
+      return { classes, currentClassKey, appSettings, savedAt: new Date().toISOString() };
     }
 
-    // Storage
     function saveToLocalStorage() {
-      const data = {
-        classes,
-        currentClassKey,
-        appSettings,
-        savedAt: new Date().toISOString()
-      };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      } catch (e) {
-        console.error("Error saving to localStorage", e);
-      }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(buildAppDataObject())); }
+      catch (e) { console.error("localStorage save failed", e); }
+    }
+
+    function applyLoadedData(parsed) {
+      Object.keys(classes).forEach(k => delete classes[k]);
+      Object.assign(classes, parsed.classes || {});
+
+      const keysFromConfig = CLASS_CONFIG.map(c => c.key);
+      currentClassKey = (parsed.currentClassKey && keysFromConfig.includes(parsed.currentClassKey))
+        ? parsed.currentClassKey
+        : keysFromConfig[0];
+
+      const s = parsed.appSettings || {};
+      appSettings.whatsappStudentTemplate = s.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
+      appSettings.whatsappParentTemplate  = s.whatsappParentTemplate  || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
+      appSettings.studentEmailTemplate    = s.studentEmailTemplate    || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
+      appSettings.parentEmailTemplate     = s.parentEmailTemplate     || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
     }
 
     function loadFromLocalStorage() {
@@ -1040,38 +797,134 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return false;
         const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object") return false;
-        if (!parsed.classes) return false;
+        if (!parsed || !parsed.classes) return false;
+        applyLoadedData(parsed);
+        return true;
+      } catch (e) { return false; }
+    }
 
-        Object.keys(classes).forEach(k => delete classes[k]);
-        Object.assign(classes, parsed.classes);
+    async function saveToServer() {
+      if (!REMOTE_API_TOKEN || REMOTE_API_TOKEN === "PASTE_YOUR_TOKEN_HERE") {
+        setSyncStatus("token missing (not saving)");
+        return;
+      }
 
-        const keysFromConfig = CLASS_CONFIG.map(c => c.key);
-        if (parsed.currentClassKey && keysFromConfig.includes(parsed.currentClassKey)) {
-          currentClassKey = parsed.currentClassKey;
-        } else {
-          currentClassKey = keysFromConfig[0];
+      try {
+        setSyncStatus("saving…");
+        const res = await fetch(REMOTE_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-KIIT-TOKEN": REMOTE_API_TOKEN
+          },
+          body: JSON.stringify(buildAppDataObject())
+        });
+
+        const txt = await res.text();
+
+        if (!res.ok) {
+          console.error("SAVE FAILED:", res.status, txt);
+          setSyncStatus("save failed (" + res.status + ")");
+          return;
+        }
+        setSyncStatus("saved");
+      } catch (e) {
+        console.error("SAVE ERROR:", e);
+        setSyncStatus("save error");
+      }
+    }
+
+    async function loadFromServer() {
+      try {
+        setSyncStatus("loading…");
+        const res = await fetch(REMOTE_API_URL, { method: "GET" });
+        const txt = await res.text();
+
+        if (!res.ok) {
+          console.error("LOAD FAILED:", res.status, txt);
+          setSyncStatus("load failed (" + res.status + ")");
+          return false;
         }
 
-        if (parsed.appSettings && typeof parsed.appSettings === "object") {
-          appSettings.whatsappStudentTemplate =
-            parsed.appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
-          appSettings.whatsappParentTemplate =
-            parsed.appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
-          appSettings.studentEmailTemplate =
-            parsed.appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
-          appSettings.parentEmailTemplate =
-            parsed.appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
+        if (!txt) {
+          setSyncStatus("server returned empty");
+          return false;
         }
 
+        const parsed = JSON.parse(txt);
+        if (!parsed || typeof parsed !== "object" || !parsed.classes) {
+          setSyncStatus("server data invalid");
+          return false;
+        }
+
+        applyLoadedData(parsed);
+        setSyncStatus(parsed.__empty ? "loaded (empty)" : "loaded");
         return true;
       } catch (e) {
-        console.error("Error loading from localStorage", e);
+        console.error("LOAD ERROR:", e);
+        setSyncStatus("load error");
         return false;
       }
     }
 
-    // CLASS RADIO BUTTONS
+    function saveAll() { saveToLocalStorage(); saveToServer(); }
+
+    async function runServerDiagnostics() {
+      try {
+        const ping = await fetch(REMOTE_PING_URL);
+        console.log("PING:", ping.status, await ping.text());
+
+        if (!REMOTE_API_TOKEN || REMOTE_API_TOKEN === "PASTE_YOUR_TOKEN_HERE") {
+          console.warn("Token missing; skipping token-test.");
+          return;
+        }
+
+        const test = await fetch(REMOTE_TEST_URL, {
+          headers: { "X-KIIT-TOKEN": REMOTE_API_TOKEN }
+        });
+        console.log("TOKEN-TEST:", test.status, await test.text());
+      } catch (e) {
+        console.error("Diagnostics error:", e);
+      }
+    }
+
+    // =========================
+    // NAV
+    // =========================
+    const navSegments = document.getElementById("nav-segments");
+    const sections = {};
+    const navButtons = [];
+
+    APP_SECTIONS.forEach((sec) => {
+      const btn = document.createElement("button");
+      const isDefault = (sec.id === "reports-section");
+      btn.className = "nav-button" + (isDefault ? " active" : "");
+      btn.dataset.section = sec.id;
+      btn.textContent = sec.label;
+      navSegments.appendChild(btn);
+      navButtons.push(btn);
+      sections[sec.id] = document.getElementById(sec.id);
+    });
+
+    function showSectionSectionId(id) {
+      Object.keys(sections).forEach(sid => sections[sid].style.display = (sid === id ? "block" : "none"));
+      navButtons.forEach(b => b.classList.toggle("active", b.dataset.section === id));
+
+      if (id === "attendance-section") {
+        renderAttendanceTable(); refreshAllPercents(); refreshAllHistoryCells();
+        updateClassCountLabel(); updatePresentToday();
+      } else if (id === "reports-section") {
+        renderReportsTable(); refreshAllPercents(); updateReportsClassesSummary();
+      } else if (id === "roster-section") {
+        renderRosterTable(); refreshAllPercents();
+      }
+    }
+
+    navButtons.forEach(btn => btn.onclick = () => showSectionSectionId(btn.dataset.section));
+
+    // =========================
+    // CLASS RADIOS
+    // =========================
     const classRadiosContainer = document.getElementById("class-radios");
     function initClassRadios() {
       classRadiosContainer.innerHTML = "";
@@ -1086,6 +939,7 @@
         input.name = "class-select";
         input.id = id;
         input.value = cfg.key;
+
         if (cfg.key === currentClassKey) {
           input.checked = true;
           label.classList.add("active");
@@ -1099,28 +953,27 @@
 
           const today = new Date().toISOString().slice(0, 10);
           if (!currentSession.date) currentSession.date = today;
+
           attendanceDateInput.value = currentSession.date;
           loadSessionForDate(currentSession.date);
-          renderRosterTable();
-          renderAttendanceTable();
-          renderReportsTable();
-          refreshAllPercents();
-          refreshAllHistoryCells();
-          updateReportsClassesSummary();
-          saveToLocalStorage();
+
+          renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+          refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
+          saveAll();
         });
 
-        const spanTxt = document.createElement("span");
-        // Show just the short label (BEE, etc.) in radio label
-        spanTxt.textContent = cfg.label;
+        const span = document.createElement("span");
+        span.textContent = cfg.label;
 
         label.appendChild(input);
-        label.appendChild(spanTxt);
+        label.appendChild(span);
         classRadiosContainer.appendChild(label);
       });
     }
 
+    // =========================
     // ROSTER
+    // =========================
     const rollInput = document.getElementById("roll-input");
     const nameInput = document.getElementById("name-input");
     const studentPhoneInput = document.getElementById("student-phone-input");
@@ -1156,49 +1009,51 @@
       const nameRaw = (nameInput.value || "").trim();
       const studentPhone = (studentPhoneInput.value || "").trim();
       const parentPhone = (parentPhoneInput.value || "").trim();
-      if (!roll || !nameRaw) {
-        alert("Please enter at least Roll and Name.");
-        return;
-      }
+      if (!roll || !nameRaw) { alert("Please enter at least Roll and Name."); return; }
+
       const name = toTitleCase(nameRaw);
       const email = roll + "@kiit.ac.in";
 
       if (editingStudentId) {
         const st = students.find(s => s.id === editingStudentId);
         if (st) {
-          st.roll = roll;
-          st.name = name;
-          st.studentPhone = studentPhone;
-          st.parentPhone = parentPhone;
-          st.email = email;
+          st.roll = roll; st.name = name;
+          st.studentPhone = studentPhone; st.parentPhone = parentPhone; st.email = email;
         }
       } else {
-        students.push({
-          id: generateId(),
-          roll,
-          name,
-          studentPhone,
-          parentPhone,
-          email,
-          totalSessions: 0,
-          presents: 0,
-          remarks: []
-        });
+        students.push({ id: generateId(), roll, name, studentPhone, parentPhone, email, totalSessions: 0, presents: 0, remarks: [] });
       }
 
       resetRosterForm();
-      renderRosterTable();
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateReportsClassesSummary();
-      saveToLocalStorage();
+      renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+      refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
+      saveAll();
     }
-    saveStudentBtn.addEventListener("click", e => {
-      e.preventDefault();
-      handleSaveStudent();
-    });
+
+    saveStudentBtn.addEventListener("click", (e) => { e.preventDefault(); handleSaveStudent(); });
+
+    function startEditStudent(id) {
+      const st = findStudentById(id);
+      if (!st) return;
+      editingStudentId = id;
+      rollInput.value = st.roll;
+      nameInput.value = st.name;
+      studentPhoneInput.value = st.studentPhone || "";
+      parentPhoneInput.value = st.parentPhone || "";
+      emailDisplay.value = st.email || "";
+      saveStudentLabel.textContent = "Update Student";
+      rollInput.focus();
+    }
+
+    function deleteStudent(id) {
+      const cls = getCurrentClass();
+      cls.students = cls.students.filter(s => s.id !== id);
+      delete currentSession.marks[id];
+
+      renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+      refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
+      saveAll();
+    }
 
     function renderRosterTable() {
       const baseStudents = getStudents();
@@ -1218,17 +1073,14 @@
       }
 
       const students = baseStudents.slice();
-
       if (rosterSort.field === "roll") {
-        students.sort((a, b) => {
-          const cmp = String(a.roll).localeCompare(String(b.roll));
-          return rosterSort.dir === "asc" ? cmp : -cmp;
-        });
+        students.sort((a, b) => rosterSort.dir === "asc"
+          ? String(a.roll).localeCompare(String(b.roll))
+          : String(b.roll).localeCompare(String(a.roll)));
       } else if (rosterSort.field === "name") {
-        students.sort((a, b) => {
-          const cmp = a.name.localeCompare(b.name);
-          return rosterSort.dir === "asc" ? cmp : -cmp;
-        });
+        students.sort((a, b) => rosterSort.dir === "asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name));
       }
 
       students.forEach((st, index) => {
@@ -1242,28 +1094,16 @@
         chk.addEventListener("click", e => e.stopPropagation());
         tdSel.appendChild(chk);
 
-        const tdSno = document.createElement("td");
-        tdSno.textContent = index + 1;
-
-        const tdRoll = document.createElement("td");
-        tdRoll.textContent = st.roll;
-
-        const tdName = document.createElement("td");
-        tdName.textContent = st.name;
-
-        const tdSP = document.createElement("td");
-        tdSP.textContent = st.studentPhone || "-";
-
-        const tdPP = document.createElement("td");
-        tdPP.textContent = st.parentPhone || "-";
-
-        const tdEmail = document.createElement("td");
-        tdEmail.textContent = st.email;
+        const tdSno = document.createElement("td"); tdSno.textContent = index + 1;
+        const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
+        const tdName = document.createElement("td"); tdName.textContent = st.name;
+        const tdSP = document.createElement("td"); tdSP.textContent = st.studentPhone || "-";
+        const tdPP = document.createElement("td"); tdPP.textContent = st.parentPhone || "-";
+        const tdEmail = document.createElement("td"); tdEmail.textContent = st.email || "-";
 
         const tdActions = document.createElement("td");
         const wrap = document.createElement("div");
         wrap.className = "table-actions";
-
         const editBtn = document.createElement("button");
         editBtn.className = "btn btn-sm btn-outline";
         editBtn.textContent = "Edit";
@@ -1284,102 +1124,50 @@
       updateClassSummary();
     }
 
-    function startEditStudent(id) {
-      const st = findStudentById(id);
-      if (!st) return;
-      editingStudentId = id;
-      rollInput.value = st.roll;
-      nameInput.value = st.name;
-      studentPhoneInput.value = st.studentPhone;
-      parentPhoneInput.value = st.parentPhone;
-      emailDisplay.value = st.email;
-      saveStudentLabel.textContent = "Update Student";
-      rollInput.focus();
-    }
-
-    function deleteStudent(id) {
-      const cls = getCurrentClass();
-      cls.students = cls.students.filter(s => s.id !== id);
-      delete currentSession.marks[id];
-      renderRosterTable();
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateReportsClassesSummary();
-      saveToLocalStorage();
-    }
-
     rosterHeaderCheckbox.addEventListener("change", () => {
       const checked = rosterHeaderCheckbox.checked;
-      document.querySelectorAll("#roster-tbody .roster-row-checkbox").forEach(cb => {
-        cb.checked = checked;
-      });
+      document.querySelectorAll("#roster-tbody .roster-row-checkbox").forEach(cb => cb.checked = checked);
     });
-
-    rosterSelectAllBtn.onclick = () => {
-      rosterHeaderCheckbox.checked = true;
-      rosterHeaderCheckbox.dispatchEvent(new Event("change"));
-    };
+    rosterSelectAllBtn.onclick = () => { rosterHeaderCheckbox.checked = true; rosterHeaderCheckbox.dispatchEvent(new Event("change")); };
 
     rosterDeleteSelectedBtn.onclick = () => {
       const cls = getCurrentClass();
       const idsToDelete = [];
       document.querySelectorAll("#roster-tbody tr").forEach(tr => {
         const cb = tr.querySelector(".roster-row-checkbox");
-        if (cb && cb.checked && tr.dataset.studentId) {
-          idsToDelete.push(tr.dataset.studentId);
-        }
+        if (cb && cb.checked && tr.dataset.studentId) idsToDelete.push(tr.dataset.studentId);
       });
-      if (idsToDelete.length === 0) {
-        alert("No students selected.");
-        return;
-      }
+      if (!idsToDelete.length) { alert("No students selected."); return; }
       if (!confirm("Delete " + idsToDelete.length + " selected student(s)?")) return;
 
       cls.students = cls.students.filter(st => !idsToDelete.includes(st.id));
-
       idsToDelete.forEach(id => {
         delete currentSession.marks[id];
         const sessionsByDate = getSessionsByDate();
         Object.keys(sessionsByDate).forEach(date => {
           const sess = sessionsByDate[date];
-          if (sess && sess.marks && sess.marks[id]) {
-            delete sess.marks[id];
-          }
+          if (sess && sess.marks && sess.marks[id]) delete sess.marks[id];
         });
       });
 
-      renderRosterTable();
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateReportsClassesSummary();
-      saveToLocalStorage();
-    };
-
-    document.getElementById("toggle-help-btn").onclick = () => {
-      const box = document.getElementById("help-box");
-      box.style.display = (box.style.display === "none" || !box.style.display) ? "block" : "none";
+      renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+      refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
+      saveAll();
     };
 
     document.querySelectorAll("#roster-table thead th.sortable-roster").forEach(th => {
       th.onclick = () => {
         const field = th.dataset.sortField;
         if (!field) return;
-
-        if (rosterSort.field === field) {
-          rosterSort.dir = rosterSort.dir === "asc" ? "desc" : "asc";
-        } else {
-          rosterSort.field = field;
-          rosterSort.dir = "asc";
-        }
+        if (rosterSort.field === field) rosterSort.dir = (rosterSort.dir === "asc" ? "desc" : "asc");
+        else { rosterSort.field = field; rosterSort.dir = "asc"; }
         renderRosterTable();
       };
     });
 
-    // Import XLS
+    // =========================
+    // XLS IMPORT
+    // =========================
     const xlsFileInput = document.getElementById("xls-file-input");
     const importXlsBtn = document.getElementById("import-xls-btn");
     const importXlsStatus = document.getElementById("import-xls-status");
@@ -1396,10 +1184,8 @@
       const students = cls.students;
       const firstSheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[firstSheetName];
-      if (!sheet) {
-        importXlsStatus.textContent = "Could not read the first sheet.";
-        return;
-      }
+      if (!sheet) { importXlsStatus.textContent = "Could not read the first sheet."; return; }
+
       const range = XLSX.utils.decode_range(sheet["!ref"]);
       let added = 0, updated = 0;
 
@@ -1432,38 +1218,22 @@
           existing.email = email;
           updated++;
         } else {
-          students.push({
-            id: generateId(),
-            roll,
-            name: name || roll,
-            studentPhone,
-            parentPhone,
-            email,
-            totalSessions: 0,
-            presents: 0,
-            remarks: []
-          });
+          students.push({ id: generateId(), roll, name: name || roll, studentPhone, parentPhone, email, totalSessions: 0, presents: 0, remarks: [] });
           added++;
         }
       }
 
-      renderRosterTable();
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateReportsClassesSummary();
-      saveToLocalStorage();
+      renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+      refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
+      saveAll();
       importXlsStatus.textContent = "Import complete: " + added + " added, " + updated + " updated.";
     }
 
     importXlsBtn.onclick = () => {
       importXlsStatus.textContent = "";
       const file = xlsFileInput.files && xlsFileInput.files[0];
-      if (!file) {
-        alert("Please select an XLS/XLSX file first.");
-        return;
-      }
+      if (!file) { alert("Please select an XLS/XLSX file first."); return; }
+
       const reader = new FileReader();
       reader.onload = e => {
         try {
@@ -1481,7 +1251,9 @@
       reader.readAsArrayBuffer(file);
     };
 
-    // Attendance
+    // =========================
+    // ATTENDANCE
+    // =========================
     const attendanceTbody = document.getElementById("attendance-tbody");
     const attendanceDateInput = document.getElementById("attendance-date-input");
     const attendanceNotesInput = document.getElementById("attendance-notes-input");
@@ -1503,18 +1275,13 @@
     function updateClassCountLabel() {
       const sessionsByDate = getSessionsByDate();
       const selected = attendanceDateInput.value || currentSession.date || "";
-      if (!selected) {
-        classCountEl.textContent = "";
-        return;
-      }
-      const dates = Object.keys(sessionsByDate)
-        .filter(d => d <= selected)
-        .sort();
+      if (!selected) { classCountEl.textContent = ""; return; }
+
+      const dates = Object.keys(sessionsByDate).filter(d => d <= selected).sort();
       const totalClasses = dates.length;
-      classCountEl.textContent =
-        totalClasses === 0
-          ? "No classes saved on or before this date."
-          : "Total classes till this date: " + totalClasses;
+      classCountEl.textContent = totalClasses === 0
+        ? "No classes saved on or before this date."
+        : "Total classes till this date: " + totalClasses;
 
       if (sessionsByDate[selected]) {
         clearDayBtn.style.display = "inline-flex";
@@ -1527,26 +1294,17 @@
 
     function updatePresentToday() {
       const students = getStudents();
-      if (!students.length) {
-        presentTodayEl.textContent = "";
-        return;
-      }
+      if (!students.length) { presentTodayEl.textContent = ""; return; }
       let totalPresent = 0;
       students.forEach(st => {
         const mark = currentSession.marks[st.id];
         if (mark && mark.present) totalPresent++;
       });
-      presentTodayEl.textContent =
-        "Total present today: " + totalPresent + " of " + students.length;
+      presentTodayEl.textContent = "Total present today: " + totalPresent + " of " + students.length;
     }
 
-    attendanceDateInput.addEventListener("change", () => {
-      const date = attendanceDateInput.value || "";
-      loadSessionForDate(date);
-    });
-    attendanceNotesInput.addEventListener("input", () => {
-      currentSession.notes = attendanceNotesInput.value || "";
-    });
+    attendanceDateInput.addEventListener("change", () => loadSessionForDate(attendanceDateInput.value || ""));
+    attendanceNotesInput.addEventListener("input", () => { currentSession.notes = attendanceNotesInput.value || ""; });
 
     function loadSessionForDate(date) {
       const sessionsByDate = getSessionsByDate();
@@ -1557,11 +1315,8 @@
         currentSession.marks = JSON.parse(JSON.stringify(saved.marks || {}));
       }
       attendanceNotesInput.value = currentSession.notes || "";
-      renderAttendanceTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateClassCountLabel();
-      updatePresentToday();
+      renderAttendanceTable(); refreshAllPercents(); refreshAllHistoryCells();
+      updateClassCountLabel(); updatePresentToday();
     }
 
     function renderHistoryCell(st) {
@@ -1571,25 +1326,12 @@
       pill.className = "history-pill";
       pill.dataset.historyCell = st.id;
 
-      let dots;
-      if (!history.length) {
-        dots = [null];
-      } else {
-        dots = Array(3 - history.length).fill(null).concat(history);
-      }
-
+      const dots = (!history.length) ? [null] : Array(3 - history.length).fill(null).concat(history);
       dots.forEach(val => {
         const dot = document.createElement("span");
-        if (val === "P") {
-          dot.className = "history-dot history-p";
-          dot.textContent = "P";
-        } else if (val === "A") {
-          dot.className = "history-dot history-a";
-          dot.textContent = "A";
-        } else {
-          dot.className = "history-dot history-empty";
-          dot.textContent = "-";
-        }
+        if (val === "P") { dot.className = "history-dot history-p"; dot.textContent = "P"; }
+        else if (val === "A") { dot.className = "history-dot history-a"; dot.textContent = "A"; }
+        else { dot.className = "history-dot history-empty"; dot.textContent = "-"; }
         pill.appendChild(dot);
       });
 
@@ -1615,9 +1357,7 @@
       }
 
       students.forEach(st => {
-        if (!currentSession.marks[st.id]) {
-          currentSession.marks[st.id] = { present: true, remark: "" };
-        }
+        if (!currentSession.marks[st.id]) currentSession.marks[st.id] = { present: true, remark: "" };
         const mark = currentSession.marks[st.id];
         const percent = computePercentWithPreview(st);
 
@@ -1632,9 +1372,7 @@
         });
 
         const tdHistory = renderHistoryCell(st);
-
-        const tdRoll = document.createElement("td");
-        tdRoll.textContent = st.roll;
+        const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
 
         const tdName = document.createElement("td");
         const span = document.createElement("span");
@@ -1646,13 +1384,10 @@
         const tdRemarks = document.createElement("td");
         const inpRem = document.createElement("input");
         inpRem.type = "text";
-        inpRem.className = "remarks-input";
         inpRem.placeholder = "Add remark";
         inpRem.value = mark.remark || "";
         inpRem.onclick = e => e.stopPropagation();
-        inpRem.oninput = () => {
-          currentSession.marks[st.id].remark = inpRem.value;
-        };
+        inpRem.oninput = () => { currentSession.marks[st.id].remark = inpRem.value; };
         tdRemarks.appendChild(inpRem);
 
         const tdPres = document.createElement("td");
@@ -1661,10 +1396,7 @@
         chk.type = "checkbox";
         chk.className = "checkbox-large";
         chk.checked = !!mark.present;
-        chk.onclick = e => {
-          e.stopPropagation();
-          setPresentForStudent(st.id, chk.checked);
-        };
+        chk.onclick = e => { e.stopPropagation(); setPresentForStudent(st.id, chk.checked); };
         tdPres.appendChild(chk);
 
         tr.append(tdHistory, tdRoll, tdName, tdRemarks, tdPres);
@@ -1679,8 +1411,7 @@
       if (!row) return;
       const checkbox = row.querySelector("input[type=checkbox]");
       if (checkbox) checkbox.checked = isPresent;
-      if (isPresent) row.classList.remove("absent");
-      else row.classList.add("absent");
+      if (isPresent) row.classList.remove("absent"); else row.classList.add("absent");
     }
 
     function toggleAttendanceForStudent(studentId) {
@@ -1705,16 +1436,11 @@
       updatePresentToday();
     }
 
-    // Header checkbox to check/uncheck all
     toggleAllCheckbox.addEventListener("change", () => {
       const check = toggleAllCheckbox.checked;
-      const students = getStudents();
-      students.forEach(st => {
-        if (!currentSession.marks[st.id]) {
-          currentSession.marks[st.id] = { present: check, remark: "" };
-        } else {
-          currentSession.marks[st.id].present = check;
-        }
+      getStudents().forEach(st => {
+        if (!currentSession.marks[st.id]) currentSession.marks[st.id] = { present: check, remark: "" };
+        else currentSession.marks[st.id].present = check;
         applyRowState(st.id, check);
         updateHistoryCellForStudent(st);
       });
@@ -1726,25 +1452,16 @@
       const parts = (fullName || "").trim().split(/\s+/).filter(Boolean);
       if (parts.length === 0) return { first: "", last: "" };
       if (parts.length === 1) return { first: parts[0], last: "" };
-      const first = parts[0];
-      const last = parts.slice(1).join(" ");
-      return { first, last };
+      return { first: parts[0], last: parts.slice(1).join(" ") };
     }
 
-    // Today's Excel filename: classcode_{DDMM}_{SAPkey}
     function exportAttendanceExcelForCurrentDate() {
       const cls = getCurrentClass();
       const students = cls.students;
-      if (!students || students.length === 0) {
-        alert("No students in roster for this class.");
-        return;
-      }
+      if (!students || students.length === 0) { alert("No students in roster for this class."); return; }
 
       const date = attendanceDateInput.value || currentSession.date;
-      if (!date) {
-        alert("Please select a date first.");
-        return;
-      }
+      if (!date) { alert("Please select a date first."); return; }
 
       const sessionsByDate = cls.sessionsByDate || {};
       const savedSession = sessionsByDate[date];
@@ -1772,81 +1489,22 @@
 
       const dParts = date.split("-");
       let ddmm = date;
-      if (dParts.length === 3) {
-        const dd = dParts[2];
-        const mm = dParts[1];
-        ddmm = dd + mm;
-      }
+      if (dParts.length === 3) ddmm = dParts[2] + dParts[1];
+
       const meta = getCurrentClassMeta();
       const code = meta ? meta.classCode : currentClassKey.replace(/\s+/g, "");
       const sap = meta ? meta.sapKey : "SAP";
-
       const filename = code + "_" + ddmm + "_" + sap + ".xls";
 
       XLSX.writeFile(wb, filename, { bookType: "xls" });
     }
-
-    exportExcelBtn.onclick = e => {
-      e.preventDefault();
-      exportAttendanceExcelForCurrentDate();
-    };
-
-    // NAV handling (we need references early for switching)
-    const navSegments = document.getElementById("nav-segments");
-    const sections = {};
-    const navButtons = [];
-
-    APP_SECTIONS.forEach((sec) => {
-      const btn = document.createElement("button");
-      const isDefault = (sec.id === "reports-section"); // default visible
-      btn.className = "nav-button" + (isDefault ? " active" : "");
-      btn.dataset.section = sec.id;
-      btn.textContent = sec.label;
-      navSegments.appendChild(btn);
-      navButtons.push(btn);
-      sections[sec.id] = document.getElementById(sec.id);
-    });
-
-    function showSectionSectionId(id) {
-      Object.keys(sections).forEach(sid => {
-        sections[sid].style.display = sid === id ? "block" : "none";
-      });
-      navButtons.forEach(b => b.classList.toggle("active", b.dataset.section === id));
-      if (id === "attendance-section") {
-        renderAttendanceTable();
-        refreshAllPercents();
-        refreshAllHistoryCells();
-        updateClassCountLabel();
-        updatePresentToday();
-      } else if (id === "reports-section") {
-        renderReportsTable();
-        refreshAllPercents();
-        updateReportsClassesSummary();
-      } else if (id === "roster-section") {
-        renderRosterTable();
-        refreshAllPercents();
-      } else if (id === "mentor-section") {
-        // nothing special needed on open now
-      }
-    }
-
-    navButtons.forEach(btn => {
-      btn.onclick = () => {
-        const id = btn.dataset.section;
-        showSectionSectionId(id);
-      };
-    });
+    exportExcelBtn.onclick = e => { e.preventDefault(); exportAttendanceExcelForCurrentDate(); };
 
     function saveAttendanceSession() {
       const students = getStudents();
-      if (students.length === 0) {
-        alert("No students to save. Add students in the Roster tab first.");
-        return;
-      }
-      if (!currentSession.date) {
-        alert("Please select a date for this session.");
-        return;
-      }
+      if (students.length === 0) { alert("No students to save. Add students in the Roster tab first."); return; }
+      if (!currentSession.date) { alert("Please select a date for this session."); return; }
+
       const cls = getCurrentClass();
       const sessionsByDate = cls.sessionsByDate;
       const prev = sessionsByDate[currentSession.date];
@@ -1867,69 +1525,49 @@
 
       students.forEach(st => {
         let mark = currentSession.marks[st.id];
-        if (!mark) {
-          mark = { present: true, remark: "" };
-          currentSession.marks[st.id] = mark;
-        }
+        if (!mark) { mark = { present: true, remark: "" }; currentSession.marks[st.id] = mark; }
+
         st.totalSessions = (st.totalSessions || 0) + 1;
         if (mark.present) st.presents = (st.presents || 0) + 1;
+
         const remarkText = (mark.remark || "").trim();
-        if (remarkText) {
-          st.remarks.push({ date: currentSession.date, text: remarkText });
-        }
+        if (remarkText) st.remarks.push({ date: currentSession.date, text: remarkText });
       });
 
       Object.keys(currentSession.marks).forEach(id => currentSession.marks[id].remark = "");
       attendanceNotesInput.value = "";
       currentSession.notes = "";
 
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateClassCountLabel();
-      updatePresentToday();
-      updateReportsClassesSummary();
-      saveToLocalStorage();
+      renderAttendanceTable(); renderReportsTable();
+      refreshAllPercents(); refreshAllHistoryCells();
+      updateClassCountLabel(); updatePresentToday(); updateReportsClassesSummary();
+      saveAll();
 
       alert("Attendance saved successfully for " + formatDateDisplay(currentSession.date) + ".");
-
-      // After saving, switch to Reports section
       showSectionSectionId("reports-section");
     }
-    saveSessionBtn.onclick = e => {
-      e.preventDefault();
-      saveAttendanceSession();
-    };
+    saveSessionBtn.onclick = e => { e.preventDefault(); saveAttendanceSession(); };
 
     function clearAttendanceForCurrentDate() {
       const date = currentSession.date;
-      if (!date) {
-        alert("Select a date first.");
-        return;
-      }
+      if (!date) { alert("Select a date first."); return; }
+
       const cls = getCurrentClass();
       const sessionsByDate = cls.sessionsByDate;
       const session = sessionsByDate[date];
+
       if (!session) {
         currentSession = { date, notes: "", marks: {} };
         attendanceNotesInput.value = "";
-        renderAttendanceTable();
-        refreshAllPercents();
-        refreshAllHistoryCells();
-        updateClassCountLabel();
-        updatePresentToday();
-        updateReportsClassesSummary();
-        saveToLocalStorage();
+        renderAttendanceTable(); refreshAllPercents(); refreshAllHistoryCells();
+        updateClassCountLabel(); updatePresentToday(); updateReportsClassesSummary();
+        saveAll();
         return;
       }
 
-      if (!confirm("This will remove saved attendance for " + formatDateDisplay(date) + " and adjust totals. Continue?")) {
-        return;
-      }
+      if (!confirm("This will remove saved attendance for " + formatDateDisplay(date) + " and adjust totals. Continue?")) return;
 
-      const students = getStudents();
-      students.forEach(st => {
+      getStudents().forEach(st => {
         const mark = session.marks[st.id];
         if (!mark) return;
         if (st.totalSessions > 0) st.totalSessions -= 1;
@@ -1940,22 +1578,16 @@
 
       currentSession = { date, notes: "", marks: {} };
       attendanceNotesInput.value = "";
-      renderAttendanceTable();
-      renderReportsTable();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateClassCountLabel();
-      updatePresentToday();
-      updateReportsClassesSummary();
-      saveToLocalStorage();
+      renderAttendanceTable(); renderReportsTable();
+      refreshAllPercents(); refreshAllHistoryCells();
+      updateClassCountLabel(); updatePresentToday(); updateReportsClassesSummary();
+      saveAll();
     }
+    clearDayBtn.ondblclick = e => { e.preventDefault(); clearAttendanceForCurrentDate(); };
 
-    clearDayBtn.ondblclick = e => {
-      e.preventDefault();
-      clearAttendanceForCurrentDate();
-    };
-
+    // =========================
     // REPORTS (Msgs)
+    // =========================
     const reportsTbody = document.getElementById("reports-tbody");
     const reportsHeaderRow = document.getElementById("reports-header-row");
 
@@ -1963,54 +1595,23 @@
       const cls = getCurrentClass();
       const students = cls.students.slice();
       const sessionsByDate = cls.sessionsByDate || {};
-      const dates = Object.keys(sessionsByDate).sort(); // saved only
+      const dates = Object.keys(sessionsByDate).sort();
 
       reportsHeaderRow.innerHTML = "";
-      const thSno = document.createElement("th");
-      thSno.className = "sortable";
-      thSno.dataset.sortField = "sno";
-      thSno.style.width = "50px";
-      thSno.textContent = "S.No";
 
-      const thRoll = document.createElement("th");
-      thRoll.className = "sortable";
-      thRoll.dataset.sortField = "roll";
-      thRoll.style.width = "90px";
-      thRoll.textContent = "Roll";
+      function mkTh(text, sortableField, width) {
+        const th = document.createElement("th");
+        th.textContent = text;
+        if (width) th.style.width = width;
+        if (sortableField) { th.className = "sortable"; th.dataset.sortField = sortableField; }
+        return th;
+      }
 
-      const thPercent = document.createElement("th");
-      thPercent.className = "sortable";
-      thPercent.dataset.sortField = "percent";
-      thPercent.style.width = "70px";
-      thPercent.textContent = "%";
-
-      const thName = document.createElement("th");
-      thName.className = "sortable";
-      thName.dataset.sortField = "name";
-      thName.textContent = "Name";
-
-      const thActions = document.createElement("th");
-      thActions.style.width = "200px";
-      thActions.textContent = "Actions";
-
-      const thTotP = document.createElement("th");
-      thTotP.textContent = "Total P";
-      thTotP.style.width = "60px";
-      const thTotA = document.createElement("th");
-      thTotA.textContent = "Total A";
-      thTotA.style.width = "60px";
-      const thRemarksCount = document.createElement("th");
-      thRemarksCount.className = "sortable";
-      thRemarksCount.dataset.sortField = "remarksCount";
-      thRemarksCount.style.width = "80px";
-      thRemarksCount.textContent = "#Remarks";
-
-      // Append headers in new order: basics, then actions, then date columns, then totals/remarks
-      reportsHeaderRow.appendChild(thSno);
-      reportsHeaderRow.appendChild(thRoll);
-      reportsHeaderRow.appendChild(thPercent);
-      reportsHeaderRow.appendChild(thName);
-      reportsHeaderRow.appendChild(thActions);
+      reportsHeaderRow.appendChild(mkTh("S.No", "sno", "50px"));
+      reportsHeaderRow.appendChild(mkTh("Roll", "roll", "90px"));
+      reportsHeaderRow.appendChild(mkTh("%", "percent", "70px"));
+      reportsHeaderRow.appendChild(mkTh("Name", "name"));
+      reportsHeaderRow.appendChild(mkTh("Actions", null, "200px"));
 
       dates.forEach(d => {
         const th = document.createElement("th");
@@ -2019,9 +1620,9 @@
         reportsHeaderRow.appendChild(th);
       });
 
-      reportsHeaderRow.appendChild(thTotP);
-      reportsHeaderRow.appendChild(thTotA);
-      reportsHeaderRow.appendChild(thRemarksCount);
+      reportsHeaderRow.appendChild(mkTh("Total P", null, "60px"));
+      reportsHeaderRow.appendChild(mkTh("Total A", null, "60px"));
+      reportsHeaderRow.appendChild(mkTh("#Remarks", "remarksCount", "80px"));
 
       students.sort((a, b) => {
         if (reportSort.field === "roll") {
@@ -2051,7 +1652,6 @@
       if (students.length === 0) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        // S.No, Roll, %, Name, Actions, dates..., TotP, TotA, #Remarks
         td.colSpan = 5 + dates.length + 3;
         td.className = "empty-state";
         td.textContent = "No students in roster.";
@@ -2063,13 +1663,13 @@
       students.forEach((st, index) => {
         const tr = document.createElement("tr");
 
-        const tdSno = document.createElement("td"); tdSno.textContent = index + 1;
-        const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
-
         const totalSess = st.totalSessions || 0;
         const totalP = st.presents || 0;
         const totalA = totalSess - totalP;
         const percent = totalSess === 0 ? 0 : Math.round(100 * totalP / totalSess);
+
+        const tdSno = document.createElement("td"); tdSno.textContent = index + 1;
+        const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
 
         const tdPercent = document.createElement("td");
         tdPercent.className = "percent-cell";
@@ -2078,7 +1678,6 @@
 
         const tdName = document.createElement("td"); tdName.textContent = st.name;
 
-        // Actions (WhatsApp + WA Parent) – moved next to Name
         const tdActions = document.createElement("td");
         const wrap = document.createElement("div");
         wrap.className = "table-actions";
@@ -2096,81 +1695,119 @@
         wrap.append(waBtn, waParentBtn);
         tdActions.appendChild(wrap);
 
-        tr.appendChild(tdSno);
-        tr.appendChild(tdRoll);
-        tr.appendChild(tdPercent);
-        tr.appendChild(tdName);
-        tr.appendChild(tdActions);
+        tr.append(tdSno, tdRoll, tdPercent, tdName, tdActions);
 
         dates.forEach(d => {
           const sess = sessionsByDate[d];
           const mark = sess && sess.marks && sess.marks[st.id];
           const td = document.createElement("td");
-          let val = "";
-          if (mark) {
-            if (mark.present) val = "P";
-            else val = "A";
-          }
-          td.textContent = val;
+          td.textContent = mark ? (mark.present ? "P" : "A") : "";
           tr.appendChild(td);
         });
 
-        const tdTotP = document.createElement("td");
-        tdTotP.textContent = totalP;
-        const tdTotA = document.createElement("td");
-        tdTotA.textContent = totalA;
+        const tdTotP = document.createElement("td"); tdTotP.textContent = totalP;
+        const tdTotA = document.createElement("td"); tdTotA.textContent = totalA;
 
         const tdRemarksCount = document.createElement("td");
         const badge = document.createElement("span");
         badge.className = "badge";
-        badge.textContent = st.remarks.length;
+        badge.textContent = (st.remarks || []).length;
         tdRemarksCount.appendChild(badge);
         tdRemarksCount.style.cursor = "pointer";
         tdRemarksCount.onclick = () => openRemarksModal(st.id);
 
-        tr.appendChild(tdTotP);
-        tr.appendChild(tdTotA);
-        tr.appendChild(tdRemarksCount);
-
+        tr.append(tdTotP, tdTotA, tdRemarksCount);
         reportsTbody.appendChild(tr);
       });
+
       updateClassSummary();
 
       document.querySelectorAll("#reports-table thead th.sortable").forEach(th => {
         th.onclick = () => {
           const field = th.dataset.sortField;
           if (!field) return;
-          if (reportSort.field === field) {
-            reportSort.dir = reportSort.dir === "asc" ? "desc" : "asc";
-          } else {
-            reportSort.field = field;
-            reportSort.dir = "asc";
-          }
+          if (reportSort.field === field) reportSort.dir = (reportSort.dir === "asc" ? "desc" : "asc");
+          else { reportSort.field = field; reportSort.dir = "asc"; }
           renderReportsTable();
         };
       });
     }
 
-    // Show total number of classes till today above Msgs table
     function updateReportsClassesSummary() {
       const summaryEl = document.getElementById("reports-classes-summary");
-      if (!summaryEl) return;
-
       const sessionsByDate = getSessionsByDate();
       const allDates = Object.keys(sessionsByDate);
-      if (allDates.length === 0) {
-        summaryEl.textContent = "No classes have been saved yet.";
-        return;
-      }
+
+      if (!allDates.length) { summaryEl.textContent = "No classes have been saved yet."; return; }
 
       const today = new Date().toISOString().slice(0, 10);
       const countTillToday = allDates.filter(d => d <= today).length;
-
-      summaryEl.textContent =
-        "Total number of classes till today: " + countTillToday;
+      summaryEl.textContent = "Total number of classes till today: " + countTillToday;
     }
 
+    // =========================
+    // WhatsApp
+    // =========================
+    function sendWhatsAppToStudent(studentId, to = "student") {
+      const st = findStudentById(studentId);
+      if (!st) return;
+
+      const phone = (to === "parent") ? (st.parentPhone || "").trim() : (st.studentPhone || "").trim();
+      if (!phone) { alert((to === "parent" ? "Parent" : "Student") + " phone number is missing."); return; }
+
+      const totalSessions = st.totalSessions || 0;
+      const presents = st.presents || 0;
+      const percent = totalSessions ? Math.round(100 * presents / totalSessions) : 0;
+
+      const remarksSummary = (!st.remarks || st.remarks.length === 0)
+        ? "None"
+        : st.remarks.slice(-3).map(r => r.text).join("; ");
+
+      const meta = getCurrentClassMeta();
+      const className = meta ? meta.label : currentClassKey;
+
+      const template = (to === "parent") ? appSettings.whatsappParentTemplate : appSettings.whatsappStudentTemplate;
+      const message = template
+        .replace("{name}", st.name)
+        .replace("{roll}", st.roll)
+        .replace("{percent}", percent)
+        .replace("{remarks}", remarksSummary)
+        .replace("{class name}", className)
+        .replace("{total number of classes}", totalSessions)
+        .replace("{Classes you are present}", presents);
+
+      const url = WHATSAPP_CONFIG.apiBase
+        + "?number=" + encodeURIComponent(phone)
+        + "&type=text"
+        + "&message=" + encodeURIComponent(message)
+        + "&instance_id=" + encodeURIComponent(WHATSAPP_CONFIG.instanceId)
+        + "&access_token=" + encodeURIComponent(WHATSAPP_CONFIG.accessToken);
+
+      window.open(url, "_blank");
+    }
+
+    // =========================
+    // Percent refresh
+    // =========================
+    function refreshAllPercents() {
+      getStudents().forEach(st => {
+        const percent = computePercentWithPreview(st);
+        const el = document.querySelector('[data-att-name="' + st.id + '"]');
+        if (el) el.innerHTML = '<span class="name-main">' + st.name + '</span>(' + percent + '%)';
+      });
+
+      getStudents().forEach(st => {
+        const totalSess = st.totalSessions || 0;
+        const totalP = st.presents || 0;
+        const percent = totalSess === 0 ? 0 : Math.round(100 * totalP / totalSess);
+        const el = document.querySelector('[data-percent-cell-report="' + st.id + '"]');
+        if (el) el.textContent = percent + "%";
+      });
+    }
+
+    // =========================
     // Remarks modal
+    // =========================
     const remarksModalBackdrop = document.getElementById("remarks-modal-backdrop");
     const remarksModalMeta = document.getElementById("remarks-modal-meta");
     const remarksModalList = document.getElementById("remarks-modal-list");
@@ -2182,40 +1819,44 @@
     function openRemarksModal(studentId) {
       const st = findStudentById(studentId);
       if (!st) return;
+
       remarksModalTitle.textContent = "Remarks for " + st.name + " (" + st.roll + ")";
-      remarksModalMeta.textContent = "Total remarks: " + st.remarks.length;
+      remarksModalMeta.textContent = "Total remarks: " + (st.remarks || []).length;
       remarksModalList.innerHTML = "";
-      if (st.remarks.length === 0) {
+
+      const list = st.remarks || [];
+      if (!list.length) {
         remarksModalEmpty.style.display = "block";
       } else {
         remarksModalEmpty.style.display = "none";
-        st.remarks.forEach(r => {
+        list.forEach(r => {
           const li = document.createElement("li");
           const d = document.createElement("div");
           d.className = "remarks-date";
           d.textContent = r.date ? formatDateDisplay(r.date) : "(no date)";
           const t = document.createElement("div");
           t.className = "remarks-text";
-          t.textContent = r.text;
+          t.textContent = r.text || "";
           li.append(d, t);
           remarksModalList.appendChild(li);
         });
       }
-      remarksModalBackdrop.classList.add("active");
+
+      remarksModalBackdrop.style.display = "flex";
       remarksModalBackdrop.setAttribute("aria-hidden", "false");
     }
 
     function closeRemarksModal() {
-      remarksModalBackdrop.classList.remove("active");
+      remarksModalBackdrop.style.display = "none";
       remarksModalBackdrop.setAttribute("aria-hidden", "true");
     }
     closeRemarksModalBtn.onclick = closeRemarksModal;
     remarksModalOkBtn.onclick = closeRemarksModal;
-    remarksModalBackdrop.onclick = e => {
-      if (e.target === remarksModalBackdrop) closeRemarksModal();
-    };
+    remarksModalBackdrop.onclick = e => { if (e.target === remarksModalBackdrop) closeRemarksModal(); };
 
+    // =========================
     // Settings modal
+    // =========================
     const settingsBtn = document.getElementById("settings-btn");
     const settingsModalBackdrop = document.getElementById("settings-modal-backdrop");
     const closeSettingsModalBtn = document.getElementById("close-settings-modal-btn");
@@ -2227,99 +1868,36 @@
     const settingsParentEmailTextarea = document.getElementById("settings-parent-email-template");
 
     function openSettingsModal() {
-      settingsWaStudentTextarea.value =
-        appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
-      settingsWaParentTextarea.value =
-        appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
-      settingsStudentEmailTextarea.value =
-        appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
-      settingsParentEmailTextarea.value =
-        appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
+      settingsWaStudentTextarea.value = appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
+      settingsWaParentTextarea.value = appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
+      settingsStudentEmailTextarea.value = appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
+      settingsParentEmailTextarea.value = appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
 
-      settingsModalBackdrop.classList.add("active");
+      settingsModalBackdrop.style.display = "flex";
       settingsModalBackdrop.setAttribute("aria-hidden", "false");
     }
-
     function closeSettingsModal() {
-      settingsModalBackdrop.classList.remove("active");
+      settingsModalBackdrop.style.display = "none";
       settingsModalBackdrop.setAttribute("aria-hidden", "true");
     }
-
-    settingsBtn.onclick = () => openSettingsModal();
-    closeSettingsModalBtn.onclick = () => closeSettingsModal();
-    settingsCancelBtn.onclick = () => closeSettingsModal();
-    settingsModalBackdrop.onclick = e => {
-      if (e.target === settingsModalBackdrop) closeSettingsModal();
-    };
+    settingsBtn.onclick = openSettingsModal;
+    closeSettingsModalBtn.onclick = closeSettingsModal;
+    settingsCancelBtn.onclick = closeSettingsModal;
+    settingsModalBackdrop.onclick = e => { if (e.target === settingsModalBackdrop) closeSettingsModal(); };
 
     settingsSaveBtn.onclick = () => {
-      appSettings.whatsappStudentTemplate =
-        settingsWaStudentTextarea.value || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
-      appSettings.whatsappParentTemplate =
-        settingsWaParentTextarea.value || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
-      appSettings.studentEmailTemplate =
-        settingsStudentEmailTextarea.value || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
-      appSettings.parentEmailTemplate =
-        settingsParentEmailTextarea.value || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
+      appSettings.whatsappStudentTemplate = settingsWaStudentTextarea.value || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
+      appSettings.whatsappParentTemplate  = settingsWaParentTextarea.value  || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
+      appSettings.studentEmailTemplate    = settingsStudentEmailTextarea.value || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
+      appSettings.parentEmailTemplate     = settingsParentEmailTextarea.value  || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
 
-      saveToLocalStorage();
+      saveAll();
       closeSettingsModal();
     };
 
-    // WhatsApp
-    function sendWhatsAppToStudent(studentId, to = "student") {
-      const st = findStudentById(studentId);
-      if (!st) return;
-
-      const phone =
-        to === "parent"
-          ? (st.parentPhone || "").trim()
-          : (st.studentPhone || "").trim();
-
-      if (!phone) {
-        alert((to === "parent" ? "Parent" : "Student") + " phone number is missing.");
-        return;
-      }
-
-      const totalSessions = st.totalSessions || 0;
-      const presents = st.presents || 0;
-      const percent = totalSessions
-        ? Math.round(100 * presents / totalSessions)
-        : 0;
-
-      const remarksSummary = st.remarks.length === 0
-        ? "None"
-        : st.remarks.slice(-3).map(r => r.text).join("; ");
-
-      const classLabelObj = getCurrentClassMeta();
-      const className = classLabelObj ? classLabelObj.label : currentClassKey;
-
-      const template =
-        to === "parent"
-          ? appSettings.whatsappParentTemplate
-          : appSettings.whatsappStudentTemplate;
-
-      let message = template
-        .replace("{name}", st.name)
-        .replace("{roll}", st.roll)
-        .replace("{percent}", percent)
-        .replace("{remarks}", remarksSummary)
-        .replace("{class name}", className)
-        .replace("{total number of classes}", totalSessions)
-        .replace("{Classes you are present}", presents);
-
-      const encodedMessage = encodeURIComponent(message);
-      const url = WHATSAPP_CONFIG.apiBase
-        + "?number=" + encodeURIComponent(phone)
-        + "&type=text"
-        + "&message=" + encodedMessage
-        + "&instance_id=" + encodeURIComponent(WHATSAPP_CONFIG.instanceId)
-        + "&access_token=" + encodeURIComponent(WHATSAPP_CONFIG.accessToken);
-
-      window.open(url, "_blank");
-    }
-
-    // Backup / Restore / Export class
+    // =========================
+    // Backup/Restore/Export
+    // =========================
     const backupBtn = document.getElementById("backup-btn");
     const restoreBtn = document.getElementById("restore-btn");
     const restoreFileInput = document.getElementById("restore-file-input");
@@ -2338,28 +1916,15 @@
     }
 
     backupBtn.onclick = () => {
-      const data = {
-        classes,
-        currentClassKey,
-        appSettings,
-        exportedAt: new Date().toISOString()
-      };
-      const json = JSON.stringify(data, null, 2);
-
+      const json = JSON.stringify(buildAppDataObject(), null, 2);
       const now = new Date();
       const dd = String(now.getDate()).padStart(2, "0");
       const mm = String(now.getMonth() + 1).padStart(2, "0");
       const yyyy = now.getFullYear();
-      const dateStr = dd + "-" + mm + "-" + yyyy;
-
-      // backup filename
-      const filename = "K_Att_BU_" + dateStr + ".json";
-      downloadTextFile(filename, json);
+      downloadTextFile("K_Att_BU_" + dd + "-" + mm + "-" + yyyy + ".json", json);
     };
 
-    restoreBtn.onclick = () => {
-      restoreFileInput.click();
-    };
+    restoreBtn.onclick = () => restoreFileInput.click();
 
     restoreFileInput.onchange = () => {
       const file = restoreFileInput.files && restoreFileInput.files[0];
@@ -2369,30 +1934,8 @@
       reader.onload = e => {
         try {
           const parsed = JSON.parse(e.target.result);
-          if (!parsed || !parsed.classes) {
-            alert("Invalid backup file.");
-            return;
-          }
-          Object.keys(classes).forEach(k => delete classes[k]);
-          Object.assign(classes, parsed.classes);
-
-          const keysFromConfig = CLASS_CONFIG.map(c => c.key);
-          if (parsed.currentClassKey && keysFromConfig.includes(parsed.currentClassKey)) {
-            currentClassKey = parsed.currentClassKey;
-          } else {
-            currentClassKey = keysFromConfig[0];
-          }
-
-          if (parsed.appSettings && typeof parsed.appSettings === "object") {
-            appSettings.whatsappStudentTemplate =
-              parsed.appSettings.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
-            appSettings.whatsappParentTemplate =
-              parsed.appSettings.whatsappParentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
-            appSettings.studentEmailTemplate =
-              parsed.appSettings.studentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
-            appSettings.parentEmailTemplate =
-              parsed.appSettings.parentEmailTemplate || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
-          }
+          if (!parsed || !parsed.classes) { alert("Invalid backup file."); return; }
+          applyLoadedData(parsed);
 
           initClassRadios();
 
@@ -2400,15 +1943,12 @@
           currentSession = { date: today, notes: "", marks: {} };
           attendanceDateInput.value = today;
           loadSessionForDate(today);
-          renderRosterTable();
-          renderAttendanceTable();
-          renderReportsTable();
-          refreshAllPercents();
-          refreshAllHistoryCells();
-          updateReportsClassesSummary();
+
+          renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+          refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
 
           alert("Data restored successfully.");
-          saveToLocalStorage();
+          saveAll();
         } catch (err) {
           console.error(err);
           alert("Error reading backup file.");
@@ -2419,8 +1959,6 @@
       reader.readAsText(file);
     };
 
-    // Export to Excel (full class)
-    // Filename: {class code}_{class name}_{date of export in DD-MM-YYYY}.xlsx
     function exportFullClassExcel() {
       const cls = getCurrentClass();
       const students = cls.students;
@@ -2429,16 +1967,10 @@
       const classCode = meta ? meta.classCode : currentClassKey.replace(/\s+/g, "_");
       const className = meta ? meta.label : currentClassKey;
 
-      if (!students || students.length === 0) {
-        alert("No students in roster for this class.");
-        return;
-      }
+      if (!students || students.length === 0) { alert("No students in roster for this class."); return; }
 
       const sessionDates = Object.keys(sessionsByDate).sort();
-      if (sessionDates.length === 0) {
-        alert("No saved attendance sessions for this class.");
-        return;
-      }
+      if (sessionDates.length === 0) { alert("No saved attendance sessions for this class."); return; }
 
       const rows = [];
       const header = ["Roll", "Name"];
@@ -2456,69 +1988,34 @@
           const mark = sess && sess.marks && sess.marks[st.id];
           if (mark) {
             totalSessions += 1;
-            if (mark.present) {
-              presents += 1;
-              row.push("P");
-            } else {
-              row.push("A");
-            }
+            if (mark.present) { presents += 1; row.push("P"); }
+            else row.push("A");
           } else {
             row.push("");
           }
         });
 
         const absents = totalSessions - presents;
-        const percent = totalSessions === 0 ?
-          0 : Math.round(100 * presents / totalSessions);
+        const percent = totalSessions === 0 ? 0 : Math.round(100 * presents / totalSessions);
         row.push(presents, absents, percent + "%");
         rows.push(row);
       });
 
-      const wsMain = XLSX.utils.aoa_to_sheet(rows);
+      const ws = XLSX.utils.aoa_to_sheet(rows);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, wsMain, "Class Attendance");
+      XLSX.utils.book_append_sheet(wb, ws, "Class Attendance");
 
       const now = new Date();
       const dd = String(now.getDate()).padStart(2, "0");
       const mm = String(now.getMonth() + 1).padStart(2, "0");
       const yyyy = now.getFullYear();
-      const dateStr = dd + "-" + mm + "-" + yyyy;
-
-      const safeName = className.replace(/\s+/g, "_");
-      const filename = classCode + "_" + safeName + "_" + dateStr + ".xlsx";
-
-      XLSX.writeFile(wb, filename);
+      XLSX.writeFile(wb, classCode + "_" + className.replace(/\s+/g, "_") + "_" + dd + "-" + mm + "-" + yyyy + ".xlsx");
     }
+    exportClassExcelBtn.onclick = exportFullClassExcel;
 
-    exportClassExcelBtn.onclick = () => {
-      exportFullClassExcel();
-    };
-
-    // Percent refresh (attendance + reports)
-    function refreshAllPercents() {
-      const students = getStudents();
-      students.forEach(st => {
-        const percent = computePercentWithPreview(st);
-        const el = document.querySelector('[data-att-name="' + st.id + '"]');
-        if (el) {
-          el.innerHTML = '<span class="name-main">' + st.name + '</span>(' + percent + '%)';
-        }
-      });
-
-      const cls = getCurrentClass();
-      const sessionsByDate = cls.sessionsByDate || {};
-      const dates = Object.keys(sessionsByDate).sort();
-      students.forEach(st => {
-        const totalSess = st.totalSessions || 0;
-        const totalP = st.presents || 0;
-        const percent = totalSess === 0 ?
-          0 : Math.round(100 * totalP / totalSess);
-        const el = document.querySelector('[data-percent-cell-report="' + st.id + '"]');
-        if (el) el.textContent = percent + "%";
-      });
-    }
-
-    // MENTOR REPORT LOGIC
+    // =========================
+    // Mentor report (same features)
+    // =========================
     const mentorConsecutiveGroup = document.getElementById("mentor-consecutive-group");
     const mentorPercentGroup = document.getElementById("mentor-percent-group");
     const mentorConsecutiveInput = document.getElementById("mentor-consecutive-input");
@@ -2531,28 +2028,16 @@
     const exportMentorReportBtn = document.getElementById("export-mentor-report-btn");
 
     function getSelectedMentorType() {
-      for (let i = 0; i < mentorTypeRadios.length; i++) {
-        if (mentorTypeRadios[i].checked) return mentorTypeRadios[i].value;
-      }
+      for (let i = 0; i < mentorTypeRadios.length; i++) if (mentorTypeRadios[i].checked) return mentorTypeRadios[i].value;
       return "consecutive";
     }
 
-    // change type -> show relevant input + dynamic report
-    Array.from(mentorTypeRadios).forEach(r => {
-      r.addEventListener("change", () => {
-        const t = getSelectedMentorType();
-        if (t === "consecutive") {
-          mentorConsecutiveGroup.style.display = "block";
-          mentorPercentGroup.style.display = "none";
-        } else {
-          mentorConsecutiveGroup.style.display = "none";
-          mentorPercentGroup.style.display = "block";
-        }
-        generateMentorReport();
-      });
-    });
-
-    // dynamic changes with inputs
+    Array.from(mentorTypeRadios).forEach(r => r.addEventListener("change", () => {
+      const t = getSelectedMentorType();
+      mentorConsecutiveGroup.style.display = (t === "consecutive") ? "block" : "none";
+      mentorPercentGroup.style.display = (t === "percentage") ? "block" : "none";
+      generateMentorReport();
+    }));
     mentorConsecutiveInput.addEventListener("input", generateMentorReport);
     mentorPercentInput.addEventListener("input", generateMentorReport);
 
@@ -2563,41 +2048,29 @@
         const d = dates[i];
         const sess = sessionsByDate[d];
         const mark = sess.marks && sess.marks[student.id];
-        if (!mark) {
-          break;
-        }
-        if (mark.present) {
-          break;
-        } else {
-          count++;
-        }
+        if (!mark) break;
+        if (mark.present) break;
+        count++;
       }
       return count;
     }
 
-    function stripBracketPart(text) {
-      if (!text) return "";
-      return text.replace(/\(.*?\)/g, "").trim();
-    }
+    function stripBracketPart(text) { return (text || "").replace(/\(.*?\)/g, "").trim(); }
 
     function sortMentorFiltered(filtered) {
       const dir = mentorSort.dir === "asc" ? 1 : -1;
       const field = mentorSort.field;
-
-      const asText = (v) => String(v ?? "").toLowerCase();
-      const asNum = (v) => Number(v ?? 0);
+      const asText = v => String(v ?? "").toLowerCase();
+      const asNum = v => Number(v ?? 0);
 
       filtered.sort((x, y) => {
         if (field === "roll") return dir * asText(x.student.roll).localeCompare(asText(y.student.roll));
         if (field === "name") return dir * asText(x.student.name).localeCompare(asText(y.student.name));
         if (field === "detail") return dir * asText(x.detail).localeCompare(asText(y.detail));
-
         if (field === "total") return dir * (asNum(x.total) - asNum(y.total));
         if (field === "p") return dir * (asNum(x.p) - asNum(y.p));
         if (field === "a") return dir * (asNum(x.a) - asNum(y.a));
         if (field === "percent") return dir * (asNum(x.percent) - asNum(y.percent));
-
-        // default: roll
         return dir * asText(x.student.roll).localeCompare(asText(y.student.roll));
       });
     }
@@ -2608,21 +2081,12 @@
       const sessionsByDate = cls.sessionsByDate || {};
       const sessionDates = Object.keys(sessionsByDate).sort();
 
-      if (students.length === 0) {
-        mentorSummaryEl.textContent = "No students in roster.";
-        mentorTableContainer.style.display = "none";
-        lastMentorReport = [];
-        return;
-      }
-      if (sessionDates.length === 0) {
-        mentorSummaryEl.textContent = "No saved attendance sessions available.";
-        mentorTableContainer.style.display = "none";
-        lastMentorReport = [];
-        return;
-      }
+      if (students.length === 0) { mentorSummaryEl.textContent = "No students in roster."; mentorTableContainer.style.display = "none"; lastMentorReport = []; return; }
+      if (sessionDates.length === 0) { mentorSummaryEl.textContent = "No saved attendance sessions available."; mentorTableContainer.style.display = "none"; lastMentorReport = []; return; }
 
       const type = getSelectedMentorType();
       let filtered = [];
+
       if (type === "consecutive") {
         const x = parseInt(mentorConsecutiveInput.value, 10) || 1;
         students.forEach(st => {
@@ -2632,17 +2096,10 @@
             const p = st.presents || 0;
             const a = total - p;
             const percent = total === 0 ? 0 : Math.round(100 * p / total);
-            filtered.push({
-              student: st,
-              total, p, a, percent,
-              detail: "Absent " + consecA + " classes consecutively"
-            });
+            filtered.push({ student: st, total, p, a, percent, detail: "Absent " + consecA + " classes consecutively" });
           }
         });
-        mentorSummaryEl.textContent =
-          "Report: Students absent for at least " + x +
-          " consecutive classes. Found " + filtered.length +
-          " students out of " + students.length + ".";
+        mentorSummaryEl.textContent = "Report: Students absent for at least " + x + " consecutive classes. Found " + filtered.length + " students.";
       } else {
         const thr = parseInt(mentorPercentInput.value, 10) || 0;
         students.forEach(st => {
@@ -2650,95 +2107,54 @@
           const p = st.presents || 0;
           const a = total - p;
           const percent = total === 0 ? 0 : Math.round(100 * p / total);
-          if (percent < thr) {
-            filtered.push({
-              student: st,
-              total, p, a, percent,
-              detail: "Attendance " + percent + "% < " + thr + "%"
-            });
-          }
+          if (percent < thr) filtered.push({ student: st, total, p, a, percent, detail: "Attendance " + percent + "% < " + thr + "%" });
         });
-        mentorSummaryEl.textContent =
-          "Report: Students whose attendance is less than " + thr +
-          "%. Found " + filtered.length + " students out of " + students.length + ".";
+        mentorSummaryEl.textContent = "Report: Students whose attendance is less than " + thr + "%. Found " + filtered.length + " students.";
       }
 
       lastMentorReport = filtered.slice();
       mentorTbody.innerHTML = "";
-
-      if (filtered.length === 0) {
-        mentorTableContainer.style.display = "none";
-        return;
-      }
+      if (filtered.length === 0) { mentorTableContainer.style.display = "none"; return; }
 
       mentorTableContainer.style.display = "block";
-
       sortMentorFiltered(filtered);
 
       filtered.forEach((item, idx) => {
-        const st = item.student;
         const tr = document.createElement("tr");
-
-        const tdSno = document.createElement("td"); tdSno.textContent = idx + 1;
-        const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
-        const tdName = document.createElement("td"); tdName.textContent = st.name;
-
-        const tdDetails = document.createElement("td");
-        tdDetails.textContent = stripBracketPart(item.detail);
-
-        const tdTotal = document.createElement("td"); tdTotal.textContent = item.total;
-        const tdP = document.createElement("td"); tdP.textContent = item.p;
-        const tdA = document.createElement("td"); tdA.textContent = item.a;
-        const tdPercent = document.createElement("td"); tdPercent.textContent = item.percent + "%";
-
-        tr.append(tdSno, tdRoll, tdName, tdDetails, tdTotal, tdP, tdA, tdPercent);
+        tr.innerHTML =
+          "<td>" + (idx + 1) + "</td>" +
+          "<td>" + item.student.roll + "</td>" +
+          "<td>" + item.student.name + "</td>" +
+          "<td>" + stripBracketPart(item.detail) + "</td>" +
+          "<td>" + item.total + "</td>" +
+          "<td>" + item.p + "</td>" +
+          "<td>" + item.a + "</td>" +
+          "<td>" + item.percent + "%</td>";
         mentorTbody.appendChild(tr);
       });
     }
 
-    generateMentorReportBtn.onclick = () => {
-      generateMentorReport();
-    };
+    generateMentorReportBtn.onclick = generateMentorReport;
 
-    // Mentor header sorting (A-Z / Z-A)
     document.querySelectorAll("#mentor-table thead th.sortable-mentor").forEach(th => {
       th.onclick = () => {
         const field = th.dataset.sortField;
         if (!field) return;
-        if (mentorSort.field === field) {
-          mentorSort.dir = mentorSort.dir === "asc" ? "desc" : "asc";
-        } else {
-          mentorSort.field = field;
-          mentorSort.dir = "asc";
-        }
+        if (mentorSort.field === field) mentorSort.dir = (mentorSort.dir === "asc" ? "desc" : "asc");
+        else { mentorSort.field = field; mentorSort.dir = "asc"; }
         generateMentorReport();
       };
     });
 
-    // Export mentor report to Excel
     function exportMentorReportExcel() {
-      if (!lastMentorReport || lastMentorReport.length === 0) {
-        alert("No mentor report data to export.");
-        return;
-      }
-
+      if (!lastMentorReport || lastMentorReport.length === 0) { alert("No mentor report data to export."); return; }
       const meta = getCurrentClassMeta();
       const classCode = meta ? meta.classCode : currentClassKey.replace(/\s+/g, "_");
       const className = meta ? meta.label : currentClassKey;
 
-      const rows = [];
-      rows.push(["Roll", "Name", "Details", "Total", "P", "A", "%"]);
-
+      const rows = [["Roll", "Name", "Details", "Total", "P", "A", "%"]];
       lastMentorReport.forEach(item => {
-        rows.push([
-          item.student.roll,
-          item.student.name,
-          stripBracketPart(item.detail),
-          item.total,
-          item.p,
-          item.a,
-          item.percent + "%"
-        ]);
+        rows.push([item.student.roll, item.student.name, stripBracketPart(item.detail), item.total, item.p, item.a, item.percent + "%"]);
       });
 
       const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -2749,20 +2165,19 @@
       const dd = String(now.getDate()).padStart(2, "0");
       const mm = String(now.getMonth() + 1).padStart(2, "0");
       const yyyy = now.getFullYear();
-      const dateStr = dd + "-" + mm + "-" + yyyy;
-
-      const filename = "Mentor_Report_" + classCode + "_" + className.replace(/\s+/g, "_") + "_" + dateStr + ".xlsx";
-      XLSX.writeFile(wb, filename);
+      XLSX.writeFile(wb, "Mentor_Report_" + classCode + "_" + className.replace(/\s+/g, "_") + "_" + dd + "-" + mm + "-" + yyyy + ".xlsx");
     }
-
     exportMentorReportBtn.onclick = exportMentorReportExcel;
 
+    // =========================
     // INIT
-    (function init() {
-      const hadStored = loadFromLocalStorage();
-      if (!hadStored) {
-        ensureClass(currentClassKey);
-      }
+    // =========================
+    (async function init() {
+      await runServerDiagnostics();
+
+      let hadStored = await loadFromServer();
+      if (!hadStored) hadStored = loadFromLocalStorage();
+      if (!hadStored) ensureClass(currentClassKey);
 
       initClassRadios();
 
@@ -2781,7 +2196,6 @@
       updatePresentToday();
       updateReportsClassesSummary();
 
-      // default visible section: reports
       showSectionSectionId("reports-section");
     })();
   </script>
