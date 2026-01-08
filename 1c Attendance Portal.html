@@ -29,7 +29,7 @@
       margin: 0 auto;
       padding: 1rem 0.75rem 1.5rem;
     }
-    header { margin-bottom: 1rem; }
+    header { margin-bottom: 0.5rem; }
 
     .header-top-row {
       display: flex;
@@ -84,11 +84,22 @@
       color: #111827;
     }
 
+    /* Summary row above section selection */
+    .class-summary-row {
+      margin: 0.5rem 0 0.75rem;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+    .class-summary-row strong {
+      font-weight: 700;
+      color: #111827;
+    }
+
     .nav-tabs {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 1rem;
+      margin-top: 0;
       margin-bottom: 0.75rem;
       gap: 0.5rem;
       flex-wrap: wrap;
@@ -220,13 +231,18 @@
       font-weight: 500;
       font-size: 0.75rem;
       color: #6b7280;
-      position: sticky;
-      top: 0;
       background: #f3f4f6;
-      z-index: 1;
     }
     th.sortable, th.sortable-roster, #mentor-table thead th.sortable-mentor { cursor: pointer; }
     tbody tr { transition: background-color var(--transition-fast); }
+
+    /* Keep ONLY Msgs header sticky while scrolling page */
+    #reports-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: #f3f4f6;
+    }
 
     /* Msgs table banding + hover */
     #reports-table tbody tr:nth-child(even) { background: #f9fafb; }
@@ -263,6 +279,57 @@
     .attendance-saved-border {
       border-color: #16a34a !important;
       box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.25);
+    }
+
+    /* Disabled row highlight (used across sections) */
+    .disabled-row {
+      background: #fee2e2 !important;
+    }
+    .disabled-text {
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
+    /* Msgs Attendance markers */
+    .att-badge {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .att-badge-a {
+      background: #fecaca;
+      color: #7f1d1d;
+    }
+    .att-badge-p {
+      background: #bbf7d0;
+      color: #065f46;
+    }
+
+    /* Mentor inline radio inputs */
+    .mentor-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+    }
+    .mentor-inline input[type="number"]{
+      width: 72px;
+      padding: 0.25rem 0.4rem;
+      font-size: 0.8rem;
+      background: #fff;
+    }
+    .mentor-inline .mentor-inline-num[disabled]{
+      opacity: 0.55;
+      cursor: not-allowed;
     }
 
     .modal-backdrop {
@@ -305,14 +372,6 @@
     .remarks-date { font-size: 0.7rem; color: #6b7280; }
     .remarks-text { margin-top: 2px; }
 
-    .disabled-row {
-      background: #fee2e2 !important;
-    }
-    .disabled-text {
-      color: #b91c1c;
-      font-weight: 600;
-    }
-
     @media (max-width: 640px) {
       .card { padding: 0.75rem; }
       .header-top-row { flex-direction: column; align-items: flex-start; }
@@ -342,9 +401,13 @@
       <div class="class-bar">
         <span></span>
         <div id="class-radios" class="class-radios"></div>
-        <span id="class-summary"></span>
       </div>
     </header>
+
+    <!-- Class summary just above section selection row -->
+    <div class="class-summary-row">
+      <span id="class-summary"></span>
+    </div>
 
     <div class="nav-tabs">
       <div class="nav-segments" id="nav-segments"></div>
@@ -516,41 +579,33 @@
 
     <!-- MENTOR -->
     <section id="mentor-section" class="card" style="display:none;">
-      <div class="form-row">
-        <div class="form-group" style="flex:1.5;">
+      <div class="form-row" style="align-items:flex-start;">
+        <div class="form-group" style="flex:1;">
           <label>Report Type</label>
-          <div style="display:flex;flex-wrap:wrap;gap:0.75rem;font-size:0.8rem;">
 
-            <label style="display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;">
+          <div class="mentor-inline">
+            <label style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
               <input type="radio" name="mentor-report-type" value="consecutive" checked />
-              <span>Consecutive absences (last X classes)</span>
+              <span>Consecutive absences (last</span>
+              <input id="mentor-consecutive-input" class="mentor-inline-num" type="number" min="1" value="2" />
+              <span>classes)</span>
             </label>
-            <label style="display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;">
+
+            <label style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
               <input type="radio" name="mentor-report-type" value="percentage" />
               <span>Below attendance % threshold</span>
+              <input id="mentor-percent-input" class="mentor-inline-num" type="number" min="0" max="100" value="75" disabled />
             </label>
           </div>
         </div>
-        <!-- Copy WhatsApp Text button -->
-        <div class="form-group" style="flex:0 0 auto;align-items:flex-end;display:flex;justify-content:flex-end;">
-          <button id="mentor-copy-wa-btn" class="btn btn-outline btn-sm" type="button">
-            Copy WhatsApp Text
-          </button>
-        </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group" id="mentor-consecutive-group">
-          <label for="mentor-consecutive-input">Last X classes (consecutive A)</label>
-          <input id="mentor-consecutive-input" type="number" min="1" value="3" />
-        </div>
-        <div class="form-group" id="mentor-percent-group" style="display:none;">
-          <label for="mentor-percent-input">% threshold (less than)</label>
-          <input id="mentor-percent-input" type="number" min="0" max="100" value="75" />
-        </div>
-        <div class="form-group" style="flex:0 0 auto;align-items:flex-end;display:flex;justify-content:flex-end;gap:0.25rem;">
-          <button id="generate-mentor-report-btn" class="btn btn-primary btn-sm" type="button">Generate Mentor Report</button>
-          <button id="export-mentor-report-btn" class="btn btn-outline btn-sm" type="button">Export Mentor Report</button>
+      <!-- Buttons in ONE row, above the table -->
+      <div class="form-row" style="align-items:center;justify-content:flex-end;margin-top:-0.25rem;">
+        <div class="form-group" style="flex:0 0 auto;display:flex;flex-direction:row;gap:0.4rem;align-items:center;justify-content:flex-end;">
+          <button id="mentor-copy-wa-btn" class="btn btn-outline btn-sm" type="button">Copy List</button>
+          <button id="generate-mentor-report-btn" class="btn btn-primary btn-sm" type="button">Generate List</button>
+          <button id="export-mentor-report-btn" class="btn btn-outline btn-sm" type="button">Export list</button>
         </div>
       </div>
 
@@ -749,11 +804,11 @@
       const meta = getCurrentClassMeta();
       const code = meta ? meta.classCode : "";
       const name = meta ? meta.label : currentClassKey;
-      const classInfo = code ? (" (" + code + ")") : name;
+      const classInfo = code ? (name + " (" + code + ")") : name;
 
-      if (total === 0) { el.textContent = classInfo + " (no students loaded)"; return; }
+      if (total === 0) { el.innerHTML = "<strong>" + classInfo + "</strong> (no students loaded)"; return; }
       const avg = Math.round(students.reduce((sum, s) => sum + computePercentWithPreview(s), 0) / total);
-      el.textContent = classInfo + " (" + total + " Stu, Avg " + avg + "%)";
+      el.innerHTML = "<strong>" + classInfo + "</strong> (" + total + " Stu, Avg " + avg + "%)";
     }
 
     function computeLast3HistoryWithCurrent(st) {
@@ -1150,6 +1205,7 @@
       students.forEach((st, index) => {
         const tr = document.createElement("tr");
         tr.dataset.studentId = st.id;
+        if (st.disabled) tr.classList.add("disabled-row");
 
         const tdSel = document.createElement("td");
         const chk = document.createElement("input");
@@ -1682,6 +1738,13 @@
     const reportsHeaderRow = document.getElementById("reports-header-row");
     const reportsActionSelect = document.getElementById("reports-action-select");
 
+    function makeAttBadge(type, text) {
+      const span = document.createElement("span");
+      span.className = "att-badge " + (type === "A" ? "att-badge-a" : "att-badge-p");
+      span.textContent = text;
+      return span;
+    }
+
     function renderReportsTable() {
       const cls = getCurrentClass();
       const students = cls.students.slice();
@@ -1698,23 +1761,17 @@
         return th;
       }
 
-      const selectTh = mkTh("", null, "40px");
-      const headerSelect = document.createElement("input");
-      headerSelect.type = "checkbox";
-      headerSelect.id = "reports-header-select-all";
-      selectTh.appendChild(headerSelect);
-      reportsHeaderRow.appendChild(selectTh);
-
+      // Column order: S.No, Roll, Action, %, Name, Dates..., Tot P, Tot A, #Remarks
       reportsHeaderRow.appendChild(mkTh("S.No", "sno", "50px"));
       reportsHeaderRow.appendChild(mkTh("Roll", "roll", "90px"));
+      reportsHeaderRow.appendChild(mkTh("Action", null, "100px"));
       reportsHeaderRow.appendChild(mkTh("%", "percent", "70px"));
       reportsHeaderRow.appendChild(mkTh("Name", "name"));
-      reportsHeaderRow.appendChild(mkTh("Action", null, "100px"));
 
       dates.forEach(d => {
         const th = document.createElement("th");
         th.textContent = formatDateDisplay(d);
-        th.title = "Attendance on " + formatDateDisplay(d) + " (P/A)";
+        th.title = "Attendance on " + formatDateDisplay(d) + " (Absence count / Present count)";
         reportsHeaderRow.appendChild(th);
       });
 
@@ -1754,7 +1811,7 @@
       if (students.length === 0) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 6 + dates.length + 3;
+        td.colSpan = 5 + dates.length + 3;
         td.className = "empty-state";
         td.textContent = "No students in roster.";
         tr.appendChild(td);
@@ -1772,21 +1829,8 @@
         const totalA = totalSess - totalP;
         const percent = totalSess === 0 ? 0 : Math.round(100 * totalP / totalSess);
 
-        const tdSelect = document.createElement("td");
-        const rowChk = document.createElement("input");
-        rowChk.type = "checkbox";
-        rowChk.className = "reports-row-checkbox";
-        tdSelect.appendChild(rowChk);
-
         const tdSno = document.createElement("td"); tdSno.textContent = index + 1;
         const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
-
-        const tdPercent = document.createElement("td");
-        tdPercent.className = "percent-cell";
-        tdPercent.dataset.percentCellReport = st.id;
-        tdPercent.textContent = percent + "%";
-
-        const tdName = document.createElement("td"); tdName.textContent = st.name;
 
         const tdActions = document.createElement("td");
         const actionBtn = document.createElement("button");
@@ -1804,17 +1848,39 @@
         };
         tdActions.appendChild(actionBtn);
 
-        tr.append(tdSelect, tdSno, tdRoll, tdPercent, tdName, tdActions);
+        const tdPercent = document.createElement("td");
+        tdPercent.className = "percent-cell";
+        tdPercent.dataset.percentCellReport = st.id;
+        tdPercent.textContent = percent + "%";
+
+        const tdName = document.createElement("td"); tdName.textContent = st.name;
+
+        tr.append(tdSno, tdRoll, tdActions, tdPercent, tdName);
+
+        // Per-student running counters:
+        // - Present => green badge with runningP (1..N)
+        // - Absent  => red badge with runningA (1..N)   (as requested)
+        let runningP = 0;
+        let runningA = 0;
 
         dates.forEach(d => {
           const sess = sessionsByDate[d];
           const mark = sess && sess.marks && sess.marks[st.id];
           const td = document.createElement("td");
+
           if (mark) {
-            td.textContent = (!st.disabled && mark.present) ? "P" : "A";
+            const isPresent = (!st.disabled && mark.present);
+            if (isPresent) {
+              runningP += 1;
+              td.appendChild(makeAttBadge("P", String(runningP)));
+            } else {
+              runningA += 1;
+              td.appendChild(makeAttBadge("A", String(runningA)));
+            }
           } else {
             td.textContent = "";
           }
+
           tr.appendChild(td);
         });
 
@@ -1845,13 +1911,6 @@
         };
       });
     }
-
-    document.addEventListener("change", (e) => {
-      if (e.target && e.target.id === "reports-header-select-all") {
-        const checked = e.target.checked;
-        document.querySelectorAll("#reports-tbody .reports-row-checkbox").forEach(cb => cb.checked = checked);
-      }
-    });
 
     function updateReportsClassesSummary() {
       const summaryEl = document.getElementById("reports-classes-summary");
@@ -2194,10 +2253,6 @@
     // =========================
     // Mentor report
     // =========================
-    const mentorConsecutiveGroup = document.getElementById("mentor-consecutive-group");
-    const mentorPercentGroup = document.getElementById("mentor-percent-group");
-    const mentorConsecutiveInput = document.getElementById("mentor-consecutive-input");
-    const mentorPercentInput = document.getElementById("mentor-percent-input");
     const mentorSummaryEl = document.getElementById("mentor-summary");
     const mentorTableContainer = document.getElementById("mentor-table-container");
     const mentorTbody = document.getElementById("mentor-tbody");
@@ -2206,19 +2261,31 @@
     const exportMentorReportBtn = document.getElementById("export-mentor-report-btn");
     const mentorCopyWaBtn = document.getElementById("mentor-copy-wa-btn");
 
+    const mentorConsecutiveInput = document.getElementById("mentor-consecutive-input");
+    const mentorPercentInput = document.getElementById("mentor-percent-input");
+
     function getSelectedMentorType() {
       for (let i = 0; i < mentorTypeRadios.length; i++) if (mentorTypeRadios[i].checked) return mentorTypeRadios[i].value;
       return "consecutive";
     }
 
-    Array.from(mentorTypeRadios).forEach(r => r.addEventListener("change", () => {
+    function syncMentorInlineInputs() {
       const t = getSelectedMentorType();
-      mentorConsecutiveGroup.style.display = (t === "consecutive") ? "block" : "none";
-      mentorPercentGroup.style.display = (t === "percentage") ? "block" : "none";
+      if (t === "consecutive") {
+        mentorConsecutiveInput.disabled = false;
+        mentorPercentInput.disabled = true;
+      } else {
+        mentorConsecutiveInput.disabled = true;
+        mentorPercentInput.disabled = false;
+      }
+    }
+
+    Array.from(mentorTypeRadios).forEach(r => r.addEventListener("change", () => {
+      syncMentorInlineInputs();
       generateMentorReport();
     }));
-    mentorConsecutiveInput.addEventListener("input", generateMentorReport);
-    mentorPercentInput.addEventListener("input", generateMentorReport);
+    mentorConsecutiveInput.addEventListener("input", () => { if (!mentorConsecutiveInput.disabled) generateMentorReport(); });
+    mentorPercentInput.addEventListener("input", () => { if (!mentorPercentInput.disabled) generateMentorReport(); });
 
     function computeConsecutiveAbsencesFromEnd(student, sessionsByDate) {
       const dates = Object.keys(sessionsByDate).sort();
@@ -2365,11 +2432,23 @@
     }
     exportMentorReportBtn.onclick = exportMentorReportExcel;
 
-    // Build WhatsApp-friendly mentor text:
-    // - Header has criteria line
-    // - Per student: "<index>. ROLL (FirstName)  P/Total (%)" (same line)
-    // - No blank line between students
-    // - At the very end, one blank line, then "Format: P/Total (% Attendance)"
+    function getMentorSortLabel() {
+      const f = (mentorSort && mentorSort.field) ? mentorSort.field : "roll";
+      const dir = (mentorSort && mentorSort.dir) ? mentorSort.dir : "asc";
+
+      // Your mentor table uses data-sort-field="roll" and "attendance"
+      // and your sortMentorFiltered treats "attendance" and "percent" as the same
+      if (f === "roll") return "Sorted by Roll";
+      if (f === "attendance" || f === "percent") return "Sorted by Attendance %";
+      if (f === "name") return "Sorted by Name (" + dir + ")";
+      if (f === "detail") return "Sorted by Details (" + dir + ")";
+      if (f === "total") return "Sorted by Total (" + dir + ")";
+      if (f === "p") return "Sorted by Present (" + dir + ")";
+      if (f === "a") return "Sorted by Absent (" + dir + ")";
+      return "Sorted by " + f + " (" + dir + ")";
+    }
+
+
     function buildMentorWhatsappText() {
       if (!lastMentorReport || lastMentorReport.length === 0) {
         return "No mentor report data available.";
@@ -2383,13 +2462,13 @@
       if (type === "consecutive") {
         const x = parseInt(mentorConsecutiveInput.value, 10) || 1;
         if (x === 1) {
-          header += "*Criteria:* Today's Absent list\n";
+          header += "*Today's Absent list\n\n(" + getMentorSortLabel() + ")";
         } else {
-          header += "*Criteria:* Absent at least " + x + " consecutive classes\n";
+          header += "*Criteria:* Absent at least " + x + " consecutive classes\n\n(" + getMentorSortLabel() + ")";
         }
       } else {
         const thr = parseInt(mentorPercentInput.value, 10) || 0;
-        header += "*Criteria:* Attendance less than " + thr + "%\n";
+        header += "*Criteria:* Attendance less than " + thr + "%\n\n(" + getMentorSortLabel() + ")";
       }
 
       header += "\n";
@@ -2408,7 +2487,7 @@
       });
 
       const body = lines.join("\n");
-      const footer = "\n\nFormat: Present/Total (% Attendance)";
+      const footer = "\n\n_*Format:* Present/Total (% Attendance)_";
 
       return header + body + footer;
     }
@@ -2447,6 +2526,8 @@
       if (!currentSession.date) currentSession.date = today;
       attendanceDateInput.value = currentSession.date;
       loadSessionForDate(currentSession.date);
+
+      syncMentorInlineInputs();
 
       renderRosterTable();
       renderAttendanceTable();
