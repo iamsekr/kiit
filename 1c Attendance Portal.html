@@ -13,8 +13,8 @@
       --color-text: #111827;
       --color-muted: #6b7280;
       --shadow-soft: 0 1px 3px rgba(15, 23, 42, 0.06);
-      --radius-small: 4px;
       --radius-medium: 8px;
+      --radius-small: 4px;
       --transition-fast: 0.15s ease-in-out;
     }
     * { box-sizing: border-box; }
@@ -58,9 +58,8 @@
       align-items: center;
       gap: 0.5rem;
       font-size: 0.8rem;
-      color: var(--color-muted);
-      flex-wrap: wrap;
     }
+
     .class-radios {
       display: inline-flex;
       gap: 0.6rem;
@@ -156,7 +155,7 @@
       flex: 1;
     }
     label { font-size: 0.75rem; color: var(--color-muted); }
-    input[type="text"], input[type="date"], input[type="tel"], input[type="file"], textarea {
+    input[type="text"], input[type="date"], input[type="tel"], input[type="file"], input[type="number"], textarea, select {
       border-radius: var(--radius-small);
       border: 1px solid var(--color-border-soft);
       padding: 0.35rem 0.5rem;
@@ -166,7 +165,7 @@
       transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
     }
     textarea { resize: vertical; min-height: 40px; }
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: #2563eb;
       background: #fff;
@@ -185,7 +184,7 @@
       font-size: 0.8rem;
       cursor: pointer;
       color: #111827;
-      transition: background-color var(--transition-fast), transform var(--transition-fast);
+      transition: background-color var(--transition-fast), transform var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
       white-space: nowrap;
     }
     .btn:hover { background: #f3f4f6; }
@@ -229,9 +228,9 @@
     th.sortable, th.sortable-roster, #mentor-table thead th.sortable-mentor { cursor: pointer; }
     tbody tr { transition: background-color var(--transition-fast); }
 
-    /* Msgs table hover highlight */
-    #reports-table tbody tr:hover { background: #fde68a; }
+    /* Msgs table banding + hover */
     #reports-table tbody tr:nth-child(even) { background: #f9fafb; }
+    #reports-table tbody tr:hover { background: #fde68a !important; }
 
     tbody tr.absent { background: #ffe5e5; }
 
@@ -306,6 +305,14 @@
     .remarks-date { font-size: 0.7rem; color: #6b7280; }
     .remarks-text { margin-top: 2px; }
 
+    .disabled-row {
+      background: #fee2e2 !important;
+    }
+    .disabled-text {
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
     @media (max-width: 640px) {
       .card { padding: 0.75rem; }
       .header-top-row { flex-direction: column; align-items: flex-start; }
@@ -333,7 +340,7 @@
       </div>
 
       <div class="class-bar">
-        <span>Class:</span>
+        <span></span>
         <div id="class-radios" class="class-radios"></div>
         <span id="class-summary"></span>
       </div>
@@ -378,6 +385,16 @@
         </div>
       </div>
 
+      <!-- Disable student toggle -->
+      <div class="form-row" style="align-items:center;margin-top:-0.3rem;">
+        <div class="form-group" style="flex:0 0 auto;">
+          <label style="display:flex;align-items:center;gap:0.25rem;">
+            <input id="disabled-input" type="checkbox" />
+            <span>Disable (debarred / special case)</span>
+          </label>
+        </div>
+      </div>
+
       <div class="form-row" style="align-items:flex-end;">
         <div class="form-group">
           <label for="email-display">Email (auto from roll)</label>
@@ -407,6 +424,7 @@
               <th class="sortable-roster" data-sort-field="sno" style="width:50px;">S.No</th>
               <th class="sortable-roster" data-sort-field="roll" style="width:90px;">Roll</th>
               <th class="sortable-roster" data-sort-field="name">Name</th>
+              <th style="width:50px;">Status</th>
               <th>Student Phone</th>
               <th>Parent Phone</th>
               <th>Email</th>
@@ -474,6 +492,20 @@
     <!-- MSGS -->
     <section id="reports-section" class="card" style="display:block;">
       <div id="reports-classes-summary" style="font-size:0.8rem;color:#4b5563;margin-bottom:0.5rem;"></div>
+
+      <!-- Action selector (no apply button) -->
+      <div class="form-row" style="align-items:center;margin-bottom:0.5rem;">
+        <div class="form-group" style="flex:0 0 auto;">
+          <label for="reports-action-select">Row action</label>
+          <select id="reports-action-select" style="padding:0.25rem 0.5rem;font-size:0.8rem;">
+            <option value="wa-student">WhatsApp Student</option>
+            <option value="wa-parent">WhatsApp Parent</option>
+            <option value="email-student">Email Student</option>
+            <option value="email-parent-cc-student">Email Parent (cc Student)</option>
+          </select>
+        </div>
+      </div>
+
       <div class="table-container">
         <table id="reports-table">
           <thead><tr id="reports-header-row"></tr></thead>
@@ -488,6 +520,7 @@
         <div class="form-group" style="flex:1.5;">
           <label>Report Type</label>
           <div style="display:flex;flex-wrap:wrap;gap:0.75rem;font-size:0.8rem;">
+
             <label style="display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;">
               <input type="radio" name="mentor-report-type" value="consecutive" checked />
               <span>Consecutive absences (last X classes)</span>
@@ -497,6 +530,12 @@
               <span>Below attendance % threshold</span>
             </label>
           </div>
+        </div>
+        <!-- Copy WhatsApp Text button -->
+        <div class="form-group" style="flex:0 0 auto;align-items:flex-end;display:flex;justify-content:flex-end;">
+          <button id="mentor-copy-wa-btn" class="btn btn-outline btn-sm" type="button">
+            Copy WhatsApp Text
+          </button>
         </div>
       </div>
 
@@ -524,11 +563,8 @@
               <th class="sortable-mentor" data-sort-field="sno" style="width:50px;">S.No</th>
               <th class="sortable-mentor" data-sort-field="roll" style="width:90px;">Roll</th>
               <th class="sortable-mentor" data-sort-field="name">Name</th>
+              <th class="sortable-mentor" data-sort-field="attendance" style="width:120px;">Attendance</th>
               <th class="sortable-mentor" data-sort-field="detail">Details</th>
-              <th class="sortable-mentor" data-sort-field="total" style="width:70px;">Total</th>
-              <th class="sortable-mentor" data-sort-field="p" style="width:70px;">P</th>
-              <th class="sortable-mentor" data-sort-field="a" style="width:70px;">A</th>
-              <th class="sortable-mentor" data-sort-field="percent" style="width:70px;">%</th>
             </tr>
           </thead>
           <tbody id="mentor-tbody"></tbody>
@@ -624,9 +660,9 @@
       whatsappParentTemplate:
         "Dear Parent of {name} ({roll}) from class {class name}, your ward's attendance is {percent}% out of {total number of classes} classes, and they were present in {Classes you are present} classes. Remarks: {remarks}",
       studentEmailTemplate:
-        "Dear {name},\\nYou belong to class {class name}.\\nYour attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\\nRemarks: {remarks}",
+        "Dear {name},\nYou belong to class {class name}.\nYour attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\nRemarks: {remarks}",
       parentEmailTemplate:
-        "Dear Parent of {name} ({roll}),\\nYour ward is in class {class name}.\\nTheir attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\\nRemarks: {remarks}"
+        "Dear Parent of {name} ({roll}),\nYour ward is in class {class name}.\nTheir attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\nRemarks: {remarks}"
     };
 
     const WHATSAPP_CONFIG = {
@@ -645,7 +681,6 @@
     const REMOTE_PING_URL  = "https://sekr.in/wp-json/kiit-att/v1/ping";
     const REMOTE_TEST_URL  = "https://sekr.in/wp-json/kiit-att/v1/token-test";
 
-    // IMPORTANT: paste your token here
     const REMOTE_API_TOKEN = "tROGebnby7DfGh7qpn24M0mKA5OiBrW5b3e7xqGT";
 
     const syncStatusEl = document.getElementById("sync-status");
@@ -670,7 +705,7 @@
     let rosterSort = { field: "sno", dir: "asc" };
     let reportSort = { field: "roll", dir: "asc" };
     let mentorSort = { field: "roll", dir: "asc" };
-    let lastMentorReport = [];
+    let lastMentorReport = []; // in the same order as displayed
 
     function ensureClass(key) {
       if (!classes[key]) classes[key] = { students: [], sessionsByDate: {} };
@@ -683,7 +718,8 @@
     function generateId() { return "s_" + Math.random().toString(36).substr(2, 9); }
     function toTitleCase(name) {
       if (!name) return "";
-      return name.toLowerCase().split(/\s+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+      return name.toLowerCase().split(/\s+/).filter(Boolean)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     }
     function findStudentById(id) { return getStudents().find(s => s.id === id) || null; }
     function findStudentByRoll(roll) { return getStudents().find(s => s.roll === roll) || null; }
@@ -695,11 +731,12 @@
     function computePercentWithPreview(student) {
       const st = getStudents().find(s => s.id === student.id) || student;
       let baseTotal = st.totalSessions || 0;
-      let basePresents = st.presents || 0;
+      let basePresents = st.disabled ? 0 : (st.presents || 0);
+
       const previewMark = currentSession.marks[st.id];
       if (previewMark && currentSession.date) {
         baseTotal += 1;
-        if (previewMark.present) basePresents += 1;
+        if (!st.disabled && previewMark.present) basePresents += 1;
       }
       if (baseTotal === 0) return 0;
       return Math.round(100 * basePresents / baseTotal);
@@ -712,12 +749,11 @@
       const meta = getCurrentClassMeta();
       const code = meta ? meta.classCode : "";
       const name = meta ? meta.label : currentClassKey;
-      const sap = meta ? meta.sapKey : "";
-      const classInfo = code ? (name + " (" + code + ")") : name;
+      const classInfo = code ? (" (" + code + ")") : name;
 
       if (total === 0) { el.textContent = classInfo + " (no students loaded)"; return; }
       const avg = Math.round(students.reduce((sum, s) => sum + computePercentWithPreview(s), 0) / total);
-      el.textContent = classInfo + " (" + total + " students, avg " + avg + "%)";
+      el.textContent = classInfo + " (" + total + " Stu, Avg " + avg + "%)";
     }
 
     function computeLast3HistoryWithCurrent(st) {
@@ -917,6 +953,8 @@
         renderReportsTable(); refreshAllPercents(); updateReportsClassesSummary();
       } else if (id === "roster-section") {
         renderRosterTable(); refreshAllPercents();
+      } else if (id === "mentor-section") {
+        generateMentorReport();
       }
     }
 
@@ -957,7 +995,7 @@
           attendanceDateInput.value = currentSession.date;
           loadSessionForDate(currentSession.date);
 
-          renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+          renderRosterTable(); renderAttendanceTable(); renderReportsTable(); generateMentorReport();
           refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
           saveAll();
         });
@@ -978,6 +1016,7 @@
     const nameInput = document.getElementById("name-input");
     const studentPhoneInput = document.getElementById("student-phone-input");
     const parentPhoneInput = document.getElementById("parent-phone-input");
+    const disabledInput = document.getElementById("disabled-input");
     const emailDisplay = document.getElementById("email-display");
     const saveStudentBtn = document.getElementById("save-student-btn");
     const saveStudentLabel = document.getElementById("save-student-label");
@@ -1000,6 +1039,7 @@
       studentPhoneInput.value = "";
       parentPhoneInput.value = "";
       emailDisplay.value = "";
+      disabledInput.checked = false;
       saveStudentLabel.textContent = "Add Student";
     }
 
@@ -1009,6 +1049,8 @@
       const nameRaw = (nameInput.value || "").trim();
       const studentPhone = (studentPhoneInput.value || "").trim();
       const parentPhone = (parentPhoneInput.value || "").trim();
+      const disabled = !!disabledInput.checked;
+
       if (!roll || !nameRaw) { alert("Please enter at least Roll and Name."); return; }
 
       const name = toTitleCase(nameRaw);
@@ -1017,15 +1059,30 @@
       if (editingStudentId) {
         const st = students.find(s => s.id === editingStudentId);
         if (st) {
-          st.roll = roll; st.name = name;
-          st.studentPhone = studentPhone; st.parentPhone = parentPhone; st.email = email;
+          st.roll = roll;
+          st.name = name;
+          st.studentPhone = studentPhone;
+          st.parentPhone = parentPhone;
+          st.email = email;
+          st.disabled = disabled;
         }
       } else {
-        students.push({ id: generateId(), roll, name, studentPhone, parentPhone, email, totalSessions: 0, presents: 0, remarks: [] });
+        students.push({
+          id: generateId(),
+          roll,
+          name,
+          studentPhone,
+          parentPhone,
+          email,
+          totalSessions: 0,
+          presents: 0,
+          remarks: [],
+          disabled
+        });
       }
 
       resetRosterForm();
-      renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+      renderRosterTable(); renderAttendanceTable(); renderReportsTable(); generateMentorReport();
       refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
       saveAll();
     }
@@ -1041,6 +1098,7 @@
       studentPhoneInput.value = st.studentPhone || "";
       parentPhoneInput.value = st.parentPhone || "";
       emailDisplay.value = st.email || "";
+      disabledInput.checked = !!st.disabled;
       saveStudentLabel.textContent = "Update Student";
       rollInput.focus();
     }
@@ -1050,7 +1108,13 @@
       cls.students = cls.students.filter(s => s.id !== id);
       delete currentSession.marks[id];
 
-      renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+      const sessionsByDate = getSessionsByDate();
+      Object.keys(sessionsByDate).forEach(date => {
+        const sess = sessionsByDate[date];
+        if (sess && sess.marks && sess.marks[id]) delete sess.marks[id];
+      });
+
+      renderRosterTable(); renderAttendanceTable(); renderReportsTable(); generateMentorReport();
       refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
       saveAll();
     }
@@ -1063,7 +1127,7 @@
       if (baseStudents.length === 0) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 8;
+        td.colSpan = 9;
         td.className = "empty-state";
         td.textContent = "No students added yet. Use the form or import XLS.";
         tr.appendChild(td);
@@ -1097,6 +1161,11 @@
         const tdSno = document.createElement("td"); tdSno.textContent = index + 1;
         const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
         const tdName = document.createElement("td"); tdName.textContent = st.name;
+
+        const tdStatus = document.createElement("td");
+        tdStatus.textContent = st.disabled ? "DIS" : "";
+        tdStatus.style.color = st.disabled ? "#b91c1c" : "";
+
         const tdSP = document.createElement("td"); tdSP.textContent = st.studentPhone || "-";
         const tdPP = document.createElement("td"); tdPP.textContent = st.parentPhone || "-";
         const tdEmail = document.createElement("td"); tdEmail.textContent = st.email || "-";
@@ -1117,7 +1186,7 @@
         wrap.append(editBtn, delBtn);
         tdActions.appendChild(wrap);
 
-        tr.append(tdSel, tdSno, tdRoll, tdName, tdSP, tdPP, tdEmail, tdActions);
+        tr.append(tdSel, tdSno, tdRoll, tdName, tdStatus, tdSP, tdPP, tdEmail, tdActions);
         rosterTbody.appendChild(tr);
       });
 
@@ -1128,7 +1197,10 @@
       const checked = rosterHeaderCheckbox.checked;
       document.querySelectorAll("#roster-tbody .roster-row-checkbox").forEach(cb => cb.checked = checked);
     });
-    rosterSelectAllBtn.onclick = () => { rosterHeaderCheckbox.checked = true; rosterHeaderCheckbox.dispatchEvent(new Event("change")); };
+    rosterSelectAllBtn.onclick = () => {
+      rosterHeaderCheckbox.checked = true;
+      rosterHeaderCheckbox.dispatchEvent(new Event("change"));
+    };
 
     rosterDeleteSelectedBtn.onclick = () => {
       const cls = getCurrentClass();
@@ -1150,7 +1222,7 @@
         });
       });
 
-      renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+      renderRosterTable(); renderAttendanceTable(); renderReportsTable(); generateMentorReport();
       refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
       saveAll();
     };
@@ -1216,14 +1288,26 @@
           existing.studentPhone = studentPhone || existing.studentPhone;
           existing.parentPhone = parentPhone || existing.parentPhone;
           existing.email = email;
+          if (typeof existing.disabled === "undefined") existing.disabled = false;
           updated++;
         } else {
-          students.push({ id: generateId(), roll, name: name || roll, studentPhone, parentPhone, email, totalSessions: 0, presents: 0, remarks: [] });
+          students.push({
+            id: generateId(),
+            roll,
+            name: name || roll,
+            studentPhone,
+            parentPhone,
+            email,
+            totalSessions: 0,
+            presents: 0,
+            remarks: [],
+            disabled: false
+          });
           added++;
         }
       }
 
-      renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+      renderRosterTable(); renderAttendanceTable(); renderReportsTable(); generateMentorReport();
       refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
       saveAll();
       importXlsStatus.textContent = "Import complete: " + added + " added, " + updated + " updated.";
@@ -1298,7 +1382,7 @@
       let totalPresent = 0;
       students.forEach(st => {
         const mark = currentSession.marks[st.id];
-        if (mark && mark.present) totalPresent++;
+        if (!st.disabled && mark && mark.present) totalPresent++;
       });
       presentTodayEl.textContent = "Total present today: " + totalPresent + " of " + students.length;
     }
@@ -1363,7 +1447,7 @@
 
         const tr = document.createElement("tr");
         tr.dataset.studentId = st.id;
-        if (!mark.present) tr.classList.add("absent");
+        if (!mark.present || st.disabled) tr.classList.add("absent");
 
         tr.addEventListener("click", e => {
           const t = e.target;
@@ -1379,6 +1463,7 @@
         span.className = "name-with-percent";
         span.dataset.attName = st.id;
         span.innerHTML = '<span class="name-main">' + st.name + '</span>(' + percent + '%)';
+        if (st.disabled) span.classList.add("disabled-text");
         tdName.appendChild(span);
 
         const tdRemarks = document.createElement("td");
@@ -1395,8 +1480,9 @@
         const chk = document.createElement("input");
         chk.type = "checkbox";
         chk.className = "checkbox-large";
-        chk.checked = !!mark.present;
-        chk.onclick = e => { e.stopPropagation(); setPresentForStudent(st.id, chk.checked); };
+        chk.checked = !!mark.present && !st.disabled;
+        chk.disabled = st.disabled;
+        chk.onclick = e => { e.stopPropagation(); if (!st.disabled) setPresentForStudent(st.id, chk.checked); };
         tdPres.appendChild(chk);
 
         tr.append(tdHistory, tdRoll, tdName, tdRemarks, tdPres);
@@ -1409,29 +1495,32 @@
     function applyRowState(studentId, isPresent) {
       const row = attendanceTbody.querySelector('tr[data-student-id="' + studentId + '"]');
       if (!row) return;
+      const st = findStudentById(studentId);
       const checkbox = row.querySelector("input[type=checkbox]");
-      if (checkbox) checkbox.checked = isPresent;
-      if (isPresent) row.classList.remove("absent"); else row.classList.add("absent");
+      if (checkbox && !st.disabled) checkbox.checked = isPresent;
+      if (isPresent && !st.disabled) row.classList.remove("absent"); else row.classList.add("absent");
     }
 
     function toggleAttendanceForStudent(studentId) {
+      const st = findStudentById(studentId);
+      if (st && st.disabled) return;
       const mark = currentSession.marks[studentId] || { present: true, remark: "" };
       mark.present = !mark.present;
       currentSession.marks[studentId] = mark;
       applyRowState(studentId, mark.present);
       refreshAllPercents();
-      const st = findStudentById(studentId);
       if (st) updateHistoryCellForStudent(st);
       updatePresentToday();
     }
 
     function setPresentForStudent(studentId, isPresent) {
+      const st = findStudentById(studentId);
+      if (st && st.disabled) return;
       const mark = currentSession.marks[studentId] || { present: isPresent, remark: "" };
       mark.present = isPresent;
       currentSession.marks[studentId] = mark;
       applyRowState(studentId, isPresent);
       refreshAllPercents();
-      const st = findStudentById(studentId);
       if (st) updateHistoryCellForStudent(st);
       updatePresentToday();
     }
@@ -1439,6 +1528,7 @@
     toggleAllCheckbox.addEventListener("change", () => {
       const check = toggleAllCheckbox.checked;
       getStudents().forEach(st => {
+        if (st.disabled) return;
         if (!currentSession.marks[st.id]) currentSession.marks[st.id] = { present: check, remark: "" };
         else currentSession.marks[st.id].present = check;
         applyRowState(st.id, check);
@@ -1478,7 +1568,7 @@
 
       students.forEach(st => {
         const m = marksSource[st.id] || { present: true };
-        const att = m.present ? "P" : "A";
+        const att = (!st.disabled && m.present) ? "P" : "A";
         const { first, last } = splitName(st.name || "");
         rows.push([st.roll, first, last, att]);
       });
@@ -1514,7 +1604,7 @@
           const oldMark = prev.marks[st.id];
           if (!oldMark) return;
           if (st.totalSessions > 0) st.totalSessions -= 1;
-          if (oldMark.present && st.presents > 0) st.presents -= 1;
+          if (!st.disabled && oldMark.present && st.presents > 0) st.presents -= 1;
         });
       }
 
@@ -1528,7 +1618,7 @@
         if (!mark) { mark = { present: true, remark: "" }; currentSession.marks[st.id] = mark; }
 
         st.totalSessions = (st.totalSessions || 0) + 1;
-        if (mark.present) st.presents = (st.presents || 0) + 1;
+        if (!st.disabled && mark.present) st.presents = (st.presents || 0) + 1;
 
         const remarkText = (mark.remark || "").trim();
         if (remarkText) st.remarks.push({ date: currentSession.date, text: remarkText });
@@ -1538,7 +1628,7 @@
       attendanceNotesInput.value = "";
       currentSession.notes = "";
 
-      renderAttendanceTable(); renderReportsTable();
+      renderAttendanceTable(); renderReportsTable(); generateMentorReport();
       refreshAllPercents(); refreshAllHistoryCells();
       updateClassCountLabel(); updatePresentToday(); updateReportsClassesSummary();
       saveAll();
@@ -1571,14 +1661,14 @@
         const mark = session.marks[st.id];
         if (!mark) return;
         if (st.totalSessions > 0) st.totalSessions -= 1;
-        if (mark.present && st.presents > 0) st.presents -= 1;
+        if (!st.disabled && mark.present && st.presents > 0) st.presents -= 1;
       });
 
       delete sessionsByDate[date];
 
       currentSession = { date, notes: "", marks: {} };
       attendanceNotesInput.value = "";
-      renderAttendanceTable(); renderReportsTable();
+      renderAttendanceTable(); renderReportsTable(); generateMentorReport();
       refreshAllPercents(); refreshAllHistoryCells();
       updateClassCountLabel(); updatePresentToday(); updateReportsClassesSummary();
       saveAll();
@@ -1590,6 +1680,7 @@
     // =========================
     const reportsTbody = document.getElementById("reports-tbody");
     const reportsHeaderRow = document.getElementById("reports-header-row");
+    const reportsActionSelect = document.getElementById("reports-action-select");
 
     function renderReportsTable() {
       const cls = getCurrentClass();
@@ -1601,17 +1692,24 @@
 
       function mkTh(text, sortableField, width) {
         const th = document.createElement("th");
-        th.textContent = text;
         if (width) th.style.width = width;
+        if (text) th.textContent = text;
         if (sortableField) { th.className = "sortable"; th.dataset.sortField = sortableField; }
         return th;
       }
+
+      const selectTh = mkTh("", null, "40px");
+      const headerSelect = document.createElement("input");
+      headerSelect.type = "checkbox";
+      headerSelect.id = "reports-header-select-all";
+      selectTh.appendChild(headerSelect);
+      reportsHeaderRow.appendChild(selectTh);
 
       reportsHeaderRow.appendChild(mkTh("S.No", "sno", "50px"));
       reportsHeaderRow.appendChild(mkTh("Roll", "roll", "90px"));
       reportsHeaderRow.appendChild(mkTh("%", "percent", "70px"));
       reportsHeaderRow.appendChild(mkTh("Name", "name"));
-      reportsHeaderRow.appendChild(mkTh("Actions", null, "200px"));
+      reportsHeaderRow.appendChild(mkTh("Action", null, "100px"));
 
       dates.forEach(d => {
         const th = document.createElement("th");
@@ -1636,9 +1734,13 @@
             : b.name.localeCompare(a.name);
         }
         if (reportSort.field === "percent") {
-          const pa = a.totalSessions ? Math.round(100 * (a.presents || 0) / a.totalSessions) : 0;
-          const pb = b.totalSessions ? Math.round(100 * (b.presents || 0) / b.totalSessions) : 0;
-          return reportSort.dir === "asc" ? pa - pb : pb - pa;
+          const ta = a.totalSessions || 0;
+          const pa = a.disabled ? 0 : (a.presents || 0);
+          const tb = b.totalSessions || 0;
+          const pb = b.disabled ? 0 : (b.presents || 0);
+          const paPct = ta ? Math.round(100 * pa / ta) : 0;
+          const pbPct = tb ? Math.round(100 * pb / tb) : 0;
+          return reportSort.dir === "asc" ? paPct - pbPct : pbPct - paPct;
         }
         if (reportSort.field === "remarksCount") {
           const ra = (a.remarks || []).length;
@@ -1652,7 +1754,7 @@
       if (students.length === 0) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 5 + dates.length + 3;
+        td.colSpan = 6 + dates.length + 3;
         td.className = "empty-state";
         td.textContent = "No students in roster.";
         tr.appendChild(td);
@@ -1662,11 +1764,19 @@
 
       students.forEach((st, index) => {
         const tr = document.createElement("tr");
+        tr.dataset.studentId = st.id;
+        if (st.disabled) tr.classList.add("disabled-row");
 
         const totalSess = st.totalSessions || 0;
-        const totalP = st.presents || 0;
+        const totalP = st.disabled ? 0 : (st.presents || 0);
         const totalA = totalSess - totalP;
         const percent = totalSess === 0 ? 0 : Math.round(100 * totalP / totalSess);
+
+        const tdSelect = document.createElement("td");
+        const rowChk = document.createElement("input");
+        rowChk.type = "checkbox";
+        rowChk.className = "reports-row-checkbox";
+        tdSelect.appendChild(rowChk);
 
         const tdSno = document.createElement("td"); tdSno.textContent = index + 1;
         const tdRoll = document.createElement("td"); tdRoll.textContent = st.roll;
@@ -1679,29 +1789,32 @@
         const tdName = document.createElement("td"); tdName.textContent = st.name;
 
         const tdActions = document.createElement("td");
-        const wrap = document.createElement("div");
-        wrap.className = "table-actions";
+        const actionBtn = document.createElement("button");
+        actionBtn.className = "btn btn-sm btn-outline";
+        actionBtn.textContent = "Run";
+        actionBtn.onclick = () => {
+          const action = reportsActionSelect.value;
+          if (action === "wa-student" || action === "wa-parent") {
+            sendWhatsAppToStudent(st.id, action === "wa-parent" ? "parent" : "student");
+          } else if (action === "email-student") {
+            sendEmailToStudent(st.id);
+          } else if (action === "email-parent-cc-student") {
+            sendEmailToParentCcStudent(st.id);
+          }
+        };
+        tdActions.appendChild(actionBtn);
 
-        const waBtn = document.createElement("button");
-        waBtn.className = "btn btn-sm btn-primary";
-        waBtn.textContent = WHATSAPP_CONFIG.buttonLabel;
-        waBtn.onclick = () => sendWhatsAppToStudent(st.id, "student");
-
-        const waParentBtn = document.createElement("button");
-        waParentBtn.className = "btn btn-sm btn-outline";
-        waParentBtn.textContent = "WA Parent";
-        waParentBtn.onclick = () => sendWhatsAppToStudent(st.id, "parent");
-
-        wrap.append(waBtn, waParentBtn);
-        tdActions.appendChild(wrap);
-
-        tr.append(tdSno, tdRoll, tdPercent, tdName, tdActions);
+        tr.append(tdSelect, tdSno, tdRoll, tdPercent, tdName, tdActions);
 
         dates.forEach(d => {
           const sess = sessionsByDate[d];
           const mark = sess && sess.marks && sess.marks[st.id];
           const td = document.createElement("td");
-          td.textContent = mark ? (mark.present ? "P" : "A") : "";
+          if (mark) {
+            td.textContent = (!st.disabled && mark.present) ? "P" : "A";
+          } else {
+            td.textContent = "";
+          }
           tr.appendChild(td);
         });
 
@@ -1733,6 +1846,13 @@
       });
     }
 
+    document.addEventListener("change", (e) => {
+      if (e.target && e.target.id === "reports-header-select-all") {
+        const checked = e.target.checked;
+        document.querySelectorAll("#reports-tbody .reports-row-checkbox").forEach(cb => cb.checked = checked);
+      }
+    });
+
     function updateReportsClassesSummary() {
       const summaryEl = document.getElementById("reports-classes-summary");
       const sessionsByDate = getSessionsByDate();
@@ -1746,7 +1866,7 @@
     }
 
     // =========================
-    // WhatsApp
+    // WhatsApp + Email
     // =========================
     function sendWhatsAppToStudent(studentId, to = "student") {
       const st = findStudentById(studentId);
@@ -1756,7 +1876,7 @@
       if (!phone) { alert((to === "parent" ? "Parent" : "Student") + " phone number is missing."); return; }
 
       const totalSessions = st.totalSessions || 0;
-      const presents = st.presents || 0;
+      const presents = st.disabled ? 0 : (st.presents || 0);
       const percent = totalSessions ? Math.round(100 * presents / totalSessions) : 0;
 
       const remarksSummary = (!st.remarks || st.remarks.length === 0)
@@ -1786,6 +1906,64 @@
       window.open(url, "_blank");
     }
 
+    function buildEmailBodyFromTemplate(template, st, extraRemarks) {
+      const totalSessions = st.totalSessions || 0;
+      const presents = st.disabled ? 0 : (st.presents || 0);
+      const percent = totalSessions ? Math.round(100 * presents / totalSessions) : 0;
+      const remarksSummary = extraRemarks || ((!st.remarks || st.remarks.length === 0)
+        ? "None"
+        : st.remarks.slice(-3).map(r => r.text).join("; "));
+      const meta = getCurrentClassMeta();
+      const className = meta ? meta.label : currentClassKey;
+
+      return template
+        .replace("{name}", st.name)
+        .replace("{roll}", st.roll)
+        .replace("{percent}", percent)
+        .replace("{remarks}", remarksSummary)
+        .replace("{class name}", className)
+        .replace("{total number of classes}", totalSessions)
+        .replace("{Classes you are present}", presents);
+    }
+
+    function sendEmailToStudent(studentId) {
+      const st = findStudentById(studentId);
+      if (!st || !st.email) {
+        alert("Student email missing for this record.");
+        return;
+      }
+      const subject = "Attendance update - " + st.roll;
+      const body = buildEmailBodyFromTemplate(appSettings.studentEmailTemplate, st);
+      const url = "mailto:" + encodeURIComponent(st.email)
+        + "?subject=" + encodeURIComponent(subject)
+        + "&body=" + encodeURIComponent(body);
+      window.location.href = url;
+    }
+
+    function sendEmailToParentCcStudent(studentId) {
+      const st = findStudentById(studentId);
+      if (!st) return;
+
+      const parentEmail = st.parentEmail || "";
+      if (!parentEmail) {
+        alert("Parent email not configured for this student.");
+        return;
+      }
+      if (!st.email) {
+        alert("Student email missing for cc.");
+        return;
+      }
+
+      const subject = "Attendance update - " + st.roll;
+      const body = buildEmailBodyFromTemplate(appSettings.parentEmailTemplate, st);
+      const url = "mailto:" + encodeURIComponent(parentEmail)
+        + "?cc=" + encodeURIComponent(st.email)
+        + "&subject=" + encodeURIComponent(subject)
+        + "&body=" + encodeURIComponent(body);
+
+      window.location.href = url;
+    }
+
     // =========================
     // Percent refresh
     // =========================
@@ -1798,8 +1976,8 @@
 
       getStudents().forEach(st => {
         const totalSess = st.totalSessions || 0;
-        const totalP = st.presents || 0;
-        const percent = totalSess === 0 ? 0 : Math.round(100 * totalP / totalSess);
+        const p = st.disabled ? 0 : (st.presents || 0);
+        const percent = totalSess === 0 ? 0 : Math.round(100 * p / totalSess);
         const el = document.querySelector('[data-percent-cell-report="' + st.id + '"]');
         if (el) el.textContent = percent + "%";
       });
@@ -1944,7 +2122,7 @@
           attendanceDateInput.value = today;
           loadSessionForDate(today);
 
-          renderRosterTable(); renderAttendanceTable(); renderReportsTable();
+          renderRosterTable(); renderAttendanceTable(); renderReportsTable(); generateMentorReport();
           refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
 
           alert("Data restored successfully.");
@@ -1988,7 +2166,7 @@
           const mark = sess && sess.marks && sess.marks[st.id];
           if (mark) {
             totalSessions += 1;
-            if (mark.present) { presents += 1; row.push("P"); }
+            if (!st.disabled && mark.present) { presents += 1; row.push("P"); }
             else row.push("A");
           } else {
             row.push("");
@@ -2014,7 +2192,7 @@
     exportClassExcelBtn.onclick = exportFullClassExcel;
 
     // =========================
-    // Mentor report (same features)
+    // Mentor report
     // =========================
     const mentorConsecutiveGroup = document.getElementById("mentor-consecutive-group");
     const mentorPercentGroup = document.getElementById("mentor-percent-group");
@@ -2026,6 +2204,7 @@
     const mentorTypeRadios = document.getElementsByName("mentor-report-type");
     const generateMentorReportBtn = document.getElementById("generate-mentor-report-btn");
     const exportMentorReportBtn = document.getElementById("export-mentor-report-btn");
+    const mentorCopyWaBtn = document.getElementById("mentor-copy-wa-btn");
 
     function getSelectedMentorType() {
       for (let i = 0; i < mentorTypeRadios.length; i++) if (mentorTypeRadios[i].checked) return mentorTypeRadios[i].value;
@@ -2049,8 +2228,8 @@
         const sess = sessionsByDate[d];
         const mark = sess.marks && sess.marks[student.id];
         if (!mark) break;
-        if (mark.present) break;
-        count++;
+        if (!student.disabled && mark.present) break;
+        if (student.disabled || !mark.present) count++;
       }
       return count;
     }
@@ -2064,13 +2243,14 @@
       const asNum = v => Number(v ?? 0);
 
       filtered.sort((x, y) => {
-        if (field === "roll") return dir * asText(x.student.roll).localeCompare(asText(y.student.roll));
-        if (field === "name") return dir * asText(x.student.name).localeCompare(asText(y.student.name));
-        if (field === "detail") return dir * asText(x.detail).localeCompare(asText(y.detail));
-        if (field === "total") return dir * (asNum(x.total) - asNum(y.total));
-        if (field === "p") return dir * (asNum(x.p) - asNum(y.p));
-        if (field === "a") return dir * (asNum(x.a) - asNum(y.a));
-        if (field === "percent") return dir * (asNum(x.percent) - asNum(y.percent));
+        if (field === "roll")     return dir * asText(x.student.roll).localeCompare(asText(y.student.roll));
+        if (field === "name")     return dir * asText(x.student.name).localeCompare(asText(y.student.name));
+        if (field === "detail")   return dir * asText(x.detail).localeCompare(asText(y.detail));
+        if (field === "attendance" || field === "percent")
+          return dir * (asNum(x.percent) - asNum(y.percent));
+        if (field === "total")    return dir * (asNum(x.total) - asNum(y.total));
+        if (field === "p")        return dir * (asNum(x.p) - asNum(y.p));
+        if (field === "a")        return dir * (asNum(x.a) - asNum(y.a));
         return dir * asText(x.student.roll).localeCompare(asText(y.student.roll));
       });
     }
@@ -2093,18 +2273,20 @@
           const consecA = computeConsecutiveAbsencesFromEnd(st, sessionsByDate);
           if (consecA >= x) {
             const total = st.totalSessions || 0;
-            const p = st.presents || 0;
+            const p = st.disabled ? 0 : (st.presents || 0);
             const a = total - p;
             const percent = total === 0 ? 0 : Math.round(100 * p / total);
             filtered.push({ student: st, total, p, a, percent, detail: "Absent " + consecA + " classes consecutively" });
           }
         });
-        mentorSummaryEl.textContent = "Report: Students absent for at least " + x + " consecutive classes. Found " + filtered.length + " students.";
+        mentorSummaryEl.textContent = (x === 1)
+          ? "Report: Today's Absent list. Found " + filtered.length + " students."
+          : "Report: Students absent for at least " + x + " consecutive classes. Found " + filtered.length + " students.";
       } else {
         const thr = parseInt(mentorPercentInput.value, 10) || 0;
         students.forEach(st => {
           const total = st.totalSessions || 0;
-          const p = st.presents || 0;
+          const p = st.disabled ? 0 : (st.presents || 0);
           const a = total - p;
           const percent = total === 0 ? 0 : Math.round(100 * p / total);
           if (percent < thr) filtered.push({ student: st, total, p, a, percent, detail: "Attendance " + percent + "% < " + thr + "%" });
@@ -2112,24 +2294,30 @@
         mentorSummaryEl.textContent = "Report: Students whose attendance is less than " + thr + "%. Found " + filtered.length + " students.";
       }
 
-      lastMentorReport = filtered.slice();
       mentorTbody.innerHTML = "";
-      if (filtered.length === 0) { mentorTableContainer.style.display = "none"; return; }
+      if (filtered.length === 0) { mentorTableContainer.style.display = "none"; lastMentorReport = []; return; }
 
       mentorTableContainer.style.display = "block";
       sortMentorFiltered(filtered);
 
+      lastMentorReport = filtered.slice(); // store in display order
+
       filtered.forEach((item, idx) => {
         const tr = document.createElement("tr");
+
+        const attendanceText = item.total
+          ? (item.p + "/" + item.total + " (" + item.percent + "%)")
+          : "0/0 (0%)";
+
         tr.innerHTML =
           "<td>" + (idx + 1) + "</td>" +
           "<td>" + item.student.roll + "</td>" +
           "<td>" + item.student.name + "</td>" +
-          "<td>" + stripBracketPart(item.detail) + "</td>" +
-          "<td>" + item.total + "</td>" +
-          "<td>" + item.p + "</td>" +
-          "<td>" + item.a + "</td>" +
-          "<td>" + item.percent + "%</td>";
+          "<td>" + attendanceText + "</td>" +
+          "<td>" + stripBracketPart(item.detail) + "</td>";
+
+        if (item.student.disabled) tr.classList.add("disabled-row");
+
         mentorTbody.appendChild(tr);
       });
     }
@@ -2152,9 +2340,17 @@
       const classCode = meta ? meta.classCode : currentClassKey.replace(/\s+/g, "_");
       const className = meta ? meta.label : currentClassKey;
 
-      const rows = [["Roll", "Name", "Details", "Total", "P", "A", "%"]];
+      const rows = [["Roll", "Name", "Attendance", "Details"]];
       lastMentorReport.forEach(item => {
-        rows.push([item.student.roll, item.student.name, stripBracketPart(item.detail), item.total, item.p, item.a, item.percent + "%"]);
+        const attendanceText = item.total
+          ? (item.p + "/" + item.total + " (" + item.percent + "%)")
+          : "0/0 (0%)";
+        rows.push([
+          item.student.roll,
+          item.student.name,
+          attendanceText,
+          stripBracketPart(item.detail)
+        ]);
       });
 
       const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -2168,6 +2364,72 @@
       XLSX.writeFile(wb, "Mentor_Report_" + classCode + "_" + className.replace(/\s+/g, "_") + "_" + dd + "-" + mm + "-" + yyyy + ".xlsx");
     }
     exportMentorReportBtn.onclick = exportMentorReportExcel;
+
+    // Build WhatsApp-friendly mentor text:
+    // - Header has criteria line
+    // - Per student: "<index>. ROLL (FirstName)  P/Total (%)" (same line)
+    // - No blank line between students
+    // - At the very end, one blank line, then "Format: P/Total (% Attendance)"
+    function buildMentorWhatsappText() {
+      if (!lastMentorReport || lastMentorReport.length === 0) {
+        return "No mentor report data available.";
+      }
+      const meta = getCurrentClassMeta();
+      const className = meta ? meta.label : currentClassKey;
+      const type = getSelectedMentorType();
+
+      let header = "Mentor Report - " + className + "\n";
+
+      if (type === "consecutive") {
+        const x = parseInt(mentorConsecutiveInput.value, 10) || 1;
+        if (x === 1) {
+          header += "*Criteria:* Today's Absent list\n";
+        } else {
+          header += "*Criteria:* Absent at least " + x + " consecutive classes\n";
+        }
+      } else {
+        const thr = parseInt(mentorPercentInput.value, 10) || 0;
+        header += "*Criteria:* Attendance less than " + thr + "%\n";
+      }
+
+      header += "\n";
+
+      const lines = lastMentorReport.map((item, idx) => {
+        const st = item.student;
+        const total = item.total || 0;
+        const p = item.p || 0;
+        const percent = item.percent || 0;
+        const firstWord = (st.name || "").trim().split(/\s+/)[0] || "";
+        return (
+          (idx + 1) + ". " +
+          st.roll + " (" + firstWord + ")  " +
+          p + "/" + total + " (" + percent + "%)"
+        );
+      });
+
+      const body = lines.join("\n");
+      const footer = "\n\nFormat: Present/Total (% Attendance)";
+
+      return header + body + footer;
+    }
+
+    async function copyMentorWhatsappTextToClipboard() {
+      const text = buildMentorWhatsappText();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        console.error("Clipboard error:", e);
+      }
+
+      if (!mentorCopyWaBtn) return;
+      const originalClass = mentorCopyWaBtn.className;
+      mentorCopyWaBtn.className = originalClass + " btn-primary";
+      setTimeout(() => {
+        mentorCopyWaBtn.className = originalClass;
+      }, 3000);
+    }
+
+    mentorCopyWaBtn.onclick = copyMentorWhatsappTextToClipboard;
 
     // =========================
     // INIT
@@ -2189,6 +2451,7 @@
       renderRosterTable();
       renderAttendanceTable();
       renderReportsTable();
+      generateMentorReport();
       refreshAllPercents();
       refreshAllHistoryCells();
       updateClassSummary();
