@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Question Bank</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    /* --------- Base Styles --------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #fceabb, #f8b500);
+      min-height: 100vh;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      color: #222;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      background: #ffffffee;
+      border-radius: 16px;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.18);
+      padding: 12px 12px 18px;
+    }
+
+    /* --------- Header / Subject Title --------- */
+    .subject-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .subject-title-block {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .subject-header h1 {
+      font-size: 1.3rem;
+      letter-spacing: 0.5px;
+      color: #333;
+      margin-bottom: 2px;
+      word-break: break-word;
+    }
+
+    .subject-header span.subtitle {
+      font-size: 0.78rem;
+      color: #777;
+    }
+
+    .subject-header-underline {
+      height: 3px;
+      width: 70px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #ff6f91, #ff9671);
+      margin-top: 6px;
+    }
+
+    /* Print icon */
+    .print-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .print-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: translateY(-1px);
+    }
+
+    .print-btn:active {
+      transform: translateY(0);
+    }
+
+    .print-icon {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      position: relative;
+    }
+
+    .print-icon::before,
+    .print-icon::after {
+      content: "";
+      position: absolute;
+      box-sizing: border-box;
+    }
+
+    /* Simple printer icon using pure CSS */
+    .print-icon::before {
+      width: 18px;
+      height: 11px;
+      border-radius: 2px;
+      border: 2px solid #555;
+      top: 6px;
+      left: 1px;
+    }
+    .print-icon::after {
+      width: 12px;
+      height: 7px;
+      border-radius: 2px;
+      border: 2px solid #555;
+      border-top: none;
+      bottom: 0;
+      left: 4px;
+      background: #fff;
+    }
+
+    /* --------- Toolbar --------- */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* --------- Accordion: Modules --------- */
+    .accordion {
+      margin-top: 4px;
+    }
+
+    .module {
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      background: #fff;
+    }
+
+    /* Colorful left border per module */
+    .module:nth-child(1) {
+      border-left: 5px solid #ff6f91;
+    }
+    .module:nth-child(2) {
+      border-left: 5px solid #ff9671;
+    }
+    .module:nth-child(3) {
+      border-left: 5px solid #ffc75f;
+    }
+    .module:nth-child(4) {
+      border-left: 5px solid #f9f871;
+    }
+    .module:nth-child(5) {
+      border-left: 5px solid #a1cfff;
+    }
+    .module:nth-child(n + 6) {
+      border-left: 5px solid #b39ddb;
+    }
+
+    .module-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 10px;
+      cursor: pointer;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 255, 255, 0.8)
+      );
+      backdrop-filter: blur(6px);
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .module-header:hover {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 1),
+        rgba(255, 255, 255, 0.92)
+      );
+      transform: translateY(-1px);
+    }
+
+    .module-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .module-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #333;
+      word-break: break-word;
+    }
+
+    .module-info {
+      font-size: 0.7rem;
+      color: #666;
+    }
+
+    .module-toggle-icon {
+      font-size: 1rem;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+
+    .module-header.open .module-toggle-icon {
+      transform: rotate(90deg);
+    }
+
+    .module-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease-out;
+      background: #fafafa;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .module-inner {
+      padding: 8px 9px 8px;
+    }
+
+    .module-note {
+      font-size: 0.7rem;
+      color: #777;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* --------- Inner Accordions (Short / Long) --------- */
+    .section-accordion {
+      border-radius: 9px;
+      overflow: hidden;
+      margin-bottom: 6px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      background: #fdfdfd;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      cursor: pointer;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.98),
+        rgba(255, 255, 255, 0.9)
+      );
+      transition: background 0.15s ease;
+    }
+
+    .section-header:hover {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 1),
+        rgba(255, 255, 255, 0.96)
+      );
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .section-badge {
+      font-size: 0.65rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      color: #fff;
+    }
+
+    .badge-short {
+      background: linear-gradient(135deg, #00b09b, #96c93d);
+    }
+
+    .badge-long {
+      background: linear-gradient(135deg, #4e54c8, #8f94fb);
+    }
+
+    .section-toggle-icon {
+      font-size: 0.85rem;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .section-header.open .section-toggle-icon {
+      transform: rotate(90deg);
+    }
+
+    .section-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease-out;
+      border-top: 1px solid rgba(0, 0, 0, 0.03);
+      background: #fafafa;
+    }
+
+    /* Distinct color for short-question content */
+    .section-accordion.section-short .section-content {
+      background: #f4fff0; /* soft green tint */
+    }
+
+    .question-list {
+      padding: 6px 8px 6px;
+      border-left: 3px solid rgba(0, 0, 0, 0.03);
+      margin-left: 2px;
+    }
+
+    /* --------- Questions --------- */
+    .question-item {
+      font-size: 0.82rem;
+      margin: 0;
+      padding: 4px 4px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      border-radius: 0;
+      position: relative;
+    }
+
+    /* banded rows */
+    .question-item:nth-child(odd) {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .question-item:nth-child(even) {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .question-number {
+      min-width: auto;
+      margin-right: 1px;
+      font-weight: 600;
+      color: #444;
+      flex-shrink: 0;
+    }
+
+    .question-star {
+      color: #c79200;
+      margin-right: 2px;
+      flex-shrink: 0;
+      font-size: 0.85rem;
+    }
+
+    .question-text {
+      flex: 1;
+      color: #333;
+    }
+
+    /* For long questions with options A/B */
+    .long-question-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .long-option {
+      display: flex;
+      gap: 4px;
+      align-items: flex-start;
+    }
+
+    .long-option-label {
+      font-weight: 600;
+      min-width: 1.4em;
+    }
+
+    .long-option-text {
+      flex: 1;
+    }
+
+    /* Hidden utility */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 8px;
+      }
+
+      .toolbar,
+      .print-btn {
+        display: none !important;
+      }
+
+      .module {
+        page-break-inside: avoid;
+      }
+
+      .subject-header-underline {
+        display: none;
+      }
+    }
+
+    /* Small-screen tweaks */
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px 8px 14px;
+      }
+      .subject-header h1 {
+        font-size: 1.08rem;
+      }
+      .toolbar {
+        font-size: 0.78rem;
+      }
+      .module-header {
+        padding: 7px 8px;
+      }
+      .module-inner {
+        padding: 6px 7px 6px;
+      }
+      .question-item {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="subject-header">
+      <div class="subject-title-block">
+        <h1 id="subjectTitle">Subject Title</h1>
+        <span class="subtitle" id="subjectSubtitle">
+          Question Bank – Modules with Short & Long Questions
+        </span>
+        <div class="subject-header-underline"></div>
+      </div>
+      <button class="print-btn" id="printBtn" title="Print">
+        <span class="print-icon"></span>
+      </button>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <span style="font-size:0.78rem; color:#555;">Tap a module to view questions.</span>
+      </div>
+    </div>
+
+    <!-- ACCORDION CONTAINER -->
+    <div class="accordion" id="accordion"></div>
+  </div>
+
+  <script>
+    // ===================== SIMPLE CONFIG =====================
+    const SUBJECT_TITLE = "Semiconductor Fabrication Design and Technology";
+    const SUBJECT_SUBTITLE = "Question Bank";
+
+    // Global UI behavior configuration
+    const UI_CONFIG = {
+      showStars: false,              // true = show ★ for important questions, false = hide
+      defaultSectionOnOpen: "long",  // "short" | "long" | "both" | "none"
+      showPrintIcon: false           // true = show print icon button, false = hide it
+    };
+
+    const MODULES = [
+      { id: "M1", index: 1, name: "M1 – Semiconductor Fundamentals" },
+      { id: "M2", index: 2, name: "M2 – Introduction to Semiconductor Manufacturing Ecosystem" },
+      { id: "M3", index: 3, name: "M3 – Lithography and Unit Process Fundamentals" }
+    ];
+
+    // One-line questions; type: S (short), L (long)
+    // important: 1 = important, 0 = not important
+    // For long with A/B: options: "a) text##b) text"
+    const QUESTIONS = [
+      // M1 – Semiconductor Fundamentals
+      { moduleId: "M1", type: "S", important: 0,  text: "Define a semiconductor and conductor." },
+      { moduleId: "M1", type: "S", important: 1,  text: "What is the energy bandgap of a solid?" },
+      { moduleId: "M1", type: "S", important: 0,  text: "Distinguish between intrinsic and extrinsic semiconductor" },
+      { moduleId: "M1", type: "S", important: 1,  text: "What is doping in semiconductors?" },
+      { moduleId: "M1", type: "S", important: 0,  text: "Name few commonly used semiconductor materials and state one reason for their popularity." },
+      { moduleId: "M1", type: "S", important: 0,  text: "What is meant by n‑type semiconductor and p-type semiconductor?" },
+      { moduleId: "M1", type: "S", important: 1,  text: "Define carrier mobility." },
+      { moduleId: "M1", type: "S", important: 0,  text: "Write the relation between resistivity and conductivity." },
+      { moduleId: "M1", type: "S", important: 1,  text: "What is generation and recombination of carriers in semiconductors?" },
+      { moduleId: "M1", type: "S", important: 0,  text: "State what is meant by a PN junction at equilibrium." },
+      { moduleId: "M1", type: "S", important: 0,  text: "What are Miller indices?" },
+      { moduleId: "M1", type: "S", important: 1, text: "What is a (100) silicon wafer?" },
+      { moduleId: "M1", type: "S", important: 0, text: "Name any two wide‑bandgap semiconductor materials." },
+
+      // M2 – Introduction to Semiconductor Manufacturing Ecosystem
+      { moduleId: "M2", type: "S", important: 0,  text: "What is a foundry in the semiconductor business model?" },
+      { moduleId: "M2", type: "S", important: 1,  text: "State the differences between Foundry and IDM." },
+      { moduleId: "M2", type: "S", important: 0,  text: "What is Moore’s law?" },
+      { moduleId: "M2", type: "S", important: 1,  text: "What is meant by scaling in VLSI technology?" },
+      { moduleId: "M2", type: "S", important: 0,  text: "What does Fabless company mean?" },
+
+      // M3 – Lithography and Unit Process Fundamentals
+      { moduleId: "M3", type: "S", important: 0,  text: "Define lithography in IC fabrication." },
+      { moduleId: "M3", type: "S", important: 1,  text: "Define resolutionn in lithography?" },
+      { moduleId: "M3", type: "S", important: 1,  text: "What is photoresist?" },
+      { moduleId: "M3", type: "S", important: 0,  text: "Why is SiO₂ important in silicon technology?" },
+      { moduleId: "M3", type: "S", important: 0,  text: "Name the unit processes used in IC fabrication." },
+      { moduleId: "M3", type: "S", important: 1,  text: "What is ion implantation?" },
+      { moduleId: "M3", type: "S", important: 0, text: "Give a brief on ALD and PVD." },
+      { moduleId: "M3", type: "S", important: 1,  text: "What is anisotropic etching?" },
+      { moduleId: "M3", type: "S", important: 1,  text: "What is the main purpose of CMP?" },
+      { moduleId: "M3", type: "S", important: 0, text: "What is meant by self‑aligned double patterning (SADP) (one line)?" },
+      { moduleId: "M3", type: "S", important: 0,  text: "Which wavelength region is used in EUV lithography?" },
+
+
+      { moduleId: "M1", type: "L", important: 0,
+        options: "a) Explain the formation of energy bands in solids.##b) With neat diagrams, distinguish between insulators, semiconductors and metals based on band structure." },
+      { moduleId: "M1", type: "L", important: 0,
+        options: "a) Define intrinsic and extrinsic semiconductors.##b) Explain how n‑type and p‑type semiconductors are formed and draw their energy band diagrams." },
+      { moduleId: "M1", type: "L", important: 0,
+        options: "a) What is doping?##b) Derive expressions for carrier concentrations in an intrinsic semiconductor." },
+      { moduleId: "M1", type: "L", important: 0,
+        options: "a) Define drift current and diffusion current in a semiconductor.##b) Explain with suitable diagrams and write the expressions for drift and diffusion current densities." },
+      { moduleId: "M1", type: "L", important: 0,
+        options: "a) Define mobility, conductivity, and resistivity.##b) Derive the expression for the conductivity of an n‑type semiconductor and discuss how mobility affects resistivity." },
+      { moduleId: "M1", type: "L", important: 0,
+        options: "a) Explain generation and recombination of carriers in a semiconductor.##b) Define carrier lifetime and describe its effect on device performance." },
+      { moduleId: "M1", type: "L", important: 0,
+        options: "a) Explain the operation of a PN junction at equilibrium with an energy band diagram.##b) Sketch and explain its I–V characteristics under forward and reverse bias." },
+      { moduleId: "M1", type: "L", important: 0,  text: "Explain how the depletion width of a pn-junction varies under forward and reverse bias, and then derive its expression." },
+      { moduleId: "M1", type: "L", important: 0,
+        options: "a) Compare Si, Ge, GaAs, SiC, and GaN as materials used for semiconductor device fabrication.##b) Explain the difference between direct band gap and indirect band gap semiconductors with neat diagrams, and discuss how these differences affect their optical absorption and emission properties." },
+      { moduleId: "M1", type: "L", important: 0,
+        options: "a) Describe the crystal structure of silicon (diamond cubic).##b) What are Miller indices? Explain their significace in crystal structure representation." },
+      { moduleId: "M1", type: "L", important: 0, text: "Explain how Miller indices (hkl) for planes and [uvw] for directions are obtained, with at least one worked example for a cubic crystal." },
+
+
+      { moduleId: "M2", type: "L", important: 0,
+        options: "a) Explain the major stages in the semiconductor value chain from design to final product realization.##b) Compare Foundry, IDM and Fabless business models." },
+      { moduleId: "M2", type: "L", important: 0, text: "State Moore’s law and discuss its impact on microfabrication." },
+      { moduleId: "M2", type: "L", important: 0, text: "Explain circuit abstraction to layout and cross‑section in the context of semiconductor fabrication and technology." },
+      { moduleId: "M2", type: "L", important: 0,
+        options: "a) Explain what is meant by circuit abstraction to layout and cross‑section.##b) Using a CMOS inverter as an example, describe (conceptually) how a circuit schematic is translated into layout and then into a fabricated cross‑section." },
+      { moduleId: "M2", type: "L", important: 0,
+        options: "a) List the main benefits of scaling down device dimensions.##b) Discuss the major challenges that arise when scaling to very small technology nodes." },
+
+
+      { moduleId: "M3", type: "L", important: 0,
+        options: "a) Explain the basic steps in optical lithography.##b) Discuss the concept of resolution and how it depends on wavelength and numerical aperture." },
+      { moduleId: "M3", type: "L", important: 0, text: "Discuss the evolution from i‑line to DUV and EUV lithography in semiconductor fabrication." },
+      { moduleId: "M3", type: "L", important: 0,
+        options: "a) What problem does multiple patterning try to solve in lithography?##b) Explain the principle of Self‑Aligned Double Patterning (SADP) and Self‑Aligned Quadruple Patterning (SAQP) with simple sketches or steps." },
+      { moduleId: "M3", type: "L", important: 0, text:"Describe the main steps of the lithography process, illustrating your answer with the patterning of a SiO₂ film as an example." },
+      { moduleId: "M3", type: "L", important: 0,
+        options: "a) Explain the thermal oxidation process of silicon and its main uses.##b) Differentiate between diffusion and ion implantation as doping techniques, mentioning advantages and limitations of each." },
+      { moduleId: "M3", type: "L", important: 0,
+        options: "a) Describe the working principle of the following depostion techniques: APCVD, LPCVD, PECVD, MOCVD, ALD.##b) Compare CVD‑type vs PVD‑type deposition techniques." },
+      { moduleId: "M3", type: "L", important: 0,
+        options: "a) Differentiate between wet etching and dry etching in semiconductor processing.##b) Explain the terms isotropic and anisotropic etching with suitable examples and sketches." },
+      { moduleId: "M3", type: "L", important: 0,
+        options: "a) Why is cleaning essential at multiple stages in IC fabrication?##b) Describe the basic principle of Chemical Mechanical Planarization (CMP) and its role in achieving planar surfaces." },
+      { moduleId: "M3", type: "L", important: 0, text: "List and explain the major steps in a simple silicon device fabrication flow (from bare wafer to a basic MOS device), including oxidation, lithography, etch, doping and metallization." }
+
+    ];
+    // ================== END SIMPLE CONFIG =====================
+
+    const subjectTitleEl = document.getElementById("subjectTitle");
+    const subjectSubtitleEl = document.getElementById("subjectSubtitle");
+    const accordionEl = document.getElementById("accordion");
+    const printBtn = document.getElementById("printBtn");
+
+    if (!UI_CONFIG.showPrintIcon && printBtn) {
+      printBtn.style.display = "none";
+    }
+
+    function render() {
+      subjectTitleEl.textContent = SUBJECT_TITLE;
+      subjectSubtitleEl.textContent = SUBJECT_SUBTITLE;
+      accordionEl.innerHTML = "";
+
+      MODULES.forEach((mod) => {
+        const moduleEl = document.createElement("div");
+        moduleEl.className = "module";
+        moduleEl.dataset.moduleIndex = mod.index;
+        moduleEl.dataset.moduleId = mod.id;
+
+        const header = document.createElement("div");
+        header.className = "module-header";
+
+        const titleBlock = document.createElement("div");
+        titleBlock.className = "module-title-block";
+
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "module-title";
+        titleSpan.textContent = mod.name;
+
+        const infoSpan = document.createElement("span");
+        infoSpan.className = "module-info";
+        infoSpan.textContent = mod.tag || "";
+
+        titleBlock.appendChild(titleSpan);
+        if (mod.tag) titleBlock.appendChild(infoSpan);
+
+        const toggleIcon = document.createElement("span");
+        toggleIcon.className = "module-toggle-icon";
+        toggleIcon.textContent = "▶";
+
+        header.appendChild(titleBlock);
+        header.appendChild(toggleIcon);
+
+        const content = document.createElement("div");
+        content.className = "module-content";
+
+        const inner = document.createElement("div");
+        inner.className = "module-inner";
+
+        const shortQs = QUESTIONS.filter(
+          (q) => q.moduleId === mod.id && q.type === "S"
+        );
+        const longQs = QUESTIONS.filter(
+          (q) => q.moduleId === mod.id && q.type === "L"
+        );
+
+        const shortSection = createSection("short", "Short-Answer Questions", "badge-short", mod, shortQs);
+        const longSection = createSection("long", "Long-Answer Questions", "badge-long", mod, longQs);
+
+        inner.appendChild(shortSection);
+        inner.appendChild(longSection);
+
+        const note = document.createElement("div");
+        note.className = "module-note";
+        note.textContent = "---";
+        inner.appendChild(note);
+
+        content.appendChild(inner);
+        moduleEl.appendChild(header);
+        moduleEl.appendChild(content);
+        accordionEl.appendChild(moduleEl);
+      });
+    }
+
+    function createSection(type, titleText, badgeClass, module, questions) {
+      const section = document.createElement("div");
+      section.className = `section-accordion section-${type}`;
+
+      const header = document.createElement("div");
+      header.className = "section-header";
+
+      const title = document.createElement("div");
+      title.className = "section-title";
+
+      const badge = document.createElement("span");
+      badge.className = `section-badge ${badgeClass}`;
+      badge.textContent = type === "short" ? "S" : "L";
+
+      const titleSpan = document.createElement("span");
+      titleSpan.textContent = titleText;
+
+      title.appendChild(badge);
+      title.appendChild(titleSpan);
+
+      const toggleIcon = document.createElement("span");
+      toggleIcon.className = "section-toggle-icon";
+      toggleIcon.textContent = "▶";
+
+      header.appendChild(title);
+      header.appendChild(toggleIcon);
+
+      const content = document.createElement("div");
+      content.className = "section-content";
+
+      const list = document.createElement("div");
+      list.className = "question-list";
+
+      questions.forEach((q) => {
+        const item = document.createElement("div");
+        item.className = "question-item";
+        item.dataset.type = type;
+
+        const isImportant = q.important === 1; // 1 = important, 0 = not
+        item.dataset.important = isImportant ? "true" : "false";
+
+        const numberSpan = document.createElement("span");
+        numberSpan.className = "question-number";
+
+        const starSpan = document.createElement("span");
+        starSpan.className = "question-star";
+        starSpan.textContent = (UI_CONFIG.showStars && isImportant) ? "★" : "";
+
+        let textEl;
+        if (type === "long" && q.options) {
+          const block = document.createElement("div");
+          block.className = "long-question-block";
+          const parts = q.options.split("##");
+
+          parts.forEach((p) => {
+            const optRow = document.createElement("div");
+            optRow.className = "long-option";
+
+            const match = p.trim().match(/^([a-zA-Z]\))\s*(.*)$/);
+            let label = "";
+            let text = p;
+
+            if (match) {
+              label = match[1].charAt(0);
+              text = match[2];
+            }
+
+            const labelSpan = document.createElement("span");
+            labelSpan.className = "long-option-label";
+            labelSpan.textContent = (label || "").toLowerCase() + ")";
+
+            const textSpan = document.createElement("span");
+            textSpan.className = "long-option-text";
+            textSpan.textContent = text;
+
+            optRow.appendChild(labelSpan);
+            optRow.appendChild(textSpan);
+            block.appendChild(optRow);
+          });
+
+          textEl = block;
+        } else {
+          const textSpan = document.createElement("span");
+          textSpan.className = "question-text";
+          textSpan.textContent = q.text;
+          textEl = textSpan;
+        }
+
+        item.appendChild(numberSpan);
+        item.appendChild(starSpan);
+        item.appendChild(textEl);
+
+        list.appendChild(item);
+      });
+
+      content.appendChild(list);
+      section.appendChild(header);
+      section.appendChild(content);
+
+      return section;
+    }
+
+    function renumberQuestions() {
+      const modules = document.querySelectorAll(".module");
+
+      modules.forEach((module) => {
+        const idx = module.dataset.moduleIndex;
+
+        const shorts = module.querySelectorAll('.question-item[data-type="short"]');
+        shorts.forEach((q, i) => {
+          q.querySelector(".question-number").textContent = "S" + idx + "." + (i + 1);
+        });
+
+        const longs = module.querySelectorAll('.question-item[data-type="long"]');
+        longs.forEach((q, i) => {
+          const base = "L" + idx + "." + (i + 1);
+          q.querySelector(".question-number").textContent = base;
+        });
+      });
+    }
+
+    function setupModuleAccordions() {
+      const modules = document.querySelectorAll(".module");
+
+      modules.forEach((module) => {
+        const header = module.querySelector(".module-header");
+        const content = module.querySelector(".module-content");
+
+        header.addEventListener("click", () => {
+          const isOpen = header.classList.contains("open");
+
+          // Close other modules and their sections
+          document.querySelectorAll(".module-header.open").forEach((h) => {
+            if (h !== header) {
+              h.classList.remove("open");
+              const c = h.parentElement.querySelector(".module-content");
+              if (c) c.style.maxHeight = null;
+
+              const secs = h.parentElement.querySelectorAll(".section-header.open");
+              secs.forEach((sh) => {
+                sh.classList.remove("open");
+                const sc = sh.parentElement.querySelector(".section-content");
+                if (sc) sc.style.maxHeight = null;
+              });
+            }
+          });
+
+          if (isOpen) {
+            // Close this module and its sections
+            header.classList.remove("open");
+            content.style.maxHeight = null;
+
+            const secs = module.querySelectorAll(".section-header.open");
+            secs.forEach((sh) => {
+              sh.classList.remove("open");
+              const sc = sh.parentElement.querySelector(".section-content");
+              if (sc) sc.style.maxHeight = null;
+            });
+          } else {
+            // Open this module
+            header.classList.add("open");
+            content.style.maxHeight = content.scrollHeight + "px";
+
+            // Only apply default sections if none is open yet
+            const anySectionOpen = module.querySelector(".section-header.open");
+            if (!anySectionOpen) {
+              const shortHeader = module.querySelector(
+                ".section-accordion.section-short .section-header"
+              );
+              const shortContent = module.querySelector(
+                ".section-accordion.section-short .section-content"
+              );
+              const longHeader = module.querySelector(
+                ".section-accordion.section-long .section-header"
+              );
+              const longContent = module.querySelector(
+                ".section-accordion.section-long .section-content"
+              );
+
+              // Close both first (safety)
+              [shortHeader, longHeader].forEach((h) => h && h.classList.remove("open"));
+              [shortContent, longContent].forEach((c) => {
+                if (c) c.style.maxHeight = null;
+              });
+
+              if (UI_CONFIG.defaultSectionOnOpen === "short" && shortHeader && shortContent) {
+                shortHeader.classList.add("open");
+                shortContent.style.maxHeight = shortContent.scrollHeight + "px";
+              } else if (UI_CONFIG.defaultSectionOnOpen === "long" && longHeader && longContent) {
+                longHeader.classList.add("open");
+                longContent.style.maxHeight = longContent.scrollHeight + "px";
+              } else if (UI_CONFIG.defaultSectionOnOpen === "both") {
+                if (shortHeader && shortContent) {
+                  shortHeader.classList.add("open");
+                  shortContent.style.maxHeight = shortContent.scrollHeight + "px";
+                }
+                if (longHeader && longContent) {
+                  longHeader.classList.add("open");
+                  longContent.style.maxHeight = longContent.scrollHeight + "px";
+                }
+              }
+              // "none" -> leave both closed
+            }
+
+            // Re-adjust module height after any inner expand
+            setTimeout(() => {
+              content.style.maxHeight = content.scrollHeight + "px";
+            }, 220);
+          }
+        });
+      });
+    }
+
+    function setupSectionAccordions() {
+      const sections = document.querySelectorAll(".section-accordion");
+
+      sections.forEach((section) => {
+        const header = section.querySelector(".section-header");
+        const content = section.querySelector(".section-content");
+
+        header.addEventListener("click", (e) => {
+          // Prevent module header click from also firing
+          e.stopPropagation();
+
+          const isOpen = header.classList.contains("open");
+          const module = section.closest(".module");
+          const moduleContent = module.querySelector(".module-content");
+
+          // Close sibling sections in same module
+          module.querySelectorAll(".section-header.open").forEach((h) => {
+            if (h !== header) {
+              h.classList.remove("open");
+              const c = h.parentElement.querySelector(".section-content");
+              if (c) c.style.maxHeight = null;
+            }
+          });
+
+          if (isOpen) {
+            header.classList.remove("open");
+            content.style.maxHeight = null;
+          } else {
+            header.classList.add("open");
+            content.style.maxHeight = content.scrollHeight + "px";
+          }
+
+          // adjust module height
+          setTimeout(() => {
+            moduleContent.style.maxHeight = moduleContent.scrollHeight + "px";
+          }, 210);
+        });
+      });
+    }
+
+    function setupPrint() {
+      if (!printBtn) return;
+
+      printBtn.addEventListener("click", () => {
+        const modules = document.querySelectorAll(".module");
+        const prevStates = [];
+
+        modules.forEach((module) => {
+          const header = module.querySelector(".module-header");
+          const content = module.querySelector(".module-content");
+          const shortHeader = module.querySelector(
+            ".section-accordion.section-short .section-header"
+          );
+          const longHeader = module.querySelector(
+            ".section-accordion.section-long .section-header"
+          );
+          const shortContent = module.querySelector(
+            ".section-accordion.section-short .section-content"
+          );
+          const longContent = module.querySelector(
+            ".section-accordion.section-long .section-content"
+          );
+
+          prevStates.push({
+            mOpen: header.classList.contains("open"),
+            sOpen: shortHeader && shortHeader.classList.contains("open"),
+            lOpen: longHeader && longHeader.classList.contains("open")
+          });
+
+          header.classList.add("open");
+          content.style.maxHeight = content.scrollHeight + "px";
+
+          if (shortHeader && shortContent) {
+            shortHeader.classList.add("open");
+            shortContent.style.maxHeight = shortContent.scrollHeight + "px";
+          }
+          if (longHeader && longContent) {
+            longHeader.classList.add("open");
+            longContent.style.maxHeight = longContent.scrollHeight + "px";
+          }
+        });
+
+        setTimeout(() => {
+          window.print();
+
+          const modulesArr = Array.from(document.querySelectorAll(".module"));
+          modulesArr.forEach((module, idx) => {
+            const st = prevStates[idx];
+            if (!st) return;
+
+            const header = module.querySelector(".module-header");
+            const content = module.querySelector(".module-content");
+            const shortHeader = module.querySelector(
+              ".section-accordion.section-short .section-header"
+            );
+            const longHeader = module.querySelector(
+              ".section-accordion.section-long .section-header"
+            );
+            const shortContent = module.querySelector(
+              ".section-accordion.section-short .section-content"
+            );
+            const longContent = module.querySelector(
+              ".section-accordion.section-long .section-content"
+            );
+
+            if (st.mOpen) {
+              header.classList.add("open");
+              content.style.maxHeight = content.scrollHeight + "px";
+            } else {
+              header.classList.remove("open");
+              content.style.maxHeight = null;
+            }
+
+            if (shortHeader && shortContent) {
+              if (st.sOpen) {
+                shortHeader.classList.add("open");
+                shortContent.style.maxHeight = shortContent.scrollHeight + "px";
+              } else {
+                shortHeader.classList.remove("open");
+                shortContent.style.maxHeight = null;
+              }
+            }
+
+            if (longHeader && longContent) {
+              if (st.lOpen) {
+                longHeader.classList.add("open");
+                longContent.style.maxHeight = longContent.scrollHeight + "px";
+              } else {
+                longHeader.classList.remove("open");
+                longContent.style.maxHeight = null;
+              }
+            }
+          });
+        }, 250);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      render();
+      renumberQuestions();
+      setupModuleAccordions();
+      setupSectionAccordions();
+      setupPrint();
+    });
+  // Disable right-click context menu on the whole document
+  document.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+  });
+  </script>
+</body>
+</html>
