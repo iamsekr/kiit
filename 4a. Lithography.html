@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Semiconductor Fab: Vapor Deposition Final</title>
+    <title>Semiconductor Fab: Dual Layer Process</title>
     <style>
         :root {
             --bg-color: #f8f9fa;
@@ -66,6 +66,32 @@
             gap: 12px;
         }
 
+        /* Slider Styling */
+        .slider-group {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+        input[type=range]:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
         .btn-row { display: flex; gap: 10px; }
 
         button {
@@ -88,51 +114,6 @@
 
         .btn-secondary { background-color: white; border: 1px solid #cbd5e1; color: #475569; }
         .btn-secondary:hover { background-color: #f8fafc; border-color: #94a3b8; color: #1e293b; }
-
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 12px;
-            background: #f8fafc;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-        }
-        .switch {
-            position: relative; display: inline-block; width: 44px; height: 24px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #cbd5e1; transition: .3s; border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-            background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        .fab-label {
-            background: rgba(255, 255, 255, 0.95);
-            color: #333;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: 600;
-            border: 1px solid var(--accent);
-            font-family: 'Segoe UI', sans-serif;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            user-select: none;
-        }
-        .fab-label::after {
-            content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px;
-            border-width: 5px; border-style: solid;
-            border-color: var(--accent) transparent transparent transparent;
-        }
 
         #loading {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -167,7 +148,7 @@
 
     <div id="sidebar">
         <div>
-            <h1>Fab Lab: Circuitry</h1>
+            <h1>Fab Lab: Dual Layer</h1>
             <h3>Vapor Deposition Process</h3>
         </div>
 
@@ -179,15 +160,15 @@
             </div>
         </div>
 
-        <div class="toggle-row">
-            <span style="font-size: 0.9rem; font-weight:500; color: #444;">Show Layer Labels</span>
-            <label class="switch">
-                <input type="checkbox" id="labelToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
-
         <div class="controls-area">
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>Mask Height</span>
+                    <span id="maskHeightVal">3.5</span>
+                </div>
+                <input type="range" id="maskHeight" min="1.5" max="8.0" step="0.1" value="3.5" disabled>
+            </div>
+
             <div class="btn-row">
                 <button id="backBtn" class="btn-secondary" disabled>← Back</button>
                 <button id="nextBtn" class="btn-primary">Next Step →</button>
@@ -199,7 +180,6 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
         // ================= CONFIGURATION =================
         const CONFIG = {
@@ -210,25 +190,25 @@
             // COLORS
             colorSilicon: 0x505050,
             colorOxide: 0xA2D9FF,      
+            colorMetal: 0xd4af37,        // Gold/Copper
             colorResistLiquid: 0xFCA5A5, // Pinkish
             colorResistHard: 0xd13f3f,   // Deep Red (Exposed)
             colorResistSoft: 0xFCA5A5,   // Pale Pink (Unexposed)
             colorMaskChrome: 0x111111,
-            colorMaskGlass: 0xffffff,
+
+            colorMaskGlass: 0xc2ff78,   // Glass mask
             colorUvLight: 0x8000ff,      
-            colorEtchant: 0xA2D9FF,      
-            colorDeveloper: 0xFCA5A5,    
             
             // SETTINGS
             particleCount: 800,    
-            uvDuration: 12000, // 8 Seconds
-            labelsVisible: false
+            uvDuration: 8000 // 8 Seconds
         };
         // =================================================
 
         const MATS = {
             silicon: new THREE.MeshStandardMaterial({ color: CONFIG.colorSilicon, roughness: 0.4, metalness: 0.1 }),
             oxide: new THREE.MeshStandardMaterial({ color: CONFIG.colorOxide, roughness: 0.6 }), 
+            metal: new THREE.MeshStandardMaterial({ color: CONFIG.colorMetal, roughness: 0.2, metalness: 0.9 }), 
             resistLiq: new THREE.MeshStandardMaterial({ color: CONFIG.colorResistLiquid, roughness: 0.2 }), 
             resistHard: new THREE.MeshStandardMaterial({ color: CONFIG.colorResistHard, roughness: 0.3 }), 
             resistSoft: new THREE.MeshStandardMaterial({ color: CONFIG.colorResistSoft, roughness: 0.3 }), 
@@ -238,27 +218,19 @@
         };
 
         const scene = new THREE.Scene();
-        // UPDATED BACKGROUND COLOR TO GRAY (0x787777)
         const bgCol = 0x787777;
         scene.background = new THREE.Color(bgCol); 
         scene.fog = new THREE.Fog(bgCol, 20, 60);
 
         const container = document.getElementById('canvas-container');
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-        camera.position.set(12, 12, 12);
+        camera.position.set(12, 14, 14);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.SoftShadowMap;
         container.appendChild(renderer.domElement);
-
-        const labelRenderer = new CSS2DRenderer();
-        labelRenderer.setSize(container.clientWidth, container.clientHeight);
-        labelRenderer.domElement.style.position = 'absolute';
-        labelRenderer.domElement.style.top = '0px';
-        labelRenderer.domElement.style.pointerEvents = 'none';
-        container.appendChild(labelRenderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
@@ -276,8 +248,11 @@
 
         document.getElementById('loading').style.display = 'none';
 
-        // --- CIRCUIT PATTERN ---
-        const PATTERN = [
+        // --- GLOBAL STATE FOR MASK HEIGHT ---
+        let currentMaskHeight = 3.5;
+
+        // --- LAYER 1 PATTERN (Base Traces) ---
+        const PATTERN_1 = [
             [0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,1,1,0,0,0,0,0,0,0,1,1,0], 
             [0,1,1,0,0,0,0,0,0,0,1,1,0],
@@ -292,6 +267,24 @@
             [0,1,1,0,0,0,0,0,0,1,1,0,0], 
             [0,0,0,0,0,0,0,0,0,0,0,0,0]
         ];
+
+        // --- LAYER 2 PATTERN (Complex Interconnects) ---
+        const PATTERN_2 = [
+            [1,0,1,0,0,0,1,0,0,0,1,0,1],
+            [1,0,1,0,1,1,1,1,1,0,1,0,1], 
+            [1,0,1,0,1,0,1,0,1,0,1,0,1],
+            [1,0,0,0,1,0,1,0,1,0,0,0,1],
+            [1,1,1,1,1,0,1,0,1,1,1,1,1], 
+            [0,0,1,0,0,0,1,0,0,0,1,0,0],
+            [1,1,1,0,1,1,0,1,1,0,1,1,1], // Dense Center
+            [0,0,1,0,0,0,1,0,0,0,1,0,0],
+            [1,1,1,1,1,0,1,0,1,1,1,1,1], 
+            [1,0,0,0,1,0,1,0,1,0,0,0,1],
+            [1,0,1,0,1,0,1,0,1,0,1,0,1],
+            [1,0,1,0,1,1,1,1,1,0,1,0,1], 
+            [1,0,1,0,0,0,1,0,0,0,1,0,1]
+        ];
+
         const GRID_SIZE = 13;
         const CELL_SIZE = CONFIG.waferSize / GRID_SIZE; 
         const WAFER_SIZE = CONFIG.waferSize;
@@ -303,28 +296,23 @@
         scene.add(world);
         
         // --- GEOMETRY FACTORY ---
-        function createPatternedLayer(material, yStart, thickness) {
+        function createPatternedLayer(material, yStart, thickness, patternArray) {
             const group = new THREE.Group();
-            
-            // Set the Group's Y position to the starting height.
-            // This ensures when we scale the group from 0 to 1, it grows UP from this exact point.
             group.position.y = yStart; 
             
             const offset = WAFER_SIZE / 2 - (CELL_SIZE/2);
             
             for(let r=0; r<GRID_SIZE; r++){
                 for(let c=0; c<GRID_SIZE; c++){
-                    const isTrace = PATTERN[r][c] === 1;
+                    const isTrace = patternArray[r][c] === 1;
                     const type = isTrace ? MESH_IDS.TRACE : MESH_IDS.FIELD;
                     
                     const geo = new THREE.BoxGeometry(CELL_SIZE, thickness, CELL_SIZE);
-                    // Pivot at bottom face
                     geo.translate(0, thickness/2, 0); 
                     
                     const mat = material.clone();
                     const mesh = new THREE.Mesh(geo, mat);
                     
-                    // Local position Y is 0. The Global Y is handled by group.position.y
                     mesh.position.set(
                         c * CELL_SIZE - offset,
                         0, 
@@ -346,65 +334,42 @@
         const ctx = {
             add: (obj) => world.add(obj),
             
-            addLabel: (parent, text, yOff=0.5) => {
-                const div = document.createElement('div');
-                div.className = 'fab-label';
-                div.textContent = text;
-                div.style.opacity = CONFIG.labelsVisible ? '1' : '0';
-                const l = new CSS2DObject(div);
-                l.position.set(0, yOff, 0); 
-                parent.add(l);
-            },
-            
-            // ANIMATION: Accepts duration and synchronizes growth
             animateVaporDeposition: (obj, color, thickness, duration = 3000) => {
                 obj.scale.y = 0.001;
                 obj.visible = true;
-                
-                // Calculate how much to grow per 16ms tick to match duration
                 const growthStep = 16 / duration; 
 
-                // 1. Rain Particles
                 const rainGroup = new THREE.Group();
                 world.add(rainGroup);
                 const geo = new THREE.BoxGeometry(0.06, 0.06, 0.06);
                 const mat = new THREE.MeshBasicMaterial({color: color});
 
                 const rainInterval = setInterval(() => {
-                   // Stop raining when fully grown
                    if(obj.scale.y >= 1) {
                        clearInterval(rainInterval);
                        setTimeout(() => { world.remove(rainGroup); }, 500);
                        return;
                    }
-                   
-                   // Spawn Batch
                    for(let i=0; i<8; i++) { 
                        const p = new THREE.Mesh(geo, mat);
-                       // Spawn high above relative to the group's position
                        p.position.set(
                            (Math.random()-0.5) * WAFER_SIZE, 
                            obj.position.y + 6, 
                            (Math.random()-0.5) * WAFER_SIZE
                        );
                        rainGroup.add(p);
-                       
                        let speed = 0.4;
                        const fall = setInterval(() => {
                            p.position.y -= speed;
-                           
-                           // Calculate current physical height of the surface
                            const currentSurfaceY = obj.position.y + (thickness * obj.scale.y);
-                           
                            if(p.position.y <= currentSurfaceY) {
                                rainGroup.remove(p);
                                clearInterval(fall);
                            }
                        }, 16);
                    }
-                }, 40); // Spawn rate
+                }, 40);
 
-                // 2. Grow Layer Upwards Synchronized with Time
                 let s = 0;
                 const grow = setInterval(() => {
                     s += growthStep; 
@@ -420,7 +385,6 @@
                 const count = CONFIG.particleCount;
                 const geo = new THREE.BoxGeometry(0.08, 0.08, 0.08);
                 const mat = new THREE.MeshBasicMaterial({color: color});
-                
                 for(let i=0; i<count; i++) {
                     const p = new THREE.Mesh(geo, mat);
                     p.position.set((Math.random()-0.5)*WAFER_SIZE, yBase, (Math.random()-0.5)*WAFER_SIZE);
@@ -468,47 +432,34 @@
                     const sub = new THREE.Mesh(baseGeo, MATS.silicon);
                     sub.position.y = 0;
                     c.add(sub);
-                    c.addLabel(sub, "Silicon Substrate", CONFIG.subThickness + 0.5);
                 }
             },
             {
-                title: "Oxidation (Vapor Deposition)",
+                title: "Oxidation (Layer 1)",
                 desc: "Silicon Dioxide (Blue) is deposited from the gas phase onto the substrate.",
                 render: (c, instant) => {
-                    // FIX: Start EXACTLY at the top of the Silicon Substrate (0.8)
                     const yPos = CONFIG.subThickness; 
-                    
-                    const ox = createPatternedLayer(MATS.oxide, yPos, CONFIG.layerThickness);
+                    const ox = createPatternedLayer(MATS.oxide, yPos, CONFIG.layerThickness, PATTERN_1);
                     ox.name = "oxide_layer";
                     c.add(ox);
-                    
                     if(instant) ox.scale.y = 1;
-                    // UPDATED DURATION: 1 Second
                     else c.animateVaporDeposition(ox, CONFIG.colorOxide, CONFIG.layerThickness, 2000); 
-                    
-                    c.addLabel(ox.children[84], "Oxide Layer");
                 }
             },
             {
-                title: "Photoresist Deposition",
+                title: "Photoresist (Layer 1)",
                 desc: "Negative Photoresist (Pink) is deposited via Vapor Deposition.",
                 render: (c, instant) => {
-                    // FIX: Start EXACTLY at the top of the Oxide Layer (0.8 + 0.1)
                     const yPos = CONFIG.subThickness + CONFIG.layerThickness; 
-                    
-                    const res = createPatternedLayer(MATS.resistLiq, yPos, CONFIG.layerThickness);
+                    const res = createPatternedLayer(MATS.resistLiq, yPos, CONFIG.layerThickness, PATTERN_1);
                     res.name = "resist_layer";
                     c.add(res);
-                    
                     if(instant) res.scale.y = 1;
-                    // UPDATED DURATION: 0.5 Seconds
                     else c.animateVaporDeposition(res, CONFIG.colorResistLiquid, CONFIG.layerThickness, 1000); 
-                    
-                    c.addLabel(res.children[84], "Negative Resist");
                 }
             },
             {
-                title: "Mask Alignment",
+                title: "Mask 1 Alignment",
                 desc: "The Circuit Mask is aligned.",
                 render: (c, instant) => {
                     const maskGroup = new THREE.Group();
@@ -518,7 +469,7 @@
                     const offset = (GRID_SIZE * CELL_SIZE) / 2 - (CELL_SIZE/2);
                     for(let r=0; r<GRID_SIZE; r++){
                         for(let cIdx=0; cIdx<GRID_SIZE; cIdx++){
-                            if(PATTERN[r][cIdx] === 1) {
+                            if(PATTERN_1[r][cIdx] === 1) {
                                 const chrome = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE, 0.12, CELL_SIZE), MATS.maskChrome);
                                 chrome.position.set(cIdx * CELL_SIZE - offset, 0, r * CELL_SIZE - offset);
                                 maskGroup.add(chrome);
@@ -526,32 +477,27 @@
                         }
                     }
                     c.add(maskGroup);
-                    if(instant) maskGroup.position.set(0, 3.5, 0);
+                    
+                    if(instant) maskGroup.position.set(0, currentMaskHeight, 0);
                     else {
-                        maskGroup.position.set(0, 5, 0);
-                        c.animateMove(maskGroup, 3.5);
+                        maskGroup.position.set(0, currentMaskHeight + 1.5, 0); 
+                        c.animateMove(maskGroup, currentMaskHeight);
                     }
-                    c.addLabel(maskGroup, "Circuit Mask");
                 }
             },
             {
-                title: "UV Exposure",
-                desc: "<b>UV Light On.</b> 8-Second Exposure. Exposed resist turns Deep Red.",
+                title: "UV Exposure 1",
+                desc: "Exposure hardens resist (Deep Red) where mask allows light.",
                 render: (c, instant) => {
-                    // ROLLER LIGHT
                     const bulbGroup = new THREE.Group();
                     bulbGroup.name = "uv_bulb";
-                    
                     const rollerGeo = new THREE.CylinderGeometry(0.5, 0.5, WAFER_SIZE + 2, 32);
                     rollerGeo.rotateZ(Math.PI/2);
-                    const rollerMesh = new THREE.Mesh(rollerGeo, MATS.bulb);
-                    bulbGroup.add(rollerMesh);
-
+                    bulbGroup.add(new THREE.Mesh(rollerGeo, MATS.bulb));
                     const light = new THREE.PointLight(CONFIG.colorUvLight, 0, 40);
                     light.position.y = -2;
                     bulbGroup.add(light);
-                    
-                    bulbGroup.position.set(0, 6, 0);
+                    bulbGroup.position.set(0, 8, 0);
                     c.add(bulbGroup);
 
                     const overlay = document.getElementById('uv-overlay');
@@ -568,16 +514,6 @@
                             light.intensity = 5;
                             overlay.style.opacity = 1;
                             
-                            let rising = false;
-                            if(pulseInterval) clearInterval(pulseInterval);
-                            pulseInterval = setInterval(() => {
-                                if(light.intensity > 6) rising = false;
-                                if(light.intensity < 4) rising = true;
-                                light.intensity += rising ? 0.1 : -0.1;
-                                overlay.style.opacity = rising ? 0.8 : 0.6;
-                            }, 50);
-
-                            // SLOW COLOR TRANSITION (8 Seconds)
                             const startTime = Date.now();
                             const resLayer = world.getObjectByName("resist_layer");
                             const startColor = new THREE.Color(CONFIG.colorResistSoft);
@@ -586,9 +522,8 @@
                             if(colorTweenInterval) clearInterval(colorTweenInterval);
                             colorTweenInterval = setInterval(() => {
                                 const elapsed = Date.now() - startTime;
-                                let progress = elapsed / CONFIG.uvDuration;
+                                let progress = elapsed / 2000; 
                                 if(progress > 1) progress = 1;
-
                                 if(resLayer) {
                                     resLayer.children.forEach(block => {
                                         if(block.userData.type === MESH_IDS.FIELD) {
@@ -603,18 +538,13 @@
                 }
             },
             {
-                title: "Inspection",
-                desc: "Components removed. Observe pattern transfer.",
+                title: "Inspection 1",
+                desc: "Mask and UV removed.",
                 render: (c, instant) => {
-                    if(pulseInterval) clearInterval(pulseInterval);
                     if(colorTweenInterval) clearInterval(colorTweenInterval);
                     document.getElementById('uv-overlay').style.opacity = 0;
-                    
-                    const b = world.getObjectByName("uv_bulb");
-                    if(b) b.visible = false;
-                    const m = world.getObjectByName("mask_group");
-                    if(m) m.visible = false;
-                    
+                    const b = world.getObjectByName("uv_bulb"); if(b) b.visible = false;
+                    const m = world.getObjectByName("mask_group"); if(m) m.visible = false;
                     const r = world.getObjectByName("resist_layer");
                     if(r) r.children.forEach(b => {
                         b.material.color.setHex((b.userData.type===MESH_IDS.FIELD) ? CONFIG.colorResistHard : CONFIG.colorResistSoft);
@@ -622,36 +552,194 @@
                 }
             },
             {
-                title: "Development",
+                title: "Development 1",
                 desc: "Removing soft resist.",
                 render: (c, instant) => {
                     const resLayer = world.getObjectByName("resist_layer");
                     if(instant) {
                         if(resLayer) resLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) b.visible=false; });
                     } else {
-                        c.animateRemovalParticles(CONFIG.colorDeveloper, CONFIG.subThickness + CONFIG.layerThickness * 2);
+                        // CHANGE 1: Use resist soft color
+                        c.animateRemovalParticles(CONFIG.colorResistSoft, CONFIG.subThickness + CONFIG.layerThickness * 2);
                         if(resLayer) resLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) c.animateShrink(b); });
                     }
                 }
             },
             {
-                title: "Etching",
+                title: "Etching 1",
                 desc: "Etching exposed Oxide.",
                 render: (c, instant) => {
                     const oxLayer = world.getObjectByName("oxide_layer");
                     if(instant) {
                          if(oxLayer) oxLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) b.visible=false; });
                     } else {
-                        c.animateRemovalParticles(CONFIG.colorEtchant, CONFIG.subThickness + CONFIG.layerThickness);
+                        // CHANGE 2: Use Oxide color
+                        c.animateRemovalParticles(CONFIG.colorOxide, CONFIG.subThickness + CONFIG.layerThickness);
                         if(oxLayer) oxLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) c.animateShrink(b); });
                     }
                 }
             },
             {
-                title: "Stripping",
+                title: "Stripping 1",
                 desc: "Removing remaining resist.",
                 render: (c, instant) => {
                     const resLayer = world.getObjectByName("resist_layer");
+                    if(instant) {
+                        if(resLayer) resLayer.visible = false;
+                    } else {
+                        if(resLayer) resLayer.children.forEach(b => { if(b.visible) c.animateShrink(b); });
+                    }
+                }
+            },
+            {
+                title: "Metal Deposition (Layer 2)",
+                desc: "Conductive Metal (Gold/Copper) deposited to form interconnects.",
+                render: (c, instant) => {
+                    const yPos = CONFIG.subThickness + CONFIG.layerThickness; 
+                    const met = createPatternedLayer(MATS.metal, yPos, CONFIG.layerThickness, PATTERN_2);
+                    met.name = "metal_layer";
+                    c.add(met);
+                    if(instant) met.scale.y = 1;
+                    else c.animateVaporDeposition(met, CONFIG.colorMetal, CONFIG.layerThickness, 2000); 
+                }
+            },
+            {
+                title: "Photoresist (Layer 2)",
+                desc: "Second layer of photoresist applied.",
+                render: (c, instant) => {
+                    const yPos = CONFIG.subThickness + CONFIG.layerThickness * 2; 
+                    const res = createPatternedLayer(MATS.resistLiq, yPos, CONFIG.layerThickness, PATTERN_2);
+                    res.name = "resist_layer_2";
+                    c.add(res);
+                    if(instant) res.scale.y = 1;
+                    else c.animateVaporDeposition(res, CONFIG.colorResistLiquid, CONFIG.layerThickness, 1000); 
+                }
+            },
+            {
+                title: "Mask 2 Alignment",
+                desc: "Complex interconnect mask aligned.",
+                render: (c, instant) => {
+                    const maskGroup = new THREE.Group();
+                    maskGroup.name = "mask_group_2";
+                    const glass = new THREE.Mesh(new THREE.BoxGeometry(WAFER_SIZE, 0.1, WAFER_SIZE), MATS.maskGlass);
+                    maskGroup.add(glass);
+                    const offset = (GRID_SIZE * CELL_SIZE) / 2 - (CELL_SIZE/2);
+                    for(let r=0; r<GRID_SIZE; r++){
+                        for(let cIdx=0; cIdx<GRID_SIZE; cIdx++){
+                            if(PATTERN_2[r][cIdx] === 1) {
+                                const chrome = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE, 0.12, CELL_SIZE), MATS.maskChrome);
+                                chrome.position.set(cIdx * CELL_SIZE - offset, 0, r * CELL_SIZE - offset);
+                                maskGroup.add(chrome);
+                            }
+                        }
+                    }
+                    c.add(maskGroup);
+                    
+                    if(instant) maskGroup.position.set(0, currentMaskHeight, 0);
+                    else {
+                        maskGroup.position.set(0, currentMaskHeight + 1.5, 0);
+                        c.animateMove(maskGroup, currentMaskHeight);
+                    }
+                }
+            },
+            {
+                title: "UV Exposure 2",
+                desc: "Exposing second layer pattern.",
+                render: (c, instant) => {
+                    const bulbGroup = new THREE.Group();
+                    bulbGroup.name = "uv_bulb_2";
+                    const rollerGeo = new THREE.CylinderGeometry(0.5, 0.5, WAFER_SIZE + 2, 32);
+                    rollerGeo.rotateZ(Math.PI/2);
+                    bulbGroup.add(new THREE.Mesh(rollerGeo, MATS.bulb));
+                    const light = new THREE.PointLight(CONFIG.colorUvLight, 0, 40);
+                    light.position.y = -2;
+                    bulbGroup.add(light);
+                    bulbGroup.position.set(0, 6, 0);
+                    c.add(bulbGroup);
+                    
+                    const overlay = document.getElementById('uv-overlay');
+
+                    if(instant) {
+                        light.intensity = 5;
+                        overlay.style.opacity = 0.8;
+                        const r = world.getObjectByName("resist_layer_2");
+                        if(r) r.children.forEach(b => {
+                            b.material.color.setHex((b.userData.type===MESH_IDS.FIELD) ? CONFIG.colorResistHard : CONFIG.colorResistSoft);
+                        });
+                    } else {
+                        setTimeout(() => {
+                            light.intensity = 5;
+                            overlay.style.opacity = 1;
+                            const startTime = Date.now();
+                            const resLayer = world.getObjectByName("resist_layer_2");
+                            const startColor = new THREE.Color(CONFIG.colorResistSoft);
+                            const endColor = new THREE.Color(CONFIG.colorResistHard);
+
+                            if(colorTweenInterval) clearInterval(colorTweenInterval);
+                            colorTweenInterval = setInterval(() => {
+                                const elapsed = Date.now() - startTime;
+                                let progress = elapsed / 2000;
+                                if(progress > 1) progress = 1;
+                                if(resLayer) {
+                                    resLayer.children.forEach(block => {
+                                        if(block.userData.type === MESH_IDS.FIELD) {
+                                            block.material.color.lerpColors(startColor, endColor, progress);
+                                        }
+                                    });
+                                }
+                                if(progress >= 1) clearInterval(colorTweenInterval);
+                            }, 50);
+                        }, 500);
+                    }
+                }
+            },
+            {
+                title: "Inspection 2",
+                desc: "Mask and Light removed.",
+                render: (c, instant) => {
+                    if(colorTweenInterval) clearInterval(colorTweenInterval);
+                    document.getElementById('uv-overlay').style.opacity = 0;
+                    const b = world.getObjectByName("uv_bulb_2"); if(b) b.visible = false;
+                    const m = world.getObjectByName("mask_group_2"); if(m) m.visible = false;
+                    const r = world.getObjectByName("resist_layer_2");
+                    if(r) r.children.forEach(b => {
+                        b.material.color.setHex((b.userData.type===MESH_IDS.FIELD) ? CONFIG.colorResistHard : CONFIG.colorResistSoft);
+                    });
+                }
+            },
+            {
+                title: "Development 2",
+                desc: "Removing soft resist from Layer 2.",
+                render: (c, instant) => {
+                    const resLayer = world.getObjectByName("resist_layer_2");
+                    if(instant) {
+                        if(resLayer) resLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) b.visible=false; });
+                    } else {
+                        // CHANGE 3: Use resist soft color
+                        c.animateRemovalParticles(CONFIG.colorResistSoft, CONFIG.subThickness + CONFIG.layerThickness * 3);
+                        if(resLayer) resLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) c.animateShrink(b); });
+                    }
+                }
+            },
+            {
+                title: "Etching 2",
+                desc: "Etching exposed Metal to create wires.",
+                render: (c, instant) => {
+                    const metLayer = world.getObjectByName("metal_layer");
+                    if(instant) {
+                         if(metLayer) metLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) b.visible=false; });
+                    } else {
+                        // CHANGE 4: Use Metal color (Gold/Copper)
+                        c.animateRemovalParticles(CONFIG.colorMetal, CONFIG.subThickness + CONFIG.layerThickness * 2);
+                        if(metLayer) metLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) c.animateShrink(b); });
+                    }
+                }
+            },
+            {
+                title: "Stripping 2 (Finished)",
+                desc: "Removing Resist 2. Dual-layer circuit complete.",
+                render: (c, instant) => {
+                    const resLayer = world.getObjectByName("resist_layer_2");
                     if(instant) {
                         if(resLayer) resLayer.visible = false;
                     } else {
@@ -662,6 +750,28 @@
         ];
 
         let currentStepIndex = 0;
+
+        // --- SLIDER LOGIC ---
+        const slider = document.getElementById('maskHeight');
+        const sliderValDisplay = document.getElementById('maskHeightVal');
+
+        slider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            sliderValDisplay.innerText = val.toFixed(1);
+            
+            // 1. UPDATE GLOBAL STATE
+            currentMaskHeight = val;
+
+            // 2. APPLY IMMEDIATELY IF VISIBLE
+            const m1 = world.getObjectByName("mask_group");
+            if(m1 && m1.visible) {
+                m1.position.y = val;
+            }
+            const m2 = world.getObjectByName("mask_group_2");
+            if(m2 && m2.visible) {
+                m2.position.y = val;
+            }
+        });
 
         function renderStep(idx, isBackwards = false) {
             while(world.children.length > 0){ world.remove(world.children[0]); }
@@ -675,27 +785,49 @@
                 STEPS[i].render(ctx, forceInstant);
 
                 if (forceInstant) {
-                     if (STEPS[i].title === "UV Exposure") {
+                    if (STEPS[i].title === "UV Exposure 1") {
                         const r = world.getObjectByName("resist_layer");
                         if(r) r.children.forEach(b => {
                             b.material.color.setHex((b.userData.type===MESH_IDS.FIELD) ? CONFIG.colorResistHard : CONFIG.colorResistSoft);
                         });
-                        if (idx > i) {
-                            const b = world.getObjectByName("uv_bulb");
-                            if(b) b.visible = false;
-                        }
+                        if (idx > i) { const b = world.getObjectByName("uv_bulb"); if(b) b.visible = false; }
                     }
-                    if (STEPS[i].title === "Inspection" || STEPS[i].title.includes("Light Off")) {
-                         const b = world.getObjectByName("uv_bulb");
-                         if(b) b.visible = false;
-                         const m = world.getObjectByName("mask_group");
-                         if(m) m.visible = false;
+                    if (STEPS[i].title === "Mask 1 Alignment" && idx >= 5) {
+                         const m = world.getObjectByName("mask_group"); if(m) m.visible = false;
                     }
-                    if (STEPS[i].title === "Mask Alignment" && idx > 5) {
-                        const m = world.getObjectByName("mask_group");
-                        if(m) m.visible = false;
+                    if (STEPS[i].title === "Inspection 1") {
+                         const b = world.getObjectByName("uv_bulb"); if(b) b.visible = false;
+                         const m = world.getObjectByName("mask_group"); if(m) m.visible = false;
+                    }
+                    if (STEPS[i].title === "UV Exposure 2") {
+                        const r = world.getObjectByName("resist_layer_2");
+                        if(r) r.children.forEach(b => {
+                            b.material.color.setHex((b.userData.type===MESH_IDS.FIELD) ? CONFIG.colorResistHard : CONFIG.colorResistSoft);
+                        });
+                        if (idx > i) { const b = world.getObjectByName("uv_bulb_2"); if(b) b.visible = false; }
+                    }
+                    if (STEPS[i].title === "Mask 2 Alignment" && idx >= 14) {
+                         const m = world.getObjectByName("mask_group_2"); if(m) m.visible = false;
+                    }
+                    if (STEPS[i].title === "Inspection 2") {
+                         const b = world.getObjectByName("uv_bulb_2"); if(b) b.visible = false;
+                         const m = world.getObjectByName("mask_group_2"); if(m) m.visible = false;
                     }
                 }
+            }
+
+            // --- UPDATE SLIDER UI ---
+            slider.value = currentMaskHeight;
+            sliderValDisplay.innerText = currentMaskHeight.toFixed(1);
+
+            const m1 = world.getObjectByName("mask_group");
+            const m2 = world.getObjectByName("mask_group_2");
+            const activeMask = (m1 && m1.visible) ? m1 : ((m2 && m2.visible) ? m2 : null);
+
+            if(activeMask) {
+                slider.disabled = false;
+            } else {
+                slider.disabled = true;
             }
 
             document.getElementById('ui-step-num').innerText = `Step ${idx+1} / ${STEPS.length}`;
@@ -728,29 +860,20 @@
             renderStep(0, false);
         });
 
-        document.getElementById('labelToggle').addEventListener('change', (e) => {
-            CONFIG.labelsVisible = e.target.checked;
-            const domLabels = document.querySelectorAll('.fab-label');
-            domLabels.forEach(l => l.style.opacity = CONFIG.labelsVisible ? '1' : '0');
-        });
-
         window.addEventListener('resize', () => {
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(container.clientWidth, container.clientHeight);
-            labelRenderer.setSize(container.clientWidth, container.clientHeight);
         });
 
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
         }
         
         renderStep(0);
         animate();
-
     </script>
 </body>
 </html>
