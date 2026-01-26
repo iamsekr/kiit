@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Semiconductor Fab: Vapor Deposition Final</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --panel-bg: #ffffff;
+            --accent: #2563eb;
+            --text-main: #333333;
+            --border: #e5e7eb;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+        }
+
+        /* --- LEFT SIDE: 3D CANVAS --- */
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background: linear-gradient(to bottom, #ffffff 0%, #f0f2f5 100%);
+            cursor: move;
+        }
+
+        /* --- RIGHT SIDE: CONTROLS --- */
+        #sidebar {
+            width: 350px;
+            background-color: var(--panel-bg);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        h1 { margin: 0 0 5px 0; font-size: 1.4rem; color: var(--accent); font-weight: 700; letter-spacing: 0.5px; }
+        h3 { margin: 0 0 20px 0; font-size: 0.9rem; color: #666; font-weight: 400; }
+
+        .step-card {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent);
+            min-height: 120px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .step-num { font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 6px; display: block;}
+        .step-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: #1e293b; }
+        .step-desc { font-size: 0.9rem; line-height: 1.5; color: #475569; }
+
+        .controls-area {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-row { display: flex; gap: 10px; }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .btn-primary { background-color: var(--accent); color: #fff; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
+        .btn-primary:hover { background-color: #1d4ed8; transform: translateY(-1px); }
+        .btn-primary:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-secondary { background-color: white; border: 1px solid #cbd5e1; color: #475569; }
+        .btn-secondary:hover { background-color: #f8fafc; border-color: #94a3b8; color: #1e293b; }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        .switch {
+            position: relative; display: inline-block; width: 44px; height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1; transition: .3s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .fab-label {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid var(--accent);
+            font-family: 'Segoe UI', sans-serif;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            user-select: none;
+        }
+        .fab-label::after {
+            content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px;
+            border-width: 5px; border-style: solid;
+            border-color: var(--accent) transparent transparent transparent;
+        }
+
+        #loading {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #aaa; font-size: 1.5rem;
+        }
+        
+        #uv-overlay {
+            position: absolute; inset: 0;
+            background: rgba(138, 43, 226, 0.15);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 5;
+        }
+    </style>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div id="loading">Initializing...</div>
+    <div id="uv-overlay"></div>
+
+    <div id="canvas-container"></div>
+
+    <div id="sidebar">
+        <div>
+            <h1>Fab Lab: Circuitry</h1>
+            <h3>Vapor Deposition Process</h3>
+        </div>
+
+        <div class="step-card">
+            <span class="step-num" id="ui-step-num">Intro</span>
+            <div class="step-title" id="ui-title">Silicon Substrate</div>
+            <div class="step-desc" id="ui-desc">
+                The foundation of the chip. A pure crystal silicon wafer.
+            </div>
+        </div>
+
+        <div class="toggle-row">
+            <span style="font-size: 0.9rem; font-weight:500; color: #444;">Show Layer Labels</span>
+            <label class="switch">
+                <input type="checkbox" id="labelToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="controls-area">
+            <div class="btn-row">
+                <button id="backBtn" class="btn-secondary" disabled>← Back</button>
+                <button id="nextBtn" class="btn-primary">Next Step →</button>
+            </div>
+            <button id="resetBtn" class="btn-secondary" style="margin-top:5px; border-color: #fca5a5; color: #b91c1c;">Reset Simulation</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        // ================= CONFIGURATION =================
+        const CONFIG = {
+            waferSize: 10,        
+            subThickness: 0.8,    
+            layerThickness: 0.1,  
+            
+            // COLORS
+            colorSilicon: 0x505050,
+            colorOxide: 0xA2D9FF,      
+            colorResistLiquid: 0xFCA5A5, // Pinkish
+            colorResistHard: 0xd13f3f,   // Deep Red (Exposed)
+            colorResistSoft: 0xFCA5A5,   // Pale Pink (Unexposed)
+            colorMaskChrome: 0x111111,
+            colorMaskGlass: 0xffffff,
+            colorUvLight: 0x8000ff,      
+            colorEtchant: 0xA2D9FF,      
+            colorDeveloper: 0xFCA5A5,    
+            
+            // SETTINGS
+            particleCount: 800,    
+            uvDuration: 12000, // 8 Seconds
+            labelsVisible: false
+        };
+        // =================================================
+
+        const MATS = {
+            silicon: new THREE.MeshStandardMaterial({ color: CONFIG.colorSilicon, roughness: 0.4, metalness: 0.1 }),
+            oxide: new THREE.MeshStandardMaterial({ color: CONFIG.colorOxide, roughness: 0.6 }), 
+            resistLiq: new THREE.MeshStandardMaterial({ color: CONFIG.colorResistLiquid, roughness: 0.2 }), 
+            resistHard: new THREE.MeshStandardMaterial({ color: CONFIG.colorResistHard, roughness: 0.3 }), 
+            resistSoft: new THREE.MeshStandardMaterial({ color: CONFIG.colorResistSoft, roughness: 0.3 }), 
+            maskChrome: new THREE.MeshStandardMaterial({ color: CONFIG.colorMaskChrome, roughness: 0.1, metalness: 0.5 }), 
+            maskGlass: new THREE.MeshPhysicalMaterial({ color: CONFIG.colorMaskGlass, transmission: 0.98, opacity: 0.3, transparent: true, thickness: 0.5, roughness: 0 }),
+            bulb: new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0xaa00ff, emissiveIntensity: 1 })
+        };
+
+        const scene = new THREE.Scene();
+        // UPDATED BACKGROUND COLOR TO GRAY (0x787777)
+        const bgCol = 0x787777;
+        scene.background = new THREE.Color(bgCol); 
+        scene.fog = new THREE.Fog(bgCol, 20, 60);
+
+        const container = document.getElementById('canvas-container');
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+        camera.position.set(12, 12, 12);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.SoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(container.clientWidth, container.clientHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        container.appendChild(labelRenderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.minPolarAngle = 0; 
+        controls.maxPolarAngle = Math.PI; 
+
+        const ambi = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambi);
+        const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+        dir.position.set(5, 10, 5);
+        dir.castShadow = true;
+        dir.shadow.mapSize.width = 2048;
+        dir.shadow.mapSize.height = 2048;
+        scene.add(dir);
+
+        document.getElementById('loading').style.display = 'none';
+
+        // --- CIRCUIT PATTERN ---
+        const PATTERN = [
+            [0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,1,1,0,0,0,0,0,0,0,1,1,0], 
+            [0,1,1,0,0,0,0,0,0,0,1,1,0],
+            [0,0,1,0,0,0,0,0,0,0,1,0,0],
+            [0,0,1,1,1,1,0,1,1,1,1,0,0], 
+            [0,0,0,0,0,1,0,1,0,0,0,0,0],
+            [0,0,0,0,0,1,1,1,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,1,1,1,1,1,1,1,1,0,0,0], 
+            [0,0,1,0,0,0,0,0,0,1,0,0,0],
+            [0,0,1,0,0,0,0,0,0,1,0,0,0],
+            [0,1,1,0,0,0,0,0,0,1,1,0,0], 
+            [0,0,0,0,0,0,0,0,0,0,0,0,0]
+        ];
+        const GRID_SIZE = 13;
+        const CELL_SIZE = CONFIG.waferSize / GRID_SIZE; 
+        const WAFER_SIZE = CONFIG.waferSize;
+        const MESH_IDS = { FIELD: 0, TRACE: 1 };
+
+        // --- WORLD CONTAINER ---
+        const world = new THREE.Group();
+        world.position.y = -2;
+        scene.add(world);
+        
+        // --- GEOMETRY FACTORY ---
+        function createPatternedLayer(material, yStart, thickness) {
+            const group = new THREE.Group();
+            
+            // Set the Group's Y position to the starting height.
+            // This ensures when we scale the group from 0 to 1, it grows UP from this exact point.
+            group.position.y = yStart; 
+            
+            const offset = WAFER_SIZE / 2 - (CELL_SIZE/2);
+            
+            for(let r=0; r<GRID_SIZE; r++){
+                for(let c=0; c<GRID_SIZE; c++){
+                    const isTrace = PATTERN[r][c] === 1;
+                    const type = isTrace ? MESH_IDS.TRACE : MESH_IDS.FIELD;
+                    
+                    const geo = new THREE.BoxGeometry(CELL_SIZE, thickness, CELL_SIZE);
+                    // Pivot at bottom face
+                    geo.translate(0, thickness/2, 0); 
+                    
+                    const mat = material.clone();
+                    const mesh = new THREE.Mesh(geo, mat);
+                    
+                    // Local position Y is 0. The Global Y is handled by group.position.y
+                    mesh.position.set(
+                        c * CELL_SIZE - offset,
+                        0, 
+                        r * CELL_SIZE - offset
+                    );
+                    
+                    mesh.userData = { type: type };
+                    mesh.castShadow = true;
+                    mesh.receiveShadow = true;
+                    group.add(mesh);
+                }
+            }
+            return group;
+        }
+
+        let pulseInterval = null;
+        let colorTweenInterval = null;
+
+        const ctx = {
+            add: (obj) => world.add(obj),
+            
+            addLabel: (parent, text, yOff=0.5) => {
+                const div = document.createElement('div');
+                div.className = 'fab-label';
+                div.textContent = text;
+                div.style.opacity = CONFIG.labelsVisible ? '1' : '0';
+                const l = new CSS2DObject(div);
+                l.position.set(0, yOff, 0); 
+                parent.add(l);
+            },
+            
+            // ANIMATION: Accepts duration and synchronizes growth
+            animateVaporDeposition: (obj, color, thickness, duration = 3000) => {
+                obj.scale.y = 0.001;
+                obj.visible = true;
+                
+                // Calculate how much to grow per 16ms tick to match duration
+                const growthStep = 16 / duration; 
+
+                // 1. Rain Particles
+                const rainGroup = new THREE.Group();
+                world.add(rainGroup);
+                const geo = new THREE.BoxGeometry(0.06, 0.06, 0.06);
+                const mat = new THREE.MeshBasicMaterial({color: color});
+
+                const rainInterval = setInterval(() => {
+                   // Stop raining when fully grown
+                   if(obj.scale.y >= 1) {
+                       clearInterval(rainInterval);
+                       setTimeout(() => { world.remove(rainGroup); }, 500);
+                       return;
+                   }
+                   
+                   // Spawn Batch
+                   for(let i=0; i<8; i++) { 
+                       const p = new THREE.Mesh(geo, mat);
+                       // Spawn high above relative to the group's position
+                       p.position.set(
+                           (Math.random()-0.5) * WAFER_SIZE, 
+                           obj.position.y + 6, 
+                           (Math.random()-0.5) * WAFER_SIZE
+                       );
+                       rainGroup.add(p);
+                       
+                       let speed = 0.4;
+                       const fall = setInterval(() => {
+                           p.position.y -= speed;
+                           
+                           // Calculate current physical height of the surface
+                           const currentSurfaceY = obj.position.y + (thickness * obj.scale.y);
+                           
+                           if(p.position.y <= currentSurfaceY) {
+                               rainGroup.remove(p);
+                               clearInterval(fall);
+                           }
+                       }, 16);
+                   }
+                }, 40); // Spawn rate
+
+                // 2. Grow Layer Upwards Synchronized with Time
+                let s = 0;
+                const grow = setInterval(() => {
+                    s += growthStep; 
+                    obj.scale.y = s;
+                    if(s >= 1) { 
+                        obj.scale.y = 1; 
+                        clearInterval(grow); 
+                    }
+                }, 16);
+            },
+            
+            animateRemovalParticles: (color, yBase) => {
+                const count = CONFIG.particleCount;
+                const geo = new THREE.BoxGeometry(0.08, 0.08, 0.08);
+                const mat = new THREE.MeshBasicMaterial({color: color});
+                
+                for(let i=0; i<count; i++) {
+                    const p = new THREE.Mesh(geo, mat);
+                    p.position.set((Math.random()-0.5)*WAFER_SIZE, yBase, (Math.random()-0.5)*WAFER_SIZE);
+                    world.add(p);
+                    let speed = 0.05 + Math.random()*0.1;
+                    const fly = setInterval(()=>{
+                        p.position.y += speed;
+                        p.position.x += (Math.random()-0.5)*0.1;
+                        p.position.z += (Math.random()-0.5)*0.1;
+                        if(p.position.y > yBase + 4) {
+                            world.remove(p);
+                            clearInterval(fly);
+                        }
+                    }, 16);
+                }
+            },
+            
+            animateShrink: (obj) => {
+                let s = 1;
+                const i = setInterval(()=>{
+                    s-=0.05;
+                    obj.scale.y = s;
+                    if(s<=0) { obj.visible=false; clearInterval(i); }
+                }, 16);
+            },
+            
+            animateMove: (obj, targetY) => {
+                let steps = 0;
+                const startY = obj.position.y;
+                const i = setInterval(()=>{
+                    steps+=0.05;
+                    obj.position.y = startY + (targetY - startY) * steps;
+                    if(steps>=1) clearInterval(i);
+                }, 16);
+            }
+        };
+
+        const STEPS = [
+            {
+                title: "Silicon Substrate",
+                desc: "Foundation: Pure Crystal Silicon (P-Type).",
+                render: (c, instant) => {
+                    const baseGeo = new THREE.BoxGeometry(WAFER_SIZE, CONFIG.subThickness, WAFER_SIZE);
+                    baseGeo.translate(0, CONFIG.subThickness/2, 0); 
+                    const sub = new THREE.Mesh(baseGeo, MATS.silicon);
+                    sub.position.y = 0;
+                    c.add(sub);
+                    c.addLabel(sub, "Silicon Substrate", CONFIG.subThickness + 0.5);
+                }
+            },
+            {
+                title: "Oxidation (Vapor Deposition)",
+                desc: "Silicon Dioxide (Blue) is deposited from the gas phase onto the substrate.",
+                render: (c, instant) => {
+                    // FIX: Start EXACTLY at the top of the Silicon Substrate (0.8)
+                    const yPos = CONFIG.subThickness; 
+                    
+                    const ox = createPatternedLayer(MATS.oxide, yPos, CONFIG.layerThickness);
+                    ox.name = "oxide_layer";
+                    c.add(ox);
+                    
+                    if(instant) ox.scale.y = 1;
+                    // UPDATED DURATION: 1 Second
+                    else c.animateVaporDeposition(ox, CONFIG.colorOxide, CONFIG.layerThickness, 2000); 
+                    
+                    c.addLabel(ox.children[84], "Oxide Layer");
+                }
+            },
+            {
+                title: "Photoresist Deposition",
+                desc: "Negative Photoresist (Pink) is deposited via Vapor Deposition.",
+                render: (c, instant) => {
+                    // FIX: Start EXACTLY at the top of the Oxide Layer (0.8 + 0.1)
+                    const yPos = CONFIG.subThickness + CONFIG.layerThickness; 
+                    
+                    const res = createPatternedLayer(MATS.resistLiq, yPos, CONFIG.layerThickness);
+                    res.name = "resist_layer";
+                    c.add(res);
+                    
+                    if(instant) res.scale.y = 1;
+                    // UPDATED DURATION: 0.5 Seconds
+                    else c.animateVaporDeposition(res, CONFIG.colorResistLiquid, CONFIG.layerThickness, 1000); 
+                    
+                    c.addLabel(res.children[84], "Negative Resist");
+                }
+            },
+            {
+                title: "Mask Alignment",
+                desc: "The Circuit Mask is aligned.",
+                render: (c, instant) => {
+                    const maskGroup = new THREE.Group();
+                    maskGroup.name = "mask_group";
+                    const glass = new THREE.Mesh(new THREE.BoxGeometry(WAFER_SIZE, 0.1, WAFER_SIZE), MATS.maskGlass);
+                    maskGroup.add(glass);
+                    const offset = (GRID_SIZE * CELL_SIZE) / 2 - (CELL_SIZE/2);
+                    for(let r=0; r<GRID_SIZE; r++){
+                        for(let cIdx=0; cIdx<GRID_SIZE; cIdx++){
+                            if(PATTERN[r][cIdx] === 1) {
+                                const chrome = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE, 0.12, CELL_SIZE), MATS.maskChrome);
+                                chrome.position.set(cIdx * CELL_SIZE - offset, 0, r * CELL_SIZE - offset);
+                                maskGroup.add(chrome);
+                            }
+                        }
+                    }
+                    c.add(maskGroup);
+                    if(instant) maskGroup.position.set(0, 3.5, 0);
+                    else {
+                        maskGroup.position.set(0, 5, 0);
+                        c.animateMove(maskGroup, 3.5);
+                    }
+                    c.addLabel(maskGroup, "Circuit Mask");
+                }
+            },
+            {
+                title: "UV Exposure",
+                desc: "<b>UV Light On.</b> 8-Second Exposure. Exposed resist turns Deep Red.",
+                render: (c, instant) => {
+                    // ROLLER LIGHT
+                    const bulbGroup = new THREE.Group();
+                    bulbGroup.name = "uv_bulb";
+                    
+                    const rollerGeo = new THREE.CylinderGeometry(0.5, 0.5, WAFER_SIZE + 2, 32);
+                    rollerGeo.rotateZ(Math.PI/2);
+                    const rollerMesh = new THREE.Mesh(rollerGeo, MATS.bulb);
+                    bulbGroup.add(rollerMesh);
+
+                    const light = new THREE.PointLight(CONFIG.colorUvLight, 0, 40);
+                    light.position.y = -2;
+                    bulbGroup.add(light);
+                    
+                    bulbGroup.position.set(0, 6, 0);
+                    c.add(bulbGroup);
+
+                    const overlay = document.getElementById('uv-overlay');
+
+                    if(instant) {
+                        light.intensity = 5;
+                        overlay.style.opacity = 0.8;
+                        const r = world.getObjectByName("resist_layer");
+                        if(r) r.children.forEach(b => {
+                            b.material.color.setHex((b.userData.type===MESH_IDS.FIELD) ? CONFIG.colorResistHard : CONFIG.colorResistSoft);
+                        });
+                    } else {
+                        setTimeout(() => {
+                            light.intensity = 5;
+                            overlay.style.opacity = 1;
+                            
+                            let rising = false;
+                            if(pulseInterval) clearInterval(pulseInterval);
+                            pulseInterval = setInterval(() => {
+                                if(light.intensity > 6) rising = false;
+                                if(light.intensity < 4) rising = true;
+                                light.intensity += rising ? 0.1 : -0.1;
+                                overlay.style.opacity = rising ? 0.8 : 0.6;
+                            }, 50);
+
+                            // SLOW COLOR TRANSITION (8 Seconds)
+                            const startTime = Date.now();
+                            const resLayer = world.getObjectByName("resist_layer");
+                            const startColor = new THREE.Color(CONFIG.colorResistSoft);
+                            const endColor = new THREE.Color(CONFIG.colorResistHard);
+
+                            if(colorTweenInterval) clearInterval(colorTweenInterval);
+                            colorTweenInterval = setInterval(() => {
+                                const elapsed = Date.now() - startTime;
+                                let progress = elapsed / CONFIG.uvDuration;
+                                if(progress > 1) progress = 1;
+
+                                if(resLayer) {
+                                    resLayer.children.forEach(block => {
+                                        if(block.userData.type === MESH_IDS.FIELD) {
+                                            block.material.color.lerpColors(startColor, endColor, progress);
+                                        }
+                                    });
+                                }
+                                if(progress >= 1) clearInterval(colorTweenInterval);
+                            }, 50);
+                        }, 500);
+                    }
+                }
+            },
+            {
+                title: "Inspection",
+                desc: "Components removed. Observe pattern transfer.",
+                render: (c, instant) => {
+                    if(pulseInterval) clearInterval(pulseInterval);
+                    if(colorTweenInterval) clearInterval(colorTweenInterval);
+                    document.getElementById('uv-overlay').style.opacity = 0;
+                    
+                    const b = world.getObjectByName("uv_bulb");
+                    if(b) b.visible = false;
+                    const m = world.getObjectByName("mask_group");
+                    if(m) m.visible = false;
+                    
+                    const r = world.getObjectByName("resist_layer");
+                    if(r) r.children.forEach(b => {
+                        b.material.color.setHex((b.userData.type===MESH_IDS.FIELD) ? CONFIG.colorResistHard : CONFIG.colorResistSoft);
+                    });
+                }
+            },
+            {
+                title: "Development",
+                desc: "Removing soft resist.",
+                render: (c, instant) => {
+                    const resLayer = world.getObjectByName("resist_layer");
+                    if(instant) {
+                        if(resLayer) resLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) b.visible=false; });
+                    } else {
+                        c.animateRemovalParticles(CONFIG.colorDeveloper, CONFIG.subThickness + CONFIG.layerThickness * 2);
+                        if(resLayer) resLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) c.animateShrink(b); });
+                    }
+                }
+            },
+            {
+                title: "Etching",
+                desc: "Etching exposed Oxide.",
+                render: (c, instant) => {
+                    const oxLayer = world.getObjectByName("oxide_layer");
+                    if(instant) {
+                         if(oxLayer) oxLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) b.visible=false; });
+                    } else {
+                        c.animateRemovalParticles(CONFIG.colorEtchant, CONFIG.subThickness + CONFIG.layerThickness);
+                        if(oxLayer) oxLayer.children.forEach(b => { if(b.userData.type === MESH_IDS.TRACE) c.animateShrink(b); });
+                    }
+                }
+            },
+            {
+                title: "Stripping",
+                desc: "Removing remaining resist.",
+                render: (c, instant) => {
+                    const resLayer = world.getObjectByName("resist_layer");
+                    if(instant) {
+                        if(resLayer) resLayer.visible = false;
+                    } else {
+                        if(resLayer) resLayer.children.forEach(b => { if(b.visible) c.animateShrink(b); });
+                    }
+                }
+            }
+        ];
+
+        let currentStepIndex = 0;
+
+        function renderStep(idx, isBackwards = false) {
+            while(world.children.length > 0){ world.remove(world.children[0]); }
+            if(pulseInterval) clearInterval(pulseInterval);
+            if(colorTweenInterval) clearInterval(colorTweenInterval);
+            document.getElementById('uv-overlay').style.opacity = 0;
+
+            for(let i=0; i<=idx; i++) {
+                const isCurrent = (i === idx);
+                const forceInstant = (!isCurrent) || isBackwards;
+                STEPS[i].render(ctx, forceInstant);
+
+                if (forceInstant) {
+                     if (STEPS[i].title === "UV Exposure") {
+                        const r = world.getObjectByName("resist_layer");
+                        if(r) r.children.forEach(b => {
+                            b.material.color.setHex((b.userData.type===MESH_IDS.FIELD) ? CONFIG.colorResistHard : CONFIG.colorResistSoft);
+                        });
+                        if (idx > i) {
+                            const b = world.getObjectByName("uv_bulb");
+                            if(b) b.visible = false;
+                        }
+                    }
+                    if (STEPS[i].title === "Inspection" || STEPS[i].title.includes("Light Off")) {
+                         const b = world.getObjectByName("uv_bulb");
+                         if(b) b.visible = false;
+                         const m = world.getObjectByName("mask_group");
+                         if(m) m.visible = false;
+                    }
+                    if (STEPS[i].title === "Mask Alignment" && idx > 5) {
+                        const m = world.getObjectByName("mask_group");
+                        if(m) m.visible = false;
+                    }
+                }
+            }
+
+            document.getElementById('ui-step-num').innerText = `Step ${idx+1} / ${STEPS.length}`;
+            document.getElementById('ui-title').innerText = STEPS[idx].title;
+            document.getElementById('ui-desc').innerHTML = STEPS[idx].desc;
+
+            const btnNext = document.getElementById('nextBtn');
+            const btnBack = document.getElementById('backBtn');
+            btnBack.disabled = (idx === 0);
+            btnNext.disabled = (idx === STEPS.length - 1);
+            btnNext.innerText = (idx === STEPS.length - 1) ? "Done" : "Next Step →";
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if(currentStepIndex < STEPS.length - 1) {
+                currentStepIndex++;
+                renderStep(currentStepIndex, false);
+            }
+        });
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            if(currentStepIndex > 0) {
+                currentStepIndex--;
+                renderStep(currentStepIndex, true);
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentStepIndex = 0;
+            renderStep(0, false);
+        });
+
+        document.getElementById('labelToggle').addEventListener('change', (e) => {
+            CONFIG.labelsVisible = e.target.checked;
+            const domLabels = document.querySelectorAll('.fab-label');
+            domLabels.forEach(l => l.style.opacity = CONFIG.labelsVisible ? '1' : '0');
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            labelRenderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        
+        renderStep(0);
+        animate();
+
+    </script>
+</body>
+</html>
