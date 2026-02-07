@@ -34,7 +34,7 @@
         .canvas {
             flex-grow: 1; position: relative;
             padding-left: 20px; padding-top: 30px;
-            overflow: hidden; cursor: pointer;
+            overflow: hidden; cursor: default;
         }
 
         /* --- Right Panel --- */
@@ -82,7 +82,7 @@
             font-weight: bold; font-size: 18px; text-shadow: 0 0 8px black; z-index: 60;
         }
 
-        /* --- Split & Fence Lines (DOM) --- */
+        /* --- Split Lines --- */
         .split-line {
             position: absolute; width: 3px; height: 60px;
             background-color: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan);
@@ -98,24 +98,18 @@
             opacity: 0; transition: opacity 0.5s;
         }
 
-        /* --- Math Layer (Dynamic Positioning) --- */
+        /* --- Math Layer --- */
         .math-layer {
-            position: absolute; top: 220px; 
-            width: 0; /* Pivot Center */
-            height: 100px;
+            position: absolute; top: 220px; width: 0; height: 100px;
             display: flex; justify-content: center; align-items: center; gap: 20px;
-            pointer-events: none; z-index: 40;
-            overflow: visible;
+            pointer-events: none; z-index: 40; overflow: visible;
         }
         .math-box {
             background: rgba(0,0,0,0.9); border: 1px solid #444; border-radius: 8px;
             padding: 8px 15px; text-align: center; opacity: 0; transition: opacity 0.5s, transform 0.5s;
-            display: flex; flex-direction: column; justify-content: center;
-            white-space: nowrap;
+            display: flex; flex-direction: column; justify-content: center; white-space: nowrap;
         }
-        /* IQR is the Boss */
         #mathIQR { border-color: var(--highlight-yellow); height: 90px; min-width: 130px; z-index: 10; }
-        /* Fences */
         #mathLow, #mathHigh { border-color: #666; height: 70px; min-width: 110px; }
         
         .math-val { color: white; font-size: 1.5rem; font-weight: bold; margin-bottom: 2px; }
@@ -128,25 +122,49 @@
             pointer-events: none; z-index: 5; transition: opacity 1s;
         }
         .axis-group { transition: opacity 0.5s; }
-        
-        /* SCALE COLORS */
         .axis-line { stroke: var(--scale-color); stroke-width: 2; }
         .axis-tick { stroke: var(--scale-color); stroke-width: 1; }
         .axis-label { fill: var(--scale-color); font-size: 12px; text-anchor: middle; }
         
-        /* Plot Elements - MORPHING ENABLED */
-        /* transition: all 1.5s covers x, x1, x2 attributes in modern browsers */
-        .marker-minmax { stroke: var(--accent-pink); stroke-width: 3; transition: all 1.5s ease-in-out; }
+        /* Plot Elements */
+        .marker-minmax { stroke: var(--accent-pink); stroke-width: 3; transition: x1 1.5s ease-in-out, x2 1.5s ease-in-out; }
         .marker-q { stroke: var(--highlight-yellow); stroke-width: 3; }
         .marker-med { stroke: var(--neon-cyan); stroke-width: 3; }
         .plot-box { fill: rgba(0, 242, 96, 0.1); stroke: var(--accent-green); stroke-width: 2; }
-        .val-label { fill: white; font-size: 14px; font-weight: bold; text-anchor: middle; transition: all 1.5s ease-in-out, opacity 0.5s; }
+        .val-label { fill: white; font-size: 14px; font-weight: bold; text-anchor: middle; transition: x 1.5s ease-in-out, opacity 0.5s; }
         .median-line { stroke: var(--neon-cyan); stroke-width: 3; }
         
         .fence-line { stroke: #888; stroke-width: 2; stroke-dasharray: 5,5; opacity: 0; transition: opacity 1s; }
         .fence-label { fill: #888; font-size: 11px; text-anchor: middle; opacity: 0; transition: opacity 1s; }
-        .outlier-dot { fill: var(--accent-pink); stroke: white; stroke-width: 1; opacity: 0; transition: opacity 0.5s; }
-        .whisker-line { stroke: var(--accent-pink); stroke-width: 2; transition: all 1.5s ease-in-out; }
+        
+        /* Outlier Dots */
+        .outlier-dot { 
+            fill: var(--accent-pink); 
+            stroke: var(--accent-pink); 
+            stroke-width: 1; 
+            opacity: 0; 
+            transition: opacity 0.2s; /* Fast appearance during drag */
+        }
+        
+        .whisker-line { stroke: var(--accent-pink); stroke-width: 2; transition: x1 1.5s ease-in-out, x2 1.5s ease-in-out; }
+
+        /* DRAGGABLE STATES */
+        .draggable-tick { 
+            stroke: var(--accent-pink); stroke-width: 6; cursor: grab; pointer-events: auto; 
+            animation: pulse-drag 1.5s infinite;
+        }
+        .dragging-tick { 
+            stroke: white; stroke-width: 6; cursor: grabbing; animation: none;
+        }
+        .snapped-tick {
+            stroke: var(--accent-pink) !important; stroke-width: 3; cursor: default; animation: none; pointer-events: none;
+        }
+
+        @keyframes pulse-drag {
+            0% { stroke-opacity: 1; stroke-width: 5; }
+            50% { stroke-opacity: 0.6; stroke-width: 8; }
+            100% { stroke-opacity: 1; stroke-width: 5; }
+        }
 
         /* --- Controls Styling --- */
         .section-label { color: #666; font-size: 0.75rem; margin-top: 5px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; }
@@ -221,8 +239,8 @@
             <label class="radio-label"><input type="radio" name="case" value="odd" checked> Case 1: Odd (11)</label>
             <label class="radio-label"><input type="radio" name="case" value="large"> Case 2: Large (14)</label>
             <label class="radio-label"><input type="radio" name="case" value="even"> Case 3: Even (12)</label>
-            <label class="radio-label" style="color: var(--accent-pink);"><input type="radio" name="case" value="out15"> Case 4: Outliers (15)</label>
-            <label class="radio-label" style="color: var(--accent-pink);"><input type="radio" name="case" value="out13"> Case 5: Outlier (13)</label>
+            <label class="radio-label" style="color: var(--accent-pink);"><input type="radio" name="case" value="out13"> Case 4: Outlier (13)</label>
+            <label class="radio-label" style="color: var(--accent-pink);"><input type="radio" name="case" value="out15"> Case 5: Outliers (15)</label>
         </div>
 
         <div class="info-panel">
@@ -274,6 +292,7 @@ const App = {
         isAnimating: false,
         waitingForCardClick: false,
         cards: [],
+        sortedData: [], // Need this for real-time outliers
         stats: { min:0, max:0, med:0, q1:0, q3:0 },
         lowerGroup: [], upperGroup: [],
         plotIndex: 0,
@@ -294,11 +313,11 @@ const App = {
         this.datasets.large = this.genData(14);
         this.datasets.even = this.genData(12);
         
-        // Case 4 (15 nums): 1 Low, 2 High
-        this.datasets.out15 = this.genOutlierData(15, 'case4'); 
+        // Case 4 (13 nums): 1 High Outlier
+        this.datasets.out13 = this.genOutlierData(13, 'case4'); 
         
-        // Case 5 (13 nums): 1 High
-        this.datasets.out13 = this.genOutlierData(13, 'case5');
+        // Case 5 (15 nums): 1 Low, 2 High Outliers
+        this.datasets.out15 = this.genOutlierData(15, 'case5');
         
         this.compareDatasets.case1 = this.genData(18);
         this.compareDatasets.case2 = this.genData(18);
@@ -313,18 +332,16 @@ const App = {
 
     genOutlierData: function(n, type) {
         const arr = [];
-        // Generate main cluster
         for(let i=0; i<n-3; i++) arr.push(Math.floor(Math.random()*20) + 45); 
 
         if (type === 'case4') { 
-            // 1 Low, 2 High
-            arr.push(10); arr.push(120); arr.push(125);
-        } else if (type === 'case5') {
-            // 1 High
+            // Case 4: 13 nums, 1 high outlier
             while(arr.length < n - 1) arr.push(Math.floor(Math.random()*20) + 45);
             arr.push(130);
+        } else if (type === 'case5') {
+            // Case 5: 15 nums, 1 low, 2 high
+            arr.push(10); arr.push(120); arr.push(125);
         }
-        // Fill remainder
         while(arr.length < n) arr.push(Math.floor(Math.random()*20) + 45);
         return arr;
     },
@@ -364,17 +381,17 @@ const App = {
 
         const mode = document.querySelector('input[name="case"]:checked').value;
         const rawData = this.datasets[mode];
-        const sorted = [...rawData].sort((a,b)=>a-b);
+        this.state.sortedData = [...rawData].sort((a,b)=>a-b);
         
-        this.state.stats = this.calcStats(sorted);
-        this.state.outlierData = this.calcOutliers(sorted, this.state.stats);
+        this.state.stats = this.calcStats(this.state.sortedData);
+        this.state.outlierData = this.calcOutliers(this.state.sortedData, this.state.stats);
 
         this.state.cards = [];
         const container = document.getElementById('cardContainer');
         const startX = 57; 
-        const slots = Array.from({length: sorted.length}, (_, i) => i).sort(() => Math.random() - 0.5);
+        const slots = Array.from({length: this.state.sortedData.length}, (_, i) => i).sort(() => Math.random() - 0.5);
         
-        sorted.forEach((val, i) => {
+        this.state.sortedData.forEach((val, i) => {
             const el = document.createElement('div');
             el.className = 'num-card';
             el.textContent = val;
@@ -441,8 +458,7 @@ const App = {
             lowSplitIndex: lowSplitIndex,
             highSplitIndex: highSplitIndex,
             dataLength: sortedArr.length,
-            // Calculate median index for alignment
-            medianIndex: (sortedArr.length - 1) / 2 
+            medianIndex: Math.floor((sortedArr.length - 1) / 2)
         };
     },
 
@@ -742,6 +758,8 @@ const App = {
 };
 
 const modManager = {
+    dragData: { active: false, type: null, snapped: { min: false, max: false } },
+
     startModSequence: function() {
         document.getElementById('modMainBtn').classList.add('mod-active');
         document.getElementById('modMainBtn').disabled = true;
@@ -760,9 +778,10 @@ const modManager = {
         // Calculate the exact center pixel of the median card
         const medianX = startX + medianIndex * (App.config.cardW + App.config.gap) + (App.config.cardW / 2);
         
-        // Apply position
+        // Apply position centered
         const mathLayer = document.getElementById('mathLayer');
         mathLayer.style.left = medianX + 'px'; 
+        mathLayer.style.transform = 'translateX(-50%)'; 
 
         // Show IQR
         document.getElementById('mathIQR').style.opacity = 1;
@@ -783,12 +802,10 @@ const modManager = {
         } else if (App.state.modStep === 3) { 
             this.drawVisualFences();
             App.state.modStep = 4;
-            UI.update("Step 4", "Fences drawn. **Click Canvas** to Trim Whiskers.");
-        } else if (App.state.modStep === 4) { 
-            this.trimWhiskers();
-            App.state.modStep = 5;
-            UI.update("Modified Plot", "Whiskers trimmed to 'safe' range. Red dots are Outliers.");
-        }
+            UI.update("Step 4", "Fences drawn. **Click and Drag the Whisker lines** to the new limits!");
+            this.enableWhiskerDrag();
+        } 
+        // Step 5 is Drag Mode - No Click Advance
     },
 
     drawVisualFences: function() {
@@ -811,13 +828,10 @@ const modManager = {
         
         const drawDataFence = (idx, type) => {
             let xPos;
-            if (idx === -2) { // Before start
-                xPos = startX - 4; 
-            } else if (idx === d.dataLength) { // After end
-                xPos = startX + (d.dataLength) * (App.config.cardW + App.config.gap) - App.config.gap/2;
-            } else if (idx === -1) {
-                return; 
-            } else {
+            if (idx === -2) { xPos = startX - 4; } 
+            else if (idx === d.dataLength) { xPos = startX + (d.dataLength) * (App.config.cardW + App.config.gap) - App.config.gap/2; } 
+            else if (idx === -1) { return; } 
+            else {
                 const xLeft = startX + idx * (App.config.cardW + App.config.gap) + App.config.cardW;
                 const xRight = startX + (idx+1) * (App.config.cardW + App.config.gap);
                 xPos = (xLeft + xRight) / 2;
@@ -834,73 +848,200 @@ const modManager = {
         drawDataFence(d.highSplitIndex, 'high');
     },
 
-    trimWhiskers: function() {
+    enableWhiskerDrag: function() {
+        const tMin = document.getElementById('tick-min');
+        const tMax = document.getElementById('tick-max');
+        
+        this.dragData = { active: false, type: null, snapped: { min: false, max: false } };
+        
+        [tMin, tMax].forEach(el => {
+            el.setAttribute("class", "draggable-tick");
+            el.addEventListener('mousedown', this.handleDragStart);
+        });
+        
+        document.addEventListener('mousemove', this.handleDragMove);
+        document.addEventListener('mouseup', this.handleDragEnd);
+    },
+
+    handleDragStart: function(e) {
+        if (modManager.dragData.snapped[e.target.id === 'tick-min' ? 'min' : 'max']) return; // Already snapped
+        
+        modManager.dragData.active = true;
+        modManager.dragData.type = e.target.id === 'tick-min' ? 'min' : 'max';
+        e.target.setAttribute("class", "dragging-tick");
+    },
+
+    handleDragMove: function(e) {
+        if (!modManager.dragData.active) return;
+        
+        const svg = document.getElementById('canvas');
+        const rect = svg.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left - 20; 
+        
+        const type = modManager.dragData.type;
+        const tick = document.getElementById(type === 'min' ? 'tick-min' : 'tick-max');
+        const label = document.getElementById(type === 'min' ? 'lbl-min' : 'lbl-max');
+        const whisker = document.getElementById(type === 'min' ? 'w-left' : 'w-right');
+        
+        tick.setAttribute("x1", mouseX);
+        tick.setAttribute("x2", mouseX);
+        label.setAttribute("x", mouseX);
+        
+        if (type === 'min') whisker.setAttribute("x1", mouseX);
+        else whisker.setAttribute("x2", mouseX);
+        
+        const range = App.state.axisRange;
+        const width = document.getElementById('canvas').clientWidth;
+        const startX = 37; const endX = 37 + (width * 0.72);
+        const val = Math.round(((mouseX - startX) / (endX - startX)) * (range.max - range.min) + range.min);
+        label.textContent = val;
+
+        // REAL-TIME OUTLIERS Logic
+        modManager.updateRealTimeOutliers(val, type);
+    },
+
+    updateRealTimeOutliers: function(dragVal, type) {
+        // Show outliers that are "revealed" by dragging past them
+        // If type is min (dragging right), show dots for data < dragVal
+        // If type is max (dragging left), show dots for data > dragVal
         const d = App.state.outlierData;
         const svg = document.getElementById('plotGroup');
         const y = App.config.plotY - 50;
-        
-        d.outliers.forEach(val => {
-            const x = plotManager.getPx(val);
-            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            c.setAttribute("cx", x); c.setAttribute("cy", y);
-            c.setAttribute("r", 4); c.setAttribute("class", "outlier-dot");
-            svg.appendChild(c);
-            setTimeout(() => { c.style.opacity = 1; }, 200);
+
+        // Clear previous dots first to avoid duplicates or stale state
+        document.querySelectorAll('.outlier-dot').forEach(el => el.remove());
+
+        // Re-draw based on current drag position
+        App.state.sortedData.forEach(val => {
+            let shouldShow = false;
+            // Check limits against fences to ensure we only show VALID outliers (outside fence)
+            // AND check against dragVal to see if user has dragged past it
+            if (type === 'min' && val < d.lowFence && val < dragVal) {
+                shouldShow = true;
+            } else if (type === 'max' && val > d.highFence && val > dragVal) {
+                shouldShow = true;
+            }
+
+            if (shouldShow) {
+                const x = plotManager.getPx(val);
+                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                c.setAttribute("cx", x); c.setAttribute("cy", y);
+                c.setAttribute("r", 4); c.setAttribute("class", "outlier-dot");
+                c.style.opacity = 1; // Immediate visibility
+                svg.appendChild(c);
+            }
         });
+    },
 
-        const newMinX = plotManager.getPx(d.newMin);
-        const newMaxX = plotManager.getPx(d.newMax);
-
-        // Slide Whisker Lines (Morph)
-        document.getElementById('w-left').setAttribute("x1", newMinX);
-        document.getElementById('w-right').setAttribute("x2", newMaxX);
+    handleDragEnd: function(e) {
+        if (!modManager.dragData.active) return;
         
-        // Slide Ticks and Labels (Morph)
-        const moveTick = (id, x, lblId, val) => {
-            document.getElementById(id).setAttribute("x1", x);
-            document.getElementById(id).setAttribute("x2", x);
+        const type = modManager.dragData.type;
+        const d = App.state.outlierData;
+        const targetVal = type === 'min' ? d.newMin : d.newMax;
+        const targetX = plotManager.getPx(targetVal);
+        const fenceVal = type === 'min' ? d.lowFence : d.highFence;
+        const fenceX = plotManager.getPx(fenceVal);
+        
+        const svg = document.getElementById('canvas');
+        const rect = svg.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left - 20;
+        
+        let success = false;
+        if (type === 'min') {
+            if (mouseX >= fenceX) success = true;
+        } else {
+            if (mouseX <= fenceX) success = true;
+        }
+        
+        if (success) {
+            modManager.snap(type, targetX, targetVal);
+        } else {
+            const s = App.state.stats;
+            const originVal = type === 'min' ? s.min : s.max;
+            modManager.snap(type, plotManager.getPx(originVal), originVal, false);
+            // Also clear outliers if reverted
+            document.querySelectorAll('.outlier-dot').forEach(el => el.remove());
+        }
+        
+        modManager.dragData.active = false;
+        modManager.dragData.type = null;
+    },
+
+    snap: function(type, x, val, success = true) {
+        const tick = document.getElementById(type === 'min' ? 'tick-min' : 'tick-max');
+        const label = document.getElementById(type === 'min' ? 'lbl-min' : 'lbl-max');
+        const whisker = document.getElementById(type === 'min' ? 'w-left' : 'w-right');
+        
+        tick.setAttribute("x1", x); tick.setAttribute("x2", x);
+        label.setAttribute("x", x); label.textContent = val;
+        
+        if (type === 'min') whisker.setAttribute("x1", x);
+        else whisker.setAttribute("x2", x);
+        
+        if (success) {
+            tick.setAttribute("class", "snapped-tick"); // Turns Pink
+            modManager.dragData.snapped[type] = true;
             
-            const lbl = document.getElementById(lblId);
-            // No fade out, just slide and update text halfway
-            lbl.setAttribute("x", x); 
-            setTimeout(() => {
-                lbl.textContent = val; 
-            }, 750); // Update text halfway through 1.5s transition
-        };
-        moveTick('tick-min', newMinX, 'lbl-min', d.newMin);
-        moveTick('tick-max', newMaxX, 'lbl-max', d.newMax);
+            // Ensure all correct outliers are permanently visible now
+            modManager.updateRealTimeOutliers(val, type); // Draw final state
+
+            if (modManager.dragData.snapped.min && modManager.dragData.snapped.max) {
+                modManager.finishModPlot();
+            }
+        } else {
+            tick.setAttribute("class", "draggable-tick");
+        }
+    },
+
+    finishModPlot: function() {
+        App.state.modStep = 5;
+        UI.update("Modified Plot", "Great! The plot now correctly handles outliers.");
+        document.removeEventListener('mousemove', this.handleDragMove);
+        document.removeEventListener('mouseup', this.handleDragEnd);
     },
 
     undo: function() {
         const step = App.state.modStep;
-        
-        if (step === 5) { // Undo Trim
+        document.removeEventListener('mousemove', this.handleDragMove);
+        document.removeEventListener('mouseup', this.handleDragEnd);
+
+        if (step === 5 || step === 4) { 
             const s = App.state.stats;
             const minX = plotManager.getPx(s.min);
             const maxX = plotManager.getPx(s.max);
+            
+            modManager.dragData = { active: false, type: null, snapped: { min: false, max: false } };
+
             document.querySelectorAll('.outlier-dot').forEach(e => e.remove());
+            
+            const tMin = document.getElementById('tick-min');
+            const tMax = document.getElementById('tick-max');
+            tMin.setAttribute("class", "marker-minmax");
+            tMax.setAttribute("class", "marker-minmax");
+            
+            tMin.removeEventListener('mousedown', this.handleDragStart);
+            tMax.removeEventListener('mousedown', this.handleDragStart);
+
             document.getElementById('w-left').setAttribute("x1", minX);
             document.getElementById('w-right').setAttribute("x2", maxX);
             
-            const tMin = document.getElementById('tick-min'); tMin.setAttribute("x1", minX); tMin.setAttribute("x2", minX);
+            tMin.setAttribute("x1", minX); tMin.setAttribute("x2", minX);
             const lMin = document.getElementById('lbl-min'); lMin.setAttribute("x", minX); lMin.textContent = s.min;
-            const tMax = document.getElementById('tick-max'); tMax.setAttribute("x1", maxX); tMax.setAttribute("x2", maxX);
+
+            tMax.setAttribute("x1", maxX); tMax.setAttribute("x2", maxX);
             const lMax = document.getElementById('lbl-max'); lMax.setAttribute("x", maxX); lMax.textContent = s.max;
             
-            App.state.modStep = 4;
-            UI.update("Step 4", "Fences drawn. **Click Canvas** to Trim Whiskers.");
-            return;
-        }
-        if (step === 4) { // Undo Visual Fences
-            document.querySelectorAll('.fence-line, .data-fence').forEach(e => e.remove());
             App.state.modStep = 3;
+            document.querySelectorAll('.fence-line, .data-fence').forEach(e => e.remove());
+            
             UI.update("Step 3", "Upper Fence calc shown. **Click Canvas** to Draw Fences.");
             return;
         }
         if (step === 3) { // Undo High Math
             document.getElementById('mathHigh').style.opacity = 0;
             App.state.modStep = 2;
-            UI.update("Step 2", "Lower Fence calc shown. **Click Canvas** for High Fence.");
+            UI.update("Step 2", "Lower Fence calc shown. **Click Canvas** for Upper Fence.");
             return;
         }
         if (step === 2) { // Undo Low Math
@@ -976,7 +1117,6 @@ const plotManager = {
         const label = (x, txt, id, pos) => {
             const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
             t.setAttribute("x", x);
-            // UPDATED: Shift Min/Max/Median even lower (y+35)
             const yPos = (pos === 'below') ? y + 35 : y - 25;
             t.setAttribute("y", yPos);
             t.textContent = txt; t.setAttribute("class", "val-label");
@@ -1118,7 +1258,18 @@ document.getElementById('compDataCheck').addEventListener('change', handleCompar
 document.getElementById('compPlotCheck').addEventListener('change', handleComparisonState);
 document.getElementById('mainBtn').addEventListener('click', (e) => { e.stopPropagation(); App.advance(); });
 document.getElementById('backBtn').addEventListener('click', (e) => { e.stopPropagation(); App.undo(); });
-document.getElementById('canvas').addEventListener('click', (e) => { if(document.getElementById('compDataCheck').checked || document.getElementById('compPlotCheck').checked) return; if (e.target.id === 'canvas' || e.target.nodeName === 'svg') App.advance(); });
+document.getElementById('canvas').addEventListener('click', (e) => { 
+    // New Feature: Canvas Click activates Mod Sequence if Plot is done
+    if(document.getElementById('compDataCheck').checked || document.getElementById('compPlotCheck').checked) return;
+    
+    // Check if standard plot is complete (Step 7) and mod hasn't started (Step 0) and mod button is visible (outliers exist)
+    if(App.state.step === 7 && App.state.modStep === 0 && document.getElementById('modControlRow').style.display !== 'none') {
+        modManager.startModSequence();
+        return;
+    }
+
+    if (e.target.id === 'canvas' || e.target.nodeName === 'svg') App.advance(); 
+});
 document.getElementById('scaleCheck').addEventListener('change', (e) => { plotManager.toggleScale(e.target.checked); });
 document.getElementById('controlsPanel').addEventListener('click', (e) => e.stopPropagation());
 
