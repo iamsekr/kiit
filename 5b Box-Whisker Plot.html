@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Box Plot Tool</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --panel-bg: #121212;
+            --text-color: #ffffff;
+            --accent-green: #00f260;
+            --accent-blue: #0575E6;
+            --accent-pink: #ff0055;
+            --card-fill: #222;
+            --card-border: #444;
+            --highlight-yellow: #ffeb3b;
+            --neon-cyan: #00ffff;
+            --card-w: 45px;
+            --card-h: 50px;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- Canvas Area --- */
+        .canvas {
+            flex-grow: 1;
+            position: relative;
+            padding-left: 20px;
+            padding-top: 30px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        /* --- Right Panel --- */
+        .controls {
+            width: 320px;
+            flex-shrink: 0;
+            background-color: var(--panel-bg);
+            border-left: 1px solid #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.9);
+            z-index: 100;
+            cursor: default;
+            overflow-y: auto;
+        }
+
+        /* --- Cards --- */
+        .num-card {
+            position: absolute;
+            width: var(--card-w);
+            height: var(--card-h);
+            background: var(--card-fill);
+            border: 2px solid var(--card-border);
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+            z-index: 10;
+            transition: left 1s ease-in-out, top 1s ease-in-out, transform 0.4s ease, background-color 0.3s, color 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .num-card.interactive { pointer-events: auto; cursor: pointer; }
+        .num-card.interactive:hover { border-color: white; }
+
+        .pulse-sync {
+            animation: pulse-anim 1s infinite;
+            border-color: white !important;
+            box-shadow: 0 0 15px rgba(255,255,255,0.8) !important;
+            transform: scale(1.1);
+        }
+
+        @keyframes pulse-anim {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+            50% { transform: scale(1.15); box-shadow: 0 0 20px rgba(255,255,255,0.9); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        }
+
+        .move-up { transform: translateY(-40px); }
+        .move-down { transform: translateY(40px); }
+        
+        .eliminated {
+            background-color: #222 !important; 
+            color: var(--highlight-yellow) !important;
+            border-color: #333 !important;
+            opacity: 0.6;
+        }
+
+        .median-found {
+            background-color: var(--neon-cyan) !important;
+            color: black !important;
+            border-color: white !important;
+            transform: scale(1.2);
+            z-index: 50;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .quartile-found {
+            background-color: var(--highlight-yellow) !important;
+            color: black !important;
+            border-color: white !important;
+            transform: scale(1.15);
+            z-index: 50;
+        }
+        
+        /* Floating Average Numbers */
+        .floating-avg {
+            transition: top 1s ease-in-out, left 1s ease-in-out, opacity 0.5s; 
+            font-weight: bold;
+            font-size: 20px;
+            text-shadow: 0 0 10px black;
+            z-index: 60;
+        }
+
+        /* --- SVG Layer --- */
+        .svg-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
+            transition: opacity 1s;
+        }
+        
+        .axis-group { transition: opacity 0.5s; }
+        
+        /* UPDATED: White Scale Colors */
+        .axis-line { stroke: #ffffff; stroke-width: 2; }
+        .axis-tick { stroke: #ffffff; stroke-width: 1; }
+        .axis-label { fill: #ffffff; font-size: 14px; text-anchor: middle; }
+        .axis-label-vert { fill: #ffffff; font-size: 11px; text-anchor: end; alignment-baseline: middle; }
+
+        /* Plot Colors */
+        .marker-minmax { stroke: var(--accent-pink); stroke-width: 3; }
+        .marker-q { stroke: var(--highlight-yellow); stroke-width: 3; }
+        .marker-med { stroke: var(--neon-cyan); stroke-width: 3; }
+        .plot-box { fill: rgba(0, 242, 96, 0.1); stroke: var(--accent-green); stroke-width: 2; }
+        .val-label { fill: white; font-size: 16px; font-weight: bold; text-anchor: middle; }
+        .val-label-small { fill: #cccccc; font-size: 11px; alignment-baseline: middle; } /* text-anchor set in JS now */
+        .median-line { stroke: var(--neon-cyan); stroke-width: 3; }
+
+        /* --- Controls --- */
+        h2 { margin: 0 0 5px 0; color: var(--accent-blue); font-size: 1.4rem; }
+        .section-label { color: #666; font-size: 0.8rem; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .radio-group, .check-group {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .radio-label, .check-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; }
+        input[type="checkbox"], input[type="radio"] { accent-color: var(--accent-blue); width: 16px; height: 16px; }
+
+        .info-panel {
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-green);
+            min-height: 70px;
+        }
+        .info-title { display: block; font-weight: bold; margin-bottom: 5px; color: #fff; }
+        .info-text { font-size: 0.9rem; color: #ccc; line-height: 1.3; }
+
+        .nav-row { display: flex; gap: 10px; margin-top: 5px; }
+
+        button {
+            border: none; padding: 12px; color: white; font-weight: bold;
+            border-radius: 6px; font-size: 1rem; cursor: pointer; transition: 0.2s;
+        }
+        button:hover:not(:disabled) { transform: translateY(-2px); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); transform: none; }
+
+        .btn-primary { background: linear-gradient(90deg, var(--accent-blue), #00d2ff); flex: 2; }
+        .btn-secondary { background: #333; flex: 1; }
+        .btn-regen { background: #e91e63; width: 100%; margin-bottom: 10px; }
+        .btn-reset { background: #333; color: #aaa; border: 1px solid #444; margin-top: 5px; font-size: 0.8rem; padding: 8px; }
+
+        .build-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .step-btn { background: #333; border: 1px solid #444; color: white; padding: 8px; cursor: pointer; border-radius: 4px; font-size: 0.85rem; }
+        .step-btn:disabled { opacity: 0.4; cursor: default; border-color: transparent; }
+        
+        .final-btn { grid-column: span 2; background: #222; border: 1px solid var(--highlight-yellow); color: var(--highlight-yellow); }
+
+        /* Comparison View Styles */
+        #compareContainer {
+            display: none;
+            width: 50%;
+            height: calc(100% - 280px);
+            position: absolute;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            padding-top: 20px;
+            border-right: 1px solid #333; 
+        }
+        .compare-col-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .compare-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .col-header { color: var(--accent-green); font-weight: bold; margin-bottom: 10px; }
+        .mini-card {
+            background: #222; border: 1px solid #444; color: white;
+            width: 40px; height: 35px; display: flex; justify-content: center; align-items: center;
+            border-radius: 4px; font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="canvas" id="canvas">
+        <svg class="svg-layer" id="svgLayer">
+            <g id="axisGroup" class="axis-group"></g>
+            <g id="plotGroup"></g>
+        </svg>
+        <div id="cardContainer"></div>
+        <div id="compareContainer"></div>
+    </div>
+
+    <div class="controls" id="controlsPanel">
+        <h2>Box Plot Builder</h2>
+        <button class="btn-regen" id="regenBtn" onclick="App.regenerate()">Regenerate Data</button>
+
+        <div class="section-label">Tutorial Mode</div>
+        <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="case" value="odd" checked> Case 1: Odd (11)</label>
+            <label class="radio-label"><input type="radio" name="case" value="large"> Case 2: Large (14)</label>
+            <label class="radio-label"><input type="radio" name="case" value="even"> Case 3: Even (12)</label>
+        </div>
+
+        <div class="info-panel">
+            <span class="info-title" id="stepTitle">Intro</span>
+            <div class="info-text" id="stepDesc"></div>
+        </div>
+
+        <div class="nav-row" id="navRow">
+            <button id="backBtn" class="btn-secondary" disabled>Back</button>
+            <button id="mainBtn" class="btn-primary">Sort Numbers</button>
+        </div>
+
+        <div id="buildArea" class="build-grid" style="display: none;">
+            <button class="step-btn" id="btn-min">1. Min</button>
+            <button class="step-btn" id="btn-max">2. Max</button>
+            <button class="step-btn" id="btn-med" style="color: var(--neon-cyan)">3. Median</button>
+            <button class="step-btn" id="btn-q1" style="color: var(--highlight-yellow)">4. Q1</button>
+            <button class="step-btn" id="btn-q3" style="color: var(--highlight-yellow)">5. Q3</button>
+            <button class="step-btn" id="btn-box" style="grid-column: span 2;">6. Draw Box</button>
+            
+            <label class="check-label" style="grid-column: span 2; background: #222; padding: 10px; border-radius: 4px;">
+                <input type="checkbox" id="scaleCheck" checked>
+                <span>Show Scale</span>
+            </label>
+
+            <button class="step-btn final-btn" id="showDataBtn" style="display:none;" onclick="plotManager.showSortedData()">Show Sorted Data</button>
+        </div>
+
+        <div class="section-label">Comparison Mode</div>
+        <div class="check-group">
+            <label class="check-label">
+                <input type="checkbox" id="compDataCheck">
+                <span>Compare All Data</span>
+            </label>
+            <label class="check-label">
+                <input type="checkbox" id="compPlotCheck">
+                <span>Compare All Plots</span>
+            </label>
+            <button class="btn-reset" onclick="resetComparison()">Reset View</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const App = {
+    datasets: { odd: [], large: [], even: [] },
+    compareDatasets: { case1: [], case2: [], case3: [] },
+
+    state: {
+        step: 0, 
+        isAnimating: false,
+        waitingForCardClick: false,
+        activeData: [], 
+        cards: [],
+        stats: { min:0, max:0, med:0, q1:0, q3:0 },
+        lowerGroup: [],
+        upperGroup: [],
+        plotIndex: 0,
+        plotSequence: ['min', 'max', 'med', 'q1', 'q3', 'box']
+    },
+    
+    config: { topY: 140, dropY: 120, cardW: 45, gap: 10, plotY: 450 },
+    timers: [],
+
+    boot: function() {
+        this.regenerateData();
+        this.init();
+    },
+
+    regenerate: function() {
+        this.regenerateData();
+        handleComparisonState(); 
+    },
+
+    regenerateData: function() {
+        this.datasets.odd = this.genData(11);
+        this.datasets.large = this.genData(14);
+        this.datasets.even = this.genData(12);
+        this.compareDatasets.case1 = this.genData(18);
+        this.compareDatasets.case2 = this.genData(18);
+        this.compareDatasets.case3 = this.genData(18);
+    },
+
+    genData: function(n) {
+        const arr = [];
+        for(let i=0; i<n; i++) arr.push(Math.floor(Math.random()*85) + 10);
+        return arr;
+    },
+
+    init: function() {
+        this.clearTimers();
+        document.getElementById('cardContainer').innerHTML = '';
+        document.getElementById('compareContainer').innerHTML = '';
+        document.getElementById('compareContainer').style.display = 'none';
+        document.getElementById('axisGroup').innerHTML = '';
+        document.getElementById('plotGroup').innerHTML = '';
+        document.getElementById('buildArea').style.display = 'none';
+        document.getElementById('navRow').style.display = 'flex';
+        document.getElementById('showDataBtn').style.display = 'none';
+        
+        document.getElementById('svgLayer').style.display = 'block';
+        document.getElementById('cardContainer').style.display = 'block';
+        
+        document.getElementById('scaleCheck').checked = true;
+        document.getElementById('axisGroup').style.opacity = 1;
+        document.getElementById('showDataBtn').disabled = false;
+        document.getElementById('showDataBtn').textContent = "Show Sorted Data";
+
+        const ids = ['min','max','med','q1','q3','box'];
+        ids.forEach(id => {
+            const b = document.getElementById('btn-'+id);
+            b.disabled = false; b.style.opacity = '1'; b.style.background = '#333';
+        });
+
+        const mode = document.querySelector('input[name="case"]:checked').value;
+        const rawData = this.datasets[mode];
+        const sorted = [...rawData].sort((a,b)=>a-b);
+        
+        this.state.stats = this.calcStats(sorted);
+
+        this.state.cards = [];
+        const container = document.getElementById('cardContainer');
+        const startX = 57; // UPDATED: 57px offset
+        const slots = Array.from({length: sorted.length}, (_, i) => i).sort(() => Math.random() - 0.5);
+        
+        sorted.forEach((val, i) => {
+            const el = document.createElement('div');
+            el.className = 'num-card';
+            el.textContent = val;
+            const slot = slots[i];
+            el.style.left = (startX + slot * (this.config.cardW + this.config.gap)) + 'px';
+            el.style.top = this.config.topY + 'px';
+            container.appendChild(el);
+            this.state.cards.push({ val: val, el: el });
+        });
+
+        this.state.step = 0;
+        this.state.plotIndex = 0;
+        this.state.isAnimating = false;
+        
+        UI.update("Messy Data", "The numbers are mixed up! Click **Sort Numbers**.");
+        UI.btn("Sort Numbers", false);
+        UI.backBtn(false);
+    },
+
+    calcStats: function(arr) {
+        const sorted = [...arr].sort((a,b)=>a-b);
+        const getMed = (a) => {
+            const m = Math.floor(a.length/2);
+            return (a.length % 2 !== 0) ? a[m] : (a[m-1] + a[m])/2;
+        };
+        const mid = Math.floor(sorted.length/2);
+        const lower = (sorted.length % 2 !== 0) ? sorted.slice(0, mid) : sorted.slice(0, mid);
+        const upper = (sorted.length % 2 !== 0) ? sorted.slice(mid+1) : sorted.slice(mid);
+        return {
+            min: sorted[0],
+            max: sorted[sorted.length-1],
+            med: getMed(sorted),
+            q1: getMed(lower),
+            q3: getMed(upper)
+        };
+    },
+
+    advance: function() {
+        if (this.state.isAnimating) return;
+        if (this.state.waitingForCardClick) { UI.flashTitle("Complete the step first!"); return; }
+        switch(this.state.step) {
+            case 0: this.animateSort(); break;
+            case 1: this.startMedianGame(); break; 
+            case 2: this.animateSplit(); break;
+            case 3: this.startQ1Game(); break;
+            case 4: this.startQ3Game(); break;
+            case 5: this.animateMerge(); break; 
+            case 6: this.preparePlot(); break;
+            case 7: this.advancePlotStep(); break;
+        }
+    },
+
+    undo: function() {
+        if(this.state.isAnimating) return;
+        switch(this.state.step) {
+            case 1: this.init(); break;
+            case 2: 
+                this.state.step = 1;
+                this.state.cards.forEach(c => { c.el.className = 'num-card'; c.el.onclick = null; });
+                document.querySelectorAll('.floating-avg').forEach(e => e.remove());
+                UI.update("Sorted!", "Median search reset.");
+                this.startMedianGame(); 
+                break;
+            case 3:
+                this.state.lowerGroup.forEach(c => c.el.remove()); this.state.upperGroup.forEach(c => c.el.remove());
+                this.state.lowerGroup = []; this.state.upperGroup = [];
+                this.state.step = 2;
+                UI.update("Median Found", "Split undone.");
+                UI.btn("Split Data", false);
+                break;
+            case 4:
+                this.state.lowerGroup.forEach(c => { c.el.className = 'num-card'; c.el.onclick = null; });
+                document.querySelectorAll('.floating-avg').forEach(e => {
+                     // Removing only Q1 indicators technically, but simplified to reset Q1
+                     if(e.classList.contains('avg-q1')) e.remove();
+                });
+                this.state.step = 3; UI.update("Halves Dropped", "Q1 search reset."); 
+                this.startQ1Game(); 
+                break;
+            case 5:
+                this.state.upperGroup.forEach(c => { c.el.className = 'num-card'; c.el.onclick = null; });
+                document.querySelectorAll('.floating-avg').forEach(e => {
+                    if(e.classList.contains('avg-q3')) e.remove();
+                });
+                this.state.step = 4; UI.update("Q1 Found", "Q3 search reset."); 
+                this.startQ3Game(); 
+                break;
+            case 6:
+                this.undoMerge(); 
+                break;
+            case 7:
+                 document.getElementById('buildArea').style.display = 'none';
+                 document.getElementById('navRow').style.display = 'flex';
+                 document.getElementById('axisGroup').innerHTML = ''; 
+                 document.getElementById('plotGroup').innerHTML = '';
+                 this.state.step = 6; this.state.plotIndex = 0;
+                 UI.update("Ready", "Click to Build Plot."); 
+                 UI.btn("Build Plot", false);
+                 break;
+        }
+    },
+
+    animateSort: function() {
+        this.state.isAnimating = true; UI.btn("Sorting...", true); UI.backBtn(false);
+        this.state.cards.forEach((c, i) => {
+            if (i % 2 === 0) c.el.classList.add('move-up'); else c.el.classList.add('move-down');
+        });
+        this.addTimer(() => {
+            const startX = 57; // UPDATED: 57px offset
+            this.state.cards.forEach((c, i) => { c.el.style.left = (startX + i * (this.config.cardW + this.config.gap)) + 'px'; });
+        }, 800);
+        this.addTimer(() => {
+            this.state.cards.forEach(c => { c.el.classList.remove('move-up'); c.el.classList.remove('move-down'); });
+            this.state.step = 1; this.state.isAnimating = false;
+            UI.backBtn(true);
+            this.startMedianGame();
+        }, 2000);
+    },
+
+    startMedianGame: function() {
+        this.state.step = 1;
+        UI.update("Find Median", "Click **LEFT-MOST** card.");
+        UI.btn("Find Median...", true); 
+        this.state.waitingForCardClick = true;
+        this.setupClicks(this.state.cards, 0, this.state.cards.length-1, 'med', () => {
+            this.state.waitingForCardClick = false; 
+            this.state.step = 2;
+            UI.btn("Split Data", false); 
+            UI.update("Median Found", `Median = ${this.state.stats.med}. Click **Split Data**.`);
+        });
+    },
+
+    animateSplit: function() {
+        this.state.isAnimating = true; UI.btn("Splitting...", true); UI.backBtn(false);
+        const createClone = (original) => {
+            const clone = original.el.cloneNode(true);
+            clone.className = 'num-card'; clone.style.left = original.el.style.left; clone.style.top = original.el.style.top;
+            clone.onmouseenter = null; clone.onmouseleave = null;
+            document.getElementById('cardContainer').appendChild(clone);
+            return { val: original.val, el: clone };
+        };
+        const n = this.state.cards.length; const mid = Math.floor(n/2);
+        let lowerIdxs = [], upperIdxs = [];
+        if (n % 2 !== 0) {
+            for(let i=0; i<mid; i++) lowerIdxs.push(i); for(let i=mid+1; i<n; i++) upperIdxs.push(i);
+        } else {
+            for(let i=0; i<mid; i++) lowerIdxs.push(i); for(let i=mid; i<n; i++) upperIdxs.push(i);
+        }
+        this.state.lowerGroup = lowerIdxs.map(i => createClone(this.state.cards[i]));
+        this.state.upperGroup = upperIdxs.map(i => createClone(this.state.cards[i]));
+        this.addTimer(() => {
+            const y = this.config.topY + this.config.dropY;
+            this.state.lowerGroup.forEach(c => { c.el.style.top = y + 'px'; c.el.style.left = (parseFloat(c.el.style.left) - 15) + 'px'; });
+            this.state.upperGroup.forEach(c => { c.el.style.top = y + 'px'; c.el.style.left = (parseFloat(c.el.style.left) + 15) + 'px'; });
+        }, 50);
+        this.addTimer(() => {
+            this.state.step = 3; this.state.isAnimating = false;
+            UI.backBtn(true);
+            this.startQ1Game();
+        }, 1200);
+    },
+
+    startQ1Game: function() {
+        this.state.step = 3;
+        UI.update("Find Q1", "Click **LEFT-MOST** card in **Bottom Left**.");
+        UI.btn("Find Q1...", true);
+        this.state.waitingForCardClick = true;
+        this.setupClicks(this.state.lowerGroup, 0, this.state.lowerGroup.length-1, 'q1', () => {
+            this.state.waitingForCardClick = false; 
+            this.state.step = 4;
+            UI.update("Q1 Found", `Q1 = ${this.state.stats.q1}. Now Find Q3.`);
+            this.startQ3Game();
+        });
+    },
+
+    startQ3Game: function() {
+        this.state.step = 4;
+        UI.update("Find Q3", "Click **LEFT-MOST** card in **Bottom Right**.");
+        UI.btn("Find Q3...", true);
+        this.state.waitingForCardClick = true;
+        this.setupClicks(this.state.upperGroup, 0, this.state.upperGroup.length-1, 'q3', () => {
+            this.state.waitingForCardClick = false; 
+            this.state.step = 5;
+            UI.update("Stats Found", "Median, Q1, and Q3 are ready. Click **Merge Rows**.");
+            UI.btn("Merge Rows", false);
+        });
+    },
+
+    animateMerge: function() {
+        this.state.isAnimating = true;
+        UI.btn("Merging...", true);
+        const targetY = this.config.topY;
+        
+        // Move Cards Back
+        [...this.state.lowerGroup, ...this.state.upperGroup].forEach(c => {
+            c.el.style.top = targetY + 'px';
+            if (this.state.lowerGroup.includes(c)) {
+                c.el.style.left = (parseFloat(c.el.style.left) + 15) + 'px';
+            } else {
+                c.el.style.left = (parseFloat(c.el.style.left) - 15) + 'px';
+            }
+        });
+
+        // Move Floating Numbers Horizontally to center them
+        document.querySelectorAll('.floating-avg').forEach(e => {
+            const currentTop = parseFloat(e.style.top) || 0;
+            const currentLeft = parseFloat(e.style.left) || 0;
+            
+            // Only move those in the dropped area (approx > 200px)
+            if(currentTop > 200) {
+                 e.style.top = (currentTop - this.config.dropY) + 'px';
+                 
+                 // Centering Logic
+                 if (e.classList.contains('avg-q1')) {
+                     // Q1 belongs to Lower Group (moved +15px Right)
+                     e.style.left = (currentLeft + 15) + 'px';
+                 } else if (e.classList.contains('avg-q3')) {
+                     // Q3 belongs to Upper Group (moved -15px Left)
+                     e.style.left = (currentLeft - 15) + 'px';
+                 }
+            }
+        });
+
+        this.addTimer(() => {
+            this.state.step = 6;
+            this.state.isAnimating = false;
+            UI.btn("Build Plot", false); 
+            UI.update("Merged!", "Click **Build Plot**.");
+        }, 1000);
+    },
+    
+    undoMerge: function() {
+        const y = this.config.topY + this.config.dropY;
+        
+        // Move cards back down
+        this.state.lowerGroup.forEach(c => { c.el.style.top = y + 'px'; c.el.style.left = (parseFloat(c.el.style.left) - 15) + 'px'; });
+        this.state.upperGroup.forEach(c => { c.el.style.top = y + 'px'; c.el.style.left = (parseFloat(c.el.style.left) + 15) + 'px'; });
+        
+        // Move floaters back down and out
+        document.querySelectorAll('.floating-avg').forEach(e => {
+            const currentTop = parseFloat(e.style.top) || 0;
+            const currentLeft = parseFloat(e.style.left) || 0;
+
+            if(currentTop < 200) {
+                e.style.top = (currentTop + this.config.dropY) + 'px';
+                
+                if (e.classList.contains('avg-q1')) {
+                     e.style.left = (currentLeft - 15) + 'px';
+                 } else if (e.classList.contains('avg-q3')) {
+                     e.style.left = (currentLeft + 15) + 'px';
+                 }
+            }
+        });
+        
+        this.state.step = 5; 
+        UI.update("Undone", "Click **Merge Rows**.");
+        UI.btn("Merge Rows", false);
+    },
+
+    preparePlot: function() {
+        this.state.step = 7;
+        document.getElementById('navRow').style.display = 'none';
+        document.getElementById('buildArea').style.display = 'grid';
+        UI.update("Build It!", "Click the **Canvas** to draw each part.");
+        plotManager.drawAxis();
+    },
+
+    advancePlotStep: function() {
+        const seq = this.state.plotSequence; const idx = this.state.plotIndex;
+        if (idx < seq.length) {
+            plotManager.draw(seq[idx]); this.state.plotIndex++;
+            if (this.state.plotIndex === seq.length) {
+                UI.update("Complete!", "The Box Plot is ready.");
+                document.getElementById('showDataBtn').style.display = 'block';
+            }
+        }
+    },
+
+    setupClicks: function(arr, startL, startR, type, onComplete) {
+        let l = startL; let r = startR;
+        const bindInteractive = () => {
+            const elLeft = arr[l].el; const elRight = arr[r].el;
+            elLeft.classList.add('interactive');
+            elLeft.onmouseenter = () => { elLeft.classList.add('pulse-sync'); elRight.classList.add('pulse-sync'); };
+            elLeft.onmouseleave = () => { elLeft.classList.remove('pulse-sync'); elRight.classList.remove('pulse-sync'); };
+            elLeft.onclick = (e) => {
+                e.stopPropagation();
+                elLeft.classList.remove('interactive', 'pulse-sync'); elRight.classList.remove('pulse-sync');
+                elLeft.onmouseenter = null; elLeft.onmouseleave = null; elLeft.onclick = null;
+                elLeft.classList.add('eliminated'); elRight.classList.add('eliminated');
+                if (l === r - 1) { 
+                    elLeft.classList.remove('eliminated'); elRight.classList.remove('eliminated');
+                    const cls = (type === 'med') ? 'median-found' : 'quartile-found';
+                    elLeft.classList.add(cls); elRight.classList.add(cls);
+                    this.showFloatingAvg(elLeft, elRight, (arr[l].val + arr[r].val)/2, type);
+                    onComplete(); return;
+                }
+                l++; r--;
+                if (l === r) {
+                    const cls = (type === 'med') ? 'median-found' : 'quartile-found';
+                    arr[l].el.classList.add(cls); onComplete();
+                } else { bindInteractive(); }
+            };
+        };
+        bindInteractive();
+    },
+
+    showFloatingAvg: function(el1, el2, val, type) {
+        const x = (parseFloat(el1.style.left) + parseFloat(el2.style.left) + this.config.cardW)/2;
+        const y = parseFloat(el1.style.top) - 30;
+        const div = document.createElement('div');
+        div.className = 'floating-avg'; 
+        div.textContent = val;
+        div.style.position = 'absolute'; 
+        div.style.left = x + 'px'; 
+        div.style.top = y + 'px';
+        div.style.transform = 'translateX(-50%)'; 
+        
+        // Color Logic
+        if (type === 'q1' || type === 'q3') {
+            div.style.color = 'var(--highlight-yellow)';
+            div.classList.add(`avg-${type}`); // Add identifier class
+        } else {
+            div.style.color = 'var(--neon-cyan)';
+            div.classList.add('avg-med');
+        }
+
+        document.getElementById('cardContainer').appendChild(div);
+    },
+
+    addTimer: function(fn, delay) { this.timers.push(setTimeout(fn, delay)); },
+    clearTimers: function() { this.timers.forEach(t => clearTimeout(t)); this.timers = []; }
+};
+
+const plotManager = {
+    drawAxis: function() {
+        const svg = document.getElementById('axisGroup');
+        const minVal = App.state.stats.min; const maxVal = App.state.stats.max;
+        const axisMin = Math.floor((minVal - 5) / 10) * 10;
+        const axisMax = Math.ceil((maxVal + 5) / 10) * 10;
+        App.state.axisRange = { min: axisMin, max: axisMax };
+        const y = App.config.plotY;
+        const width = document.getElementById('canvas').clientWidth;
+        
+        // UPDATED: Start at 37, Span 72%
+        const startX = 37; 
+        const endX = 37 + (width * 0.72);
+        
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", startX); line.setAttribute("x2", endX);
+        line.setAttribute("y1", y); line.setAttribute("y2", y);
+        line.setAttribute("class", "axis-line");
+        svg.appendChild(line);
+
+        for (let v = axisMin; v <= axisMax; v += 5) {
+            const x = this.getPx(v, startX, endX, axisMin, axisMax);
+            const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            tick.setAttribute("x1", x); tick.setAttribute("x2", x);
+            tick.setAttribute("y1", y - 5); tick.setAttribute("y2", y + 5);
+            tick.setAttribute("class", "axis-tick");
+            svg.appendChild(tick);
+            if (v % 10 === 0) {
+                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                txt.setAttribute("x", x); txt.setAttribute("y", y + 20);
+                txt.textContent = v; txt.setAttribute("class", "axis-label");
+                svg.appendChild(txt);
+            }
+        }
+    },
+
+    getPx: function(val, startX, endX, min, max) {
+        return startX + ((val - min) / (max - min)) * (endX - startX);
+    },
+
+    draw: function(type) {
+        const svg = document.getElementById('plotGroup');
+        const s = App.state.stats; const range = App.state.axisRange;
+        const width = document.getElementById('canvas').clientWidth;
+        
+        // UPDATED: Start at 37, Span 72%
+        const startX = 37; 
+        const endX = 37 + (width * 0.72);
+        const getX = (v) => this.getPx(v, startX, endX, range.min, range.max);
+        const y = App.config.plotY - 50;
+        
+        const btn = document.getElementById('btn-'+type);
+        if(btn) { btn.disabled = true; btn.style.background = '#004d40'; btn.style.borderColor = '#00f260'; }
+
+        const label = (x, txt) => {
+            const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            t.setAttribute("x", x); t.setAttribute("y", y - 30);
+            t.textContent = txt; t.setAttribute("class", "val-label"); svg.appendChild(t);
+        };
+        const tick = (x, cls) => {
+            const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l.setAttribute("x1", x); l.setAttribute("x2", x); l.setAttribute("y1", y - 15); l.setAttribute("y2", y + 15);
+            l.setAttribute("class", cls); svg.appendChild(l);
+        };
+
+        if (type === 'min') { tick(getX(s.min), 'marker-minmax'); label(getX(s.min), s.min); }
+        if (type === 'max') { tick(getX(s.max), 'marker-minmax'); label(getX(s.max), s.max); }
+        if (type === 'med') { tick(getX(s.med), 'marker-med'); label(getX(s.med), s.med); }
+        if (type === 'q1') { tick(getX(s.q1), 'marker-q'); label(getX(s.q1), s.q1); }
+        if (type === 'q3') { tick(getX(s.q3), 'marker-q'); label(getX(s.q3), s.q3); }
+        if (type === 'box') {
+            const xQ1 = getX(s.q1); const xQ3 = getX(s.q3); const xMed = getX(s.med); const xMin = getX(s.min); const xMax = getX(s.max);
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", xQ1); rect.setAttribute("y", y - 15);
+            rect.setAttribute("width", xQ3 - xQ1); rect.setAttribute("height", 30);
+            rect.setAttribute("class", "plot-box"); svg.insertBefore(rect, svg.firstChild); 
+            const medL = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            medL.setAttribute("x1", xMed); medL.setAttribute("x2", xMed); medL.setAttribute("y1", y - 15); medL.setAttribute("y2", y + 15);
+            medL.setAttribute("class", "median-line"); svg.appendChild(medL);
+            const whisker = (x1, x2) => {
+                const w = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                w.setAttribute("x1", x1); w.setAttribute("x2", x2); w.setAttribute("y1", y); w.setAttribute("y2", y);
+                w.setAttribute("class", "marker-minmax"); w.setAttribute("stroke-width", "2"); svg.insertBefore(w, rect); 
+            };
+            whisker(xMin, xQ1); whisker(xQ3, xMax);
+        }
+    },
+
+    toggleScale: function(isVisible) {
+        document.getElementById('axisGroup').style.opacity = isVisible ? 1 : 0;
+    },
+
+    showSortedData: function() {
+        App.state.lowerGroup.forEach(c => c.el.style.opacity = 0);
+        App.state.upperGroup.forEach(c => c.el.style.opacity = 0);
+        document.querySelectorAll('.floating-avg').forEach(e => e.style.opacity = 0);
+        App.state.cards.forEach(c => {
+            c.el.className = 'num-card'; c.el.style.top = (App.config.topY) + 'px';
+            c.el.style.borderColor = '#444'; c.el.style.color = 'white'; c.el.style.background = '#222';
+        });
+        document.getElementById('showDataBtn').disabled = true;
+    }
+};
+
+const CompManager = {
+    renderDataView: function() {
+        const c = document.getElementById('compareContainer');
+        c.innerHTML = ''; 
+        c.style.display = 'flex'; 
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'compare-col-container';
+        c.appendChild(wrapper);
+
+        ['case1', 'case2', 'case3'].forEach((key, idx) => {
+            const data = [...App.compareDatasets[key]].sort((a,b)=>a-b);
+            const col = document.createElement('div');
+            col.className = 'compare-col';
+            col.innerHTML = `<div class="col-header">Case ${idx+1}</div>`;
+            
+            data.forEach(val => {
+                const card = document.createElement('div');
+                card.className = 'mini-card';
+                card.textContent = val;
+                col.appendChild(card);
+            });
+            wrapper.appendChild(col);
+        });
+    },
+
+    renderPlotView: function() {
+        const svg = document.getElementById('svgLayer');
+        const axisG = document.getElementById('axisGroup');
+        const plotG = document.getElementById('plotGroup');
+        axisG.innerHTML = ''; plotG.innerHTML = '';
+        svg.style.display = 'block';
+
+        const h = document.getElementById('canvas').clientHeight;
+        const width = document.getElementById('canvas').clientWidth;
+
+        const startY = h - 300; 
+        const endY = 40; 
+        
+        const xOffset = width / 2;
+        const availableW = width / 2;
+        const axisX = xOffset + 60; 
+
+        let allVals = [
+            ...App.compareDatasets.case1, 
+            ...App.compareDatasets.case2, 
+            ...App.compareDatasets.case3
+        ];
+        
+        const minVal = Math.min(...allVals); const maxVal = Math.max(...allVals);
+        const axisMin = Math.floor((minVal - 5) / 10) * 10;
+        const axisMax = Math.ceil((maxVal + 5) / 10) * 10;
+
+        const getY = (v) => startY - ((v - axisMin) / (axisMax - axisMin)) * (startY - endY);
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", axisX); line.setAttribute("x2", axisX);
+        line.setAttribute("y1", startY); line.setAttribute("y2", endY);
+        line.setAttribute("class", "axis-line"); axisG.appendChild(line);
+
+        for (let v = axisMin; v <= axisMax; v += 5) {
+            const y = getY(v);
+            const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            tick.setAttribute("x1", axisX - 5); tick.setAttribute("x2", axisX + 5);
+            tick.setAttribute("y1", y); tick.setAttribute("y2", y);
+            tick.setAttribute("class", "axis-tick"); axisG.appendChild(tick);
+            if(v % 10 === 0) {
+                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                txt.setAttribute("x", axisX - 10); txt.setAttribute("y", y);
+                txt.textContent = v; txt.setAttribute("class", "axis-label-vert"); axisG.appendChild(txt);
+            }
+        }
+
+        const sectionW = (availableW - 100) / 3;
+        
+        ['case1', 'case2', 'case3'].forEach((key, idx) => {
+            const stats = App.calcStats(App.compareDatasets[key]);
+            
+            const centerX = xOffset + 100 + (sectionW * idx) + (sectionW/2) - 30;
+            const boxW = 30;
+            
+            const yMin = getY(stats.min);
+            const yMax = getY(stats.max);
+            const yMed = getY(stats.med);
+            const yQ1 = getY(stats.q1);
+            const yQ3 = getY(stats.q3);
+
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", centerX - boxW/2); rect.setAttribute("y", yQ3);
+            rect.setAttribute("width", boxW); rect.setAttribute("height", Math.abs(yQ1 - yQ3));
+            rect.setAttribute("class", "plot-box"); plotG.appendChild(rect);
+
+            const medL = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            medL.setAttribute("x1", centerX - boxW/2); medL.setAttribute("x2", centerX + boxW/2);
+            medL.setAttribute("y1", yMed); medL.setAttribute("y2", yMed);
+            medL.setAttribute("class", "median-line"); plotG.appendChild(medL);
+
+            const drawW = (yA, yB) => {
+                const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                l.setAttribute("x1", centerX); l.setAttribute("x2", centerX);
+                l.setAttribute("y1", yA); l.setAttribute("y2", yB);
+                l.setAttribute("class", "marker-minmax"); l.setAttribute("stroke-width", 2); plotG.appendChild(l);
+            };
+            drawW(yMin, yQ1); drawW(yQ3, yMax);
+            
+            const drawCap = (y) => {
+                const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                l.setAttribute("x1", centerX - 10); l.setAttribute("x2", centerX + 10);
+                l.setAttribute("y1", y); l.setAttribute("y2", y);
+                l.setAttribute("class", "marker-minmax"); plotG.appendChild(l);
+            };
+            drawCap(yMin); drawCap(yMax);
+            
+            const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            txt.setAttribute("x", centerX); txt.setAttribute("y", startY + 20); 
+            txt.textContent = `Case ${idx+1}`; txt.setAttribute("class", "val-label");
+            plotG.appendChild(txt);
+
+            // UPDATED: Show all 5 values (Left for Min/Med/Max, Right for Q1/Q3)
+            const drawLabel = (y, val, side) => {
+                const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                const xOffset = (side === 'left') ? -25 : 25;
+                const anchor = (side === 'left') ? 'end' : 'start';
+                
+                t.setAttribute("x", centerX + xOffset); 
+                t.setAttribute("y", y + 4); 
+                t.textContent = val; 
+                t.setAttribute("class", "val-label-small"); 
+                t.setAttribute("text-anchor", anchor);
+                plotG.appendChild(t);
+            };
+            drawLabel(yMin, stats.min, 'left');
+            drawLabel(yQ1, stats.q1, 'right');
+            drawLabel(yMed, stats.med, 'left');
+            drawLabel(yQ3, stats.q3, 'right');
+            drawLabel(yMax, stats.max, 'left');
+        });
+    }
+};
+
+const UI = {
+    update: (title, desc) => { document.getElementById('stepTitle').textContent = title; document.getElementById('stepDesc').innerHTML = desc; },
+    btn: (txt, disabled) => { const b = document.getElementById('mainBtn'); b.textContent = txt; b.disabled = disabled; },
+    backBtn: (enabled) => { document.getElementById('backBtn').disabled = !enabled; },
+    flashTitle: (msg) => { const el = document.getElementById('stepTitle'); const old = el.textContent; el.textContent = msg; el.style.color = '#ff0055'; setTimeout(() => { el.textContent = old; el.style.color = '#fff'; }, 800); }
+};
+
+function handleComparisonState() {
+    const showData = document.getElementById('compDataCheck').checked;
+    const showPlot = document.getElementById('compPlotCheck').checked;
+
+    if (!showData && !showPlot) {
+        App.init(); 
+        return;
+    }
+
+    document.getElementById('cardContainer').style.display = 'none';
+    document.getElementById('buildArea').style.display = 'none';
+    document.getElementById('navRow').style.display = 'none';
+    document.getElementById('svgLayer').style.display = 'none'; 
+    document.getElementById('compareContainer').style.display = 'none';
+
+    if (showData) {
+        CompManager.renderDataView();
+        UI.update("Data View", showPlot ? "Comparing Data (Left) & Plots (Right)" : "Comparing Data (Left Only)");
+    }
+
+    if (showPlot) {
+        CompManager.renderPlotView();
+        UI.update("Plot View", showData ? "Comparing Data (Left) & Plots (Right)" : "Comparing Plots (Right Only)");
+    }
+}
+
+function resetComparison() {
+    document.getElementById('compDataCheck').checked = false;
+    document.getElementById('compPlotCheck').checked = false;
+    handleComparisonState();
+}
+
+document.querySelectorAll('input[name="case"]').forEach(r => {
+    r.addEventListener('change', () => {
+        // Ensure comparison mode is reset
+        document.getElementById('compDataCheck').checked = false;
+        document.getElementById('compPlotCheck').checked = false;
+        // Re-initialize fresh
+        App.init();
+    });
+});
+
+document.getElementById('compDataCheck').addEventListener('change', handleComparisonState);
+document.getElementById('compPlotCheck').addEventListener('change', handleComparisonState);
+
+document.getElementById('mainBtn').addEventListener('click', (e) => { e.stopPropagation(); App.advance(); });
+document.getElementById('backBtn').addEventListener('click', (e) => { e.stopPropagation(); App.undo(); });
+document.getElementById('canvas').addEventListener('click', (e) => {
+    if(document.getElementById('compDataCheck').checked || document.getElementById('compPlotCheck').checked) return;
+    if (e.target.id === 'canvas' || e.target.nodeName === 'svg') App.advance();
+});
+document.getElementById('scaleCheck').addEventListener('change', (e) => { plotManager.toggleScale(e.target.checked); });
+document.getElementById('controlsPanel').addEventListener('click', (e) => e.stopPropagation());
+
+App.boot();
+</script>
+</body>
+</html>
