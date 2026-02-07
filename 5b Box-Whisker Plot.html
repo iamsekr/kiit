@@ -16,253 +16,169 @@
             --card-border: #444;
             --highlight-yellow: #ffeb3b;
             --neon-cyan: #00ffff;
-            --card-w: 45px;
-            --card-h: 50px;
+            --card-w: 40px; 
+            --card-h: 45px;
+            --scale-color: #757573;
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+            margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            overflow: hidden;
-            user-select: none;
+            background-color: var(--bg-color); color: var(--text-color);
+            overflow: hidden; user-select: none;
         }
 
-        .container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-        }
+        .container { display: flex; height: 100vh; width: 100vw; }
 
         /* --- Canvas Area --- */
         .canvas {
-            flex-grow: 1;
-            position: relative;
-            padding-left: 20px;
-            padding-top: 30px;
-            overflow: hidden;
-            cursor: pointer;
+            flex-grow: 1; position: relative;
+            padding-left: 20px; padding-top: 30px;
+            overflow: hidden; cursor: pointer;
         }
 
         /* --- Right Panel --- */
         .controls {
-            width: 320px;
-            flex-shrink: 0;
+            width: 280px; flex-shrink: 0;
             background-color: var(--panel-bg);
-            border-left: 1px solid #333;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            border-left: 1px solid #333; padding: 15px;
+            display: flex; flex-direction: column; gap: 10px;
             box-shadow: -5px 0 20px rgba(0, 0, 0, 0.9);
-            z-index: 100;
-            cursor: default;
-            overflow-y: auto;
+            z-index: 100; overflow-y: auto; cursor: default;
         }
 
         /* --- Cards --- */
         .num-card {
-            position: absolute;
-            width: var(--card-w);
-            height: var(--card-h);
-            background: var(--card-fill);
-            border: 2px solid var(--card-border);
-            border-radius: 6px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 18px;
-            color: white;
-            z-index: 10;
-            transition: left 1s ease-in-out, top 1s ease-in-out, transform 0.4s ease, background-color 0.3s, color 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-            pointer-events: none;
+            position: absolute; width: var(--card-w); height: var(--card-h);
+            background: var(--card-fill); border: 2px solid var(--card-border);
+            border-radius: 5px; display: flex; justify-content: center; align-items: center;
+            font-weight: bold; font-size: 16px; color: white; z-index: 10;
+            transition: left 1s, top 1s, transform 0.4s, background-color 0.3s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5); pointer-events: none;
         }
-
-        .num-card.interactive {
-            pointer-events: auto;
-            cursor: pointer;
-        }
-
-        .num-card.interactive:hover {
-            border-color: white;
-        }
+        .num-card.interactive { pointer-events: auto; cursor: pointer; }
+        .num-card.interactive:hover { border-color: white; }
 
         .pulse-sync {
             animation: pulse-anim 1s infinite;
             border-color: white !important;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8) !important;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8) !important;
             transform: scale(1.1);
         }
-
         @keyframes pulse-anim {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
-            50% { transform: scale(1.15); box-shadow: 0 0 20px rgba(255, 255, 255, 0.9); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+            0% { transform: scale(1); box-shadow: 0 0 8px rgba(255, 255, 255, 0.5); }
+            50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(255, 255, 255, 0.9); }
+            100% { transform: scale(1); box-shadow: 0 0 8px rgba(255, 255, 255, 0.5); }
         }
 
         .move-up { transform: translateY(-40px); }
         .move-down { transform: translateY(40px); }
+        .eliminated { background: #222 !important; color: var(--highlight-yellow) !important; border-color: #333 !important; opacity: 0.6; }
+        .median-found { background: var(--neon-cyan) !important; color: black !important; border-color: white !important; transform: scale(1.2); z-index: 50; box-shadow: 0 0 15px var(--neon-cyan); }
+        .quartile-found { background: var(--highlight-yellow) !important; color: black !important; border-color: white !important; transform: scale(1.15); z-index: 50; }
 
-        .eliminated {
-            background-color: #222 !important;
-            color: var(--highlight-yellow) !important;
-            border-color: #333 !important;
-            opacity: 0.6;
-        }
-
-        .median-found {
-            background-color: var(--neon-cyan) !important;
-            color: black !important;
-            border-color: white !important;
-            transform: scale(1.2);
-            z-index: 50;
-            box-shadow: 0 0 20px var(--neon-cyan);
-        }
-
-        .quartile-found {
-            background-color: var(--highlight-yellow) !important;
-            color: black !important;
-            border-color: white !important;
-            transform: scale(1.15);
-            z-index: 50;
-        }
-
-        /* Floating Average Numbers */
         .floating-avg {
-            transition: top 1s ease-in-out, left 1s ease-in-out, opacity 0.5s;
-            font-weight: bold;
-            font-size: 20px;
-            text-shadow: 0 0 10px black;
-            z-index: 60;
+            transition: top 1s, left 1s, opacity 0.5s;
+            font-weight: bold; font-size: 18px; text-shadow: 0 0 8px black; z-index: 60;
         }
 
-        /* Split Line for even medians */
+        /* --- Split & Fence Lines (DOM) --- */
         .split-line {
-            position: absolute;
-            width: 4px;
-            height: 70px;
-            background-color: var(--neon-cyan);
-            box-shadow: 0 0 15px var(--neon-cyan);
-            z-index: 55;
-            border-radius: 2px;
-            transform: translate(-50%, -10px);
-            transition: top 1s ease-in-out, left 1s ease-in-out, opacity 0.5s;
+            position: absolute; width: 3px; height: 60px;
+            background-color: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan);
+            z-index: 55; border-radius: 2px; transform: translate(-50%, -5px);
+            transition: top 1s, left 1s, opacity 0.5s;
         }
-        .quartile-line {
-            background-color: var(--highlight-yellow) !important;
-            box-shadow: 0 0 15px var(--highlight-yellow) !important;
+        .quartile-line { background-color: var(--highlight-yellow) !important; box-shadow: 0 0 10px var(--highlight-yellow) !important; }
+        
+        .data-fence {
+            position: absolute; width: 0px; height: 80px; 
+            border-left: 2px dotted #aaa; 
+            z-index: 5; transform: translate(-50%, -15px);
+            opacity: 0; transition: opacity 0.5s;
         }
+
+        /* --- Math Layer (Dynamic Positioning) --- */
+        .math-layer {
+            position: absolute; top: 220px; 
+            width: 0; /* Pivot Center */
+            height: 100px;
+            display: flex; justify-content: center; align-items: center; gap: 20px;
+            pointer-events: none; z-index: 40;
+            overflow: visible;
+        }
+        .math-box {
+            background: rgba(0,0,0,0.9); border: 1px solid #444; border-radius: 8px;
+            padding: 8px 15px; text-align: center; opacity: 0; transition: opacity 0.5s, transform 0.5s;
+            display: flex; flex-direction: column; justify-content: center;
+            white-space: nowrap;
+        }
+        /* IQR is the Boss */
+        #mathIQR { border-color: var(--highlight-yellow); height: 90px; min-width: 130px; z-index: 10; }
+        /* Fences */
+        #mathLow, #mathHigh { border-color: #666; height: 70px; min-width: 110px; }
+        
+        .math-val { color: white; font-size: 1.5rem; font-weight: bold; margin-bottom: 2px; }
+        .math-lbl { color: #aaa; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .math-eq { color: var(--accent-green); font-size: 0.75rem; font-family: monospace; margin-top: 2px; }
 
         /* --- SVG Layer --- */
         .svg-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 5;
-            transition: opacity 1s;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5; transition: opacity 1s;
         }
-
         .axis-group { transition: opacity 0.5s; }
-
-        .axis-line { stroke: #ffffff; stroke-width: 2; }
-        .axis-tick { stroke: #ffffff; stroke-width: 1; }
-        .axis-label { fill: #ffffff; font-size: 14px; text-anchor: middle; }
-        .axis-label-vert { fill: #ffffff; font-size: 11px; text-anchor: end; alignment-baseline: middle; }
-
-        /* Plot Colors */
-        .marker-minmax { stroke: var(--accent-pink); stroke-width: 3; }
+        
+        /* SCALE COLORS */
+        .axis-line { stroke: var(--scale-color); stroke-width: 2; }
+        .axis-tick { stroke: var(--scale-color); stroke-width: 1; }
+        .axis-label { fill: var(--scale-color); font-size: 12px; text-anchor: middle; }
+        
+        /* Plot Elements - MORPHING ENABLED */
+        /* transition: all 1.5s covers x, x1, x2 attributes in modern browsers */
+        .marker-minmax { stroke: var(--accent-pink); stroke-width: 3; transition: all 1.5s ease-in-out; }
         .marker-q { stroke: var(--highlight-yellow); stroke-width: 3; }
         .marker-med { stroke: var(--neon-cyan); stroke-width: 3; }
         .plot-box { fill: rgba(0, 242, 96, 0.1); stroke: var(--accent-green); stroke-width: 2; }
-        .val-label { fill: white; font-size: 16px; font-weight: bold; text-anchor: middle; }
-        .val-label-small { fill: #cccccc; font-size: 11px; alignment-baseline: middle; }
+        .val-label { fill: white; font-size: 14px; font-weight: bold; text-anchor: middle; transition: all 1.5s ease-in-out, opacity 0.5s; }
         .median-line { stroke: var(--neon-cyan); stroke-width: 3; }
+        
+        .fence-line { stroke: #888; stroke-width: 2; stroke-dasharray: 5,5; opacity: 0; transition: opacity 1s; }
+        .fence-label { fill: #888; font-size: 11px; text-anchor: middle; opacity: 0; transition: opacity 1s; }
+        .outlier-dot { fill: var(--accent-pink); stroke: white; stroke-width: 1; opacity: 0; transition: opacity 0.5s; }
+        .whisker-line { stroke: var(--accent-pink); stroke-width: 2; transition: all 1.5s ease-in-out; }
 
-        /* --- Controls --- */
-        h2 { margin: 0 0 5px 0; color: var(--accent-blue); font-size: 1.4rem; }
-        .section-label { color: #666; font-size: 0.8rem; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-
-        .radio-group, .check-group {
-            background: #1a1a1a;
-            padding: 10px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .radio-label, .check-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; }
-        input[type="checkbox"], input[type="radio"] { accent-color: var(--accent-blue); width: 16px; height: 16px; }
-
-        .info-panel {
-            background: #222;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid var(--accent-green);
-            min-height: 70px;
-        }
-        .info-title { display: block; font-weight: bold; margin-bottom: 5px; color: #fff; }
-        .info-text { font-size: 0.9rem; color: #ccc; line-height: 1.3; }
-
-        .nav-row { display: flex; gap: 10px; margin-top: 5px; }
-
-        button {
-            border: none; padding: 12px; color: white; font-weight: bold;
-            border-radius: 6px; font-size: 1rem; cursor: pointer; transition: 0.2s;
-        }
-        button:hover:not(:disabled) { transform: translateY(-2px); }
+        /* --- Controls Styling --- */
+        .section-label { color: #666; font-size: 0.75rem; margin-top: 5px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; }
+        .radio-group, .check-group { background: #1a1a1a; padding: 8px; border-radius: 6px; display: flex; flex-direction: column; gap: 5px; }
+        .radio-label, .check-label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; }
+        input[type="checkbox"], input[type="radio"] { accent-color: var(--accent-blue); width: 14px; height: 14px; }
+        .info-panel { background: #222; padding: 10px; border-radius: 6px; border-left: 3px solid var(--accent-green); min-height: 50px; }
+        .info-title { display: block; font-weight: bold; margin-bottom: 3px; color: #fff; font-size: 0.95rem; }
+        .info-text { font-size: 0.85rem; color: #ccc; line-height: 1.2; }
+        .nav-row { display: flex; gap: 8px; margin-top: 5px; }
+        
+        button { border: none; padding: 8px; color: white; font-weight: bold; border-radius: 4px; font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
+        button:hover:not(:disabled) { transform: translateY(-1px); }
         button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); transform: none; }
-
         .btn-primary { background: linear-gradient(90deg, var(--accent-blue), #00d2ff); flex: 2; }
         .btn-secondary { background: #333; flex: 1; }
-        .btn-regen { background: #e91e63; width: 100%; margin-bottom: 10px; }
-        .btn-reset { background: #333; color: #aaa; border: 1px solid #444; margin-top: 5px; font-size: 0.8rem; padding: 8px; }
+        .btn-regen { background: #e91e63; width: 100%; margin-bottom: 5px; font-size: 0.85rem; padding: 6px; }
+        .btn-reset { background: #333; color: #aaa; border: 1px solid #444; margin-top: 5px; font-size: 0.75rem; padding: 5px; }
 
-        .build-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .step-btn { background: #333; border: 1px solid #444; color: white; padding: 8px; cursor: pointer; border-radius: 4px; font-size: 0.85rem; }
-        .step-btn:disabled { opacity: 0.4; cursor: default; border-color: transparent; }
-
+        .build-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 5px; }
+        .step-btn { background: #333; border: 1px solid #444; color: white; padding: 6px; cursor: pointer; border-radius: 4px; font-size: 0.8rem; }
         .final-btn { grid-column: span 2; background: #222; border: 1px solid var(--highlight-yellow); color: var(--highlight-yellow); }
+        .mod-section { grid-column: span 2; display: flex; gap: 5px; margin-top: 5px; border-top: 1px solid #444; padding-top: 5px; }
+        .mod-btn { flex: 1; background: #4a148c; border: 1px solid #7c4dff; color: white; font-size: 0.75rem; padding: 4px; }
+        .mod-active { background: #00e676; border-color: #00e676; color: black; }
 
-        /* Comparison View Styles */
-        #compareContainer {
-            display: none;
-            width: 50%;
-            height: calc(100% - 280px);
-            position: absolute;
-            left: 0;
-            top: 0;
-            overflow-y: auto;
-            padding-top: 20px;
-            border-right: 1px solid #333;
-        }
-        .compare-col-container {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-        }
-        .compare-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            margin-bottom: 20px;
-        }
+        /* Comparison View */
+        #compareContainer { display: none; width: 50%; height: calc(100% - 280px); position: absolute; left: 0; top: 0; overflow-y: auto; padding-top: 20px; border-right: 1px solid #333; }
+        .compare-col-container { display: flex; justify-content: space-around; width: 100%; }
+        .compare-col { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-bottom: 20px; }
         .col-header { color: var(--accent-green); font-weight: bold; margin-bottom: 10px; }
-        .mini-card {
-            background: #222; border: 1px solid #444; color: white;
-            width: 40px; height: 35px; display: flex; justify-content: center; align-items: center;
-            border-radius: 4px; font-size: 14px;
-        }
+        .mini-card { background: #222; border: 1px solid #444; color: white; width: 40px; height: 35px; display: flex; justify-content: center; align-items: center; border-radius: 4px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -273,19 +189,40 @@
             <g id="axisGroup" class="axis-group"></g>
             <g id="plotGroup"></g>
         </svg>
+        
         <div id="cardContainer"></div>
+        
+        <div id="mathLayer" class="math-layer">
+            <div id="mathLow" class="math-box">
+                <span class="math-val" id="valLow">0</span>
+                <span class="math-lbl">Lower Fence</span>
+                <span class="math-eq">Q1 - 1.5*IQR</span>
+            </div>
+            <div id="mathIQR" class="math-box">
+                <span class="math-val" id="valIQR">0</span>
+                <span class="math-lbl">IQR</span>
+                <span class="math-eq">Q3 - Q1</span>
+            </div>
+            <div id="mathHigh" class="math-box">
+                <span class="math-val" id="valHigh">0</span>
+                <span class="math-lbl">Upper Fence</span>
+                <span class="math-eq">Q3 + 1.5*IQR</span>
+            </div>
+        </div>
+
         <div id="compareContainer"></div>
     </div>
 
     <div class="controls" id="controlsPanel">
-        <h2>Box Plot Builder</h2>
         <button class="btn-regen" id="regenBtn" onclick="App.regenerate()">Regenerate Data</button>
 
-        <div class="section-label">Tutorial Mode</div>
+        <div class="section-label">Select Case</div>
         <div class="radio-group">
             <label class="radio-label"><input type="radio" name="case" value="odd" checked> Case 1: Odd (11)</label>
             <label class="radio-label"><input type="radio" name="case" value="large"> Case 2: Large (14)</label>
             <label class="radio-label"><input type="radio" name="case" value="even"> Case 3: Even (12)</label>
+            <label class="radio-label" style="color: var(--accent-pink);"><input type="radio" name="case" value="out15"> Case 4: Outliers (15)</label>
+            <label class="radio-label" style="color: var(--accent-pink);"><input type="radio" name="case" value="out13"> Case 5: Outlier (13)</label>
         </div>
 
         <div class="info-panel">
@@ -299,31 +236,29 @@
         </div>
 
         <div id="buildArea" class="build-grid" style="display: none;">
-            <button class="step-btn" id="btn-min">1. Min</button>
-            <button class="step-btn" id="btn-max">2. Max</button>
-            <button class="step-btn" id="btn-med" style="color: var(--neon-cyan)">3. Median</button>
-            <button class="step-btn" id="btn-q1" style="color: var(--highlight-yellow)">4. Q1</button>
-            <button class="step-btn" id="btn-q3" style="color: var(--highlight-yellow)">5. Q3</button>
-            <button class="step-btn" id="btn-box" style="grid-column: span 2;">6. Draw Box</button>
+            <button class="step-btn" id="btn-min">Min</button>
+            <button class="step-btn" id="btn-max">Max</button>
+            <button class="step-btn" id="btn-med" style="color: var(--neon-cyan)">Median</button>
+            <button class="step-btn" id="btn-q1" style="color: var(--highlight-yellow)">Q1</button>
+            <button class="step-btn" id="btn-q3" style="color: var(--highlight-yellow)">Q3</button>
+            <button class="step-btn" id="btn-box">Box</button>
             
-            <label class="check-label" style="grid-column: span 2; background: #222; padding: 10px; border-radius: 4px;">
+            <label class="check-label" style="grid-column: span 2; background: #222; padding: 5px; border-radius: 4px;">
                 <input type="checkbox" id="scaleCheck" checked>
                 <span>Show Scale</span>
             </label>
 
+            <div id="modControlRow" class="mod-section" style="display: none;">
+                <button class="step-btn mod-btn" id="modMainBtn" onclick="modManager.startModSequence()">Show Modified Plot</button>
+            </div>
+
             <button class="step-btn final-btn" id="showDataBtn" style="display:none;" onclick="plotManager.showSortedData()">Show Sorted Data</button>
         </div>
 
-        <div class="section-label">Comparison Mode</div>
+        <div class="section-label">Compare</div>
         <div class="check-group">
-            <label class="check-label">
-                <input type="checkbox" id="compDataCheck">
-                <span>Compare All Data</span>
-            </label>
-            <label class="check-label">
-                <input type="checkbox" id="compPlotCheck">
-                <span>Compare All Plots</span>
-            </label>
+            <label class="check-label"><input type="checkbox" id="compDataCheck"><span>All Data</span></label>
+            <label class="check-label"><input type="checkbox" id="compPlotCheck"><span>All Plots</span></label>
             <button class="btn-reset" onclick="resetComparison()">Reset View</button>
         </div>
     </div>
@@ -331,39 +266,40 @@
 
 <script>
 const App = {
-    datasets: { odd: [], large: [], even: [] },
+    datasets: { odd: [], large: [], even: [], out13: [], out15: [] },
     compareDatasets: { case1: [], case2: [], case3: [] },
 
     state: {
         step: 0, 
         isAnimating: false,
         waitingForCardClick: false,
-        activeData: [], 
         cards: [],
         stats: { min:0, max:0, med:0, q1:0, q3:0 },
-        lowerGroup: [],
-        upperGroup: [],
+        lowerGroup: [], upperGroup: [],
         plotIndex: 0,
-        plotSequence: ['min', 'max', 'med', 'q1', 'q3', 'box']
+        plotSequence: ['min', 'max', 'med', 'q1', 'q3', 'box'],
+        modStep: 0,
+        outlierData: null
     },
     
-    config: { topY: 140, dropY: 120, cardW: 45, gap: 10, plotY: 450 },
+    config: { topY: 140, dropY: 120, cardW: 40, gap: 8, plotY: 450 },
     timers: [],
 
-    boot: function() {
-        this.regenerateData();
-        this.init();
-    },
+    boot: function() { this.regenerateData(); this.init(); },
 
-    regenerate: function() {
-        this.regenerateData();
-        handleComparisonState(); 
-    },
+    regenerate: function() { this.regenerateData(); handleComparisonState(); },
 
     regenerateData: function() {
         this.datasets.odd = this.genData(11);
         this.datasets.large = this.genData(14);
         this.datasets.even = this.genData(12);
+        
+        // Case 4 (15 nums): 1 Low, 2 High
+        this.datasets.out15 = this.genOutlierData(15, 'case4'); 
+        
+        // Case 5 (13 nums): 1 High
+        this.datasets.out13 = this.genOutlierData(13, 'case5');
+        
         this.compareDatasets.case1 = this.genData(18);
         this.compareDatasets.case2 = this.genData(18);
         this.compareDatasets.case3 = this.genData(18);
@@ -372,6 +308,24 @@ const App = {
     genData: function(n) {
         const arr = [];
         for(let i=0; i<n; i++) arr.push(Math.floor(Math.random()*85) + 10);
+        return arr;
+    },
+
+    genOutlierData: function(n, type) {
+        const arr = [];
+        // Generate main cluster
+        for(let i=0; i<n-3; i++) arr.push(Math.floor(Math.random()*20) + 45); 
+
+        if (type === 'case4') { 
+            // 1 Low, 2 High
+            arr.push(10); arr.push(120); arr.push(125);
+        } else if (type === 'case5') {
+            // 1 High
+            while(arr.length < n - 1) arr.push(Math.floor(Math.random()*20) + 45);
+            arr.push(130);
+        }
+        // Fill remainder
+        while(arr.length < n) arr.push(Math.floor(Math.random()*20) + 45);
         return arr;
     },
 
@@ -385,14 +339,22 @@ const App = {
         document.getElementById('buildArea').style.display = 'none';
         document.getElementById('navRow').style.display = 'flex';
         document.getElementById('showDataBtn').style.display = 'none';
+        document.getElementById('modControlRow').style.display = 'none';
+        
+        document.getElementById('mathIQR').style.opacity = 0;
+        document.getElementById('mathLow').style.opacity = 0;
+        document.getElementById('mathHigh').style.opacity = 0;
         
         document.getElementById('svgLayer').style.display = 'block';
         document.getElementById('cardContainer').style.display = 'block';
-        
         document.getElementById('scaleCheck').checked = true;
         document.getElementById('axisGroup').style.opacity = 1;
         document.getElementById('showDataBtn').disabled = false;
         document.getElementById('showDataBtn').textContent = "Show Sorted Data";
+        
+        document.getElementById('modMainBtn').textContent = "Show Modified Plot";
+        document.getElementById('modMainBtn').disabled = false;
+        document.getElementById('modMainBtn').classList.remove('mod-active');
 
         const ids = ['min','max','med','q1','q3','box'];
         ids.forEach(id => {
@@ -405,6 +367,7 @@ const App = {
         const sorted = [...rawData].sort((a,b)=>a-b);
         
         this.state.stats = this.calcStats(sorted);
+        this.state.outlierData = this.calcOutliers(sorted, this.state.stats);
 
         this.state.cards = [];
         const container = document.getElementById('cardContainer');
@@ -425,6 +388,7 @@ const App = {
         this.state.step = 0;
         this.state.plotIndex = 0;
         this.state.isAnimating = false;
+        this.state.modStep = 0;
         
         UI.update("Messy Data", "The numbers are mixed up! Click **Sort Numbers**.");
         UI.btn("Sort Numbers", false);
@@ -449,8 +413,45 @@ const App = {
         };
     },
 
+    calcOutliers: function(sortedArr, stats) {
+        const iqr = stats.q3 - stats.q1;
+        const lowFence = stats.q1 - (1.5 * iqr);
+        const highFence = stats.q3 + (1.5 * iqr);
+        const insideValues = sortedArr.filter(v => v >= lowFence && v <= highFence);
+        const outliers = sortedArr.filter(v => v < lowFence || v > highFence);
+        
+        let lowSplitIndex = -1;
+        let highSplitIndex = -1;
+        
+        for(let i=0; i<sortedArr.length-1; i++) {
+            if(sortedArr[i] < lowFence && sortedArr[i+1] >= lowFence) lowSplitIndex = i;
+            if(sortedArr[i] <= highFence && sortedArr[i+1] > highFence) highSplitIndex = i;
+        }
+
+        if (lowFence < sortedArr[0]) lowSplitIndex = -2;
+        if (highFence > sortedArr[sortedArr.length-1]) highSplitIndex = sortedArr.length;
+
+        return {
+            iqr: iqr,
+            lowFence: lowFence,
+            highFence: highFence,
+            newMin: insideValues.length > 0 ? Math.min(...insideValues) : stats.min,
+            newMax: insideValues.length > 0 ? Math.max(...insideValues) : stats.max,
+            outliers: outliers,
+            lowSplitIndex: lowSplitIndex,
+            highSplitIndex: highSplitIndex,
+            dataLength: sortedArr.length,
+            // Calculate median index for alignment
+            medianIndex: (sortedArr.length - 1) / 2 
+        };
+    },
+
     advance: function() {
         if (this.state.isAnimating) return;
+        if (this.state.modStep > 0 && this.state.modStep < 5) {
+            modManager.nextClick();
+            return;
+        }
         if (this.state.waitingForCardClick) { UI.flashTitle("Complete the step first!"); return; }
         switch(this.state.step) {
             case 0: this.animateSort(); break;
@@ -466,6 +467,10 @@ const App = {
 
     undo: function() {
         if(this.state.isAnimating) return;
+        if (this.state.modStep > 0) {
+            modManager.undo();
+            return;
+        }
         switch(this.state.step) {
             case 1: this.init(); break;
             case 2: 
@@ -506,6 +511,7 @@ const App = {
                  document.getElementById('navRow').style.display = 'flex';
                  document.getElementById('axisGroup').innerHTML = ''; 
                  document.getElementById('plotGroup').innerHTML = '';
+                 document.getElementById('modControlRow').style.display = 'none';
                  this.state.step = 6; this.state.plotIndex = 0;
                  UI.update("Ready", "Click to Build Plot."); 
                  UI.btn("Build Plot", false);
@@ -545,9 +551,6 @@ const App = {
 
     animateSplit: function() {
         this.state.isAnimating = true; UI.btn("Splitting...", true); UI.backBtn(false);
-        
-        // Removed logic that moved median line down. It now stays at top.
-
         const createClone = (original) => {
             const clone = original.el.cloneNode(true);
             clone.className = 'num-card'; clone.style.left = original.el.style.left; clone.style.top = original.el.style.top;
@@ -606,8 +609,6 @@ const App = {
         this.state.isAnimating = true;
         UI.btn("Merging...", true);
         const targetY = this.config.topY;
-        
-        // Move Cards Back
         [...this.state.lowerGroup, ...this.state.upperGroup].forEach(c => {
             c.el.style.top = targetY + 'px';
             if (this.state.lowerGroup.includes(c)) {
@@ -616,12 +617,9 @@ const App = {
                 c.el.style.left = (parseFloat(c.el.style.left) - 15) + 'px';
             }
         });
-
-        // Move Floating Numbers & Split Lines
         document.querySelectorAll('.floating-avg, .split-line').forEach(e => {
             const currentTop = parseFloat(e.style.top) || 0;
             const currentLeft = parseFloat(e.style.left) || 0;
-            
             if(currentTop > 200) {
                  e.style.top = (currentTop - this.config.dropY) + 'px';
                  if (e.classList.contains('avg-q1') || e.classList.contains('line-q1')) {
@@ -631,7 +629,6 @@ const App = {
                  }
             }
         });
-
         this.addTimer(() => {
             this.state.step = 6;
             this.state.isAnimating = false;
@@ -642,18 +639,12 @@ const App = {
     
     undoMerge: function() {
         const y = this.config.topY + this.config.dropY;
-        
         this.state.lowerGroup.forEach(c => { c.el.style.top = y + 'px'; c.el.style.left = (parseFloat(c.el.style.left) - 15) + 'px'; });
         this.state.upperGroup.forEach(c => { c.el.style.top = y + 'px'; c.el.style.left = (parseFloat(c.el.style.left) + 15) + 'px'; });
-        
-        // Restore lines & nums
         document.querySelectorAll('.floating-avg, .split-line').forEach(e => {
-            // Exclude Median items from being moved down (they stay at top)
             if (e.classList.contains('avg-med') || e.classList.contains('line-med')) return;
-
             const currentTop = parseFloat(e.style.top) || 0;
             const currentLeft = parseFloat(e.style.left) || 0;
-
             if(currentTop < 200) {
                 e.style.top = (currentTop + this.config.dropY) + 'px';
                 if (e.classList.contains('avg-q1') || e.classList.contains('line-q1')) {
@@ -663,7 +654,6 @@ const App = {
                  }
             }
         });
-        
         this.state.step = 5; 
         UI.update("Undone", "Click **Merge Rows**.");
         UI.btn("Merge Rows", false);
@@ -684,6 +674,9 @@ const App = {
             if (this.state.plotIndex === seq.length) {
                 UI.update("Complete!", "The Box Plot is ready.");
                 document.getElementById('showDataBtn').style.display = 'block';
+                if(this.state.outlierData.outliers.length > 0) {
+                    document.getElementById('modControlRow').style.display = 'flex';
+                }
             }
         }
     },
@@ -701,15 +694,11 @@ const App = {
                 elLeft.onmouseenter = null; elLeft.onmouseleave = null; elLeft.onclick = null;
                 elLeft.classList.add('eliminated'); elRight.classList.add('eliminated');
                 
-                // Case: Even Number Median (Two numbers remaining)
                 if (l === r - 1) { 
-                    // KEPT AS ELIMINATED COLOR (US Fade Yellow)
-                    // Draw Line
                     this.showSplitLine(elLeft, elRight, (arr[l].val + arr[r].val)/2, type);
                     onComplete(); return;
                 }
                 
-                // Case: Odd Number Median (One number remaining)
                 l++; r--;
                 if (l === r) {
                     const cls = (type === 'med') ? 'median-found' : 'quartile-found';
@@ -723,49 +712,212 @@ const App = {
     showSplitLine: function(el1, el2, val, type) {
         const x = (parseFloat(el1.style.left) + parseFloat(el2.style.left) + this.config.cardW)/2;
         const y = parseFloat(el1.style.top);
-
         const line = document.createElement('div');
         line.className = 'split-line';
         if (type === 'q1' || type === 'q3') {
-            line.classList.add('quartile-line');
-            line.classList.add('line-' + type); // line-q1 or line-q3
-        } else {
-            line.classList.add('line-med');
-        }
-        
-        line.style.left = x + 'px';
-        line.style.top = y + 'px';
+            line.classList.add('quartile-line'); line.classList.add('line-' + type);
+        } else { line.classList.add('line-med'); }
+        line.style.left = x + 'px'; line.style.top = y + 'px';
         document.getElementById('cardContainer').appendChild(line);
-
-        // Show value above the line
         this.showFloatingAvg(el1, el2, val, type, true);
     },
 
     showFloatingAvg: function(el1, el2, val, type, isOverLine = false) {
         const x = (parseFloat(el1.style.left) + parseFloat(el2.style.left) + this.config.cardW)/2;
-        const y = parseFloat(el1.style.top) - (isOverLine ? 45 : 30); // Shift higher if over line
+        const y = parseFloat(el1.style.top) - (isOverLine ? 35 : 30);
         const div = document.createElement('div');
-        div.className = 'floating-avg'; 
-        div.textContent = val;
-        div.style.position = 'absolute'; 
-        div.style.left = x + 'px'; 
-        div.style.top = y + 'px';
+        div.className = 'floating-avg'; div.textContent = val;
+        div.style.position = 'absolute'; div.style.left = x + 'px'; div.style.top = y + 'px';
         div.style.transform = 'translateX(-50%)'; 
-        
-        // Color Logic
         if (type === 'q1' || type === 'q3') {
-            div.style.color = 'var(--highlight-yellow)';
-            div.classList.add(`avg-${type}`); 
+            div.style.color = 'var(--highlight-yellow)'; div.classList.add(`avg-${type}`); 
         } else {
-            div.style.color = 'var(--neon-cyan)';
-            div.classList.add('avg-med');
+            div.style.color = 'var(--neon-cyan)'; div.classList.add('avg-med');
         }
-
         document.getElementById('cardContainer').appendChild(div);
     },
 
     addTimer: function(fn, delay) { this.timers.push(setTimeout(fn, delay)); },
     clearTimers: function() { this.timers.forEach(t => clearTimeout(t)); this.timers = []; }
+};
+
+const modManager = {
+    startModSequence: function() {
+        document.getElementById('modMainBtn').classList.add('mod-active');
+        document.getElementById('modMainBtn').disabled = true;
+        
+        const s = App.state.stats;
+        const d = App.state.outlierData;
+
+        // Populate values
+        document.getElementById('valIQR').textContent = s.q3 - s.q1;
+        document.getElementById('valLow').textContent = d.lowFence;
+        document.getElementById('valHigh').textContent = d.highFence;
+
+        // Position Math Layer: Center directly under the Median card
+        const startX = 57;
+        const medianIndex = d.medianIndex;
+        // Calculate the exact center pixel of the median card
+        const medianX = startX + medianIndex * (App.config.cardW + App.config.gap) + (App.config.cardW / 2);
+        
+        // Apply position
+        const mathLayer = document.getElementById('mathLayer');
+        mathLayer.style.left = medianX + 'px'; 
+
+        // Show IQR
+        document.getElementById('mathIQR').style.opacity = 1;
+        
+        App.state.modStep = 1;
+        UI.update("Step 1", "IQR Calc shown. **Click Canvas** for Lower Fence.");
+    },
+
+    nextClick: function() {
+        if(App.state.modStep === 1) { 
+            document.getElementById('mathLow').style.opacity = 1;
+            App.state.modStep = 2;
+            UI.update("Step 2", "Lower Fence calc shown. **Click Canvas** for Upper Fence.");
+        } else if (App.state.modStep === 2) { 
+            document.getElementById('mathHigh').style.opacity = 1;
+            App.state.modStep = 3;
+            UI.update("Step 3", "Upper Fence calc shown. **Click Canvas** to Draw Fences.");
+        } else if (App.state.modStep === 3) { 
+            this.drawVisualFences();
+            App.state.modStep = 4;
+            UI.update("Step 4", "Fences drawn. **Click Canvas** to Trim Whiskers.");
+        } else if (App.state.modStep === 4) { 
+            this.trimWhiskers();
+            App.state.modStep = 5;
+            UI.update("Modified Plot", "Whiskers trimmed to 'safe' range. Red dots are Outliers.");
+        }
+    },
+
+    drawVisualFences: function() {
+        const d = App.state.outlierData;
+        const svg = document.getElementById('plotGroup');
+        const y = App.config.plotY - 50;
+
+        const drawPlotFence = (val) => {
+            const x = plotManager.getPx(val);
+            const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l.setAttribute("x1", x); l.setAttribute("x2", x); l.setAttribute("y1", y - 30); l.setAttribute("y2", y + 30);
+            l.setAttribute("class", "fence-line");
+            svg.appendChild(l);
+            setTimeout(() => { l.style.opacity = 0.7; }, 50);
+        };
+        drawPlotFence(d.lowFence);
+        drawPlotFence(d.highFence);
+
+        const startX = 57; 
+        
+        const drawDataFence = (idx, type) => {
+            let xPos;
+            if (idx === -2) { // Before start
+                xPos = startX - 4; 
+            } else if (idx === d.dataLength) { // After end
+                xPos = startX + (d.dataLength) * (App.config.cardW + App.config.gap) - App.config.gap/2;
+            } else if (idx === -1) {
+                return; 
+            } else {
+                const xLeft = startX + idx * (App.config.cardW + App.config.gap) + App.config.cardW;
+                const xRight = startX + (idx+1) * (App.config.cardW + App.config.gap);
+                xPos = (xLeft + xRight) / 2;
+            }
+            
+            const line = document.createElement('div');
+            line.className = 'data-fence';
+            line.style.left = xPos + 'px';
+            line.style.top = App.config.topY + 'px';
+            document.getElementById('cardContainer').appendChild(line);
+            setTimeout(() => line.style.opacity = 1, 100);
+        };
+        drawDataFence(d.lowSplitIndex, 'low');
+        drawDataFence(d.highSplitIndex, 'high');
+    },
+
+    trimWhiskers: function() {
+        const d = App.state.outlierData;
+        const svg = document.getElementById('plotGroup');
+        const y = App.config.plotY - 50;
+        
+        d.outliers.forEach(val => {
+            const x = plotManager.getPx(val);
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute("cx", x); c.setAttribute("cy", y);
+            c.setAttribute("r", 4); c.setAttribute("class", "outlier-dot");
+            svg.appendChild(c);
+            setTimeout(() => { c.style.opacity = 1; }, 200);
+        });
+
+        const newMinX = plotManager.getPx(d.newMin);
+        const newMaxX = plotManager.getPx(d.newMax);
+
+        // Slide Whisker Lines (Morph)
+        document.getElementById('w-left').setAttribute("x1", newMinX);
+        document.getElementById('w-right').setAttribute("x2", newMaxX);
+        
+        // Slide Ticks and Labels (Morph)
+        const moveTick = (id, x, lblId, val) => {
+            document.getElementById(id).setAttribute("x1", x);
+            document.getElementById(id).setAttribute("x2", x);
+            
+            const lbl = document.getElementById(lblId);
+            // No fade out, just slide and update text halfway
+            lbl.setAttribute("x", x); 
+            setTimeout(() => {
+                lbl.textContent = val; 
+            }, 750); // Update text halfway through 1.5s transition
+        };
+        moveTick('tick-min', newMinX, 'lbl-min', d.newMin);
+        moveTick('tick-max', newMaxX, 'lbl-max', d.newMax);
+    },
+
+    undo: function() {
+        const step = App.state.modStep;
+        
+        if (step === 5) { // Undo Trim
+            const s = App.state.stats;
+            const minX = plotManager.getPx(s.min);
+            const maxX = plotManager.getPx(s.max);
+            document.querySelectorAll('.outlier-dot').forEach(e => e.remove());
+            document.getElementById('w-left').setAttribute("x1", minX);
+            document.getElementById('w-right').setAttribute("x2", maxX);
+            
+            const tMin = document.getElementById('tick-min'); tMin.setAttribute("x1", minX); tMin.setAttribute("x2", minX);
+            const lMin = document.getElementById('lbl-min'); lMin.setAttribute("x", minX); lMin.textContent = s.min;
+            const tMax = document.getElementById('tick-max'); tMax.setAttribute("x1", maxX); tMax.setAttribute("x2", maxX);
+            const lMax = document.getElementById('lbl-max'); lMax.setAttribute("x", maxX); lMax.textContent = s.max;
+            
+            App.state.modStep = 4;
+            UI.update("Step 4", "Fences drawn. **Click Canvas** to Trim Whiskers.");
+            return;
+        }
+        if (step === 4) { // Undo Visual Fences
+            document.querySelectorAll('.fence-line, .data-fence').forEach(e => e.remove());
+            App.state.modStep = 3;
+            UI.update("Step 3", "Upper Fence calc shown. **Click Canvas** to Draw Fences.");
+            return;
+        }
+        if (step === 3) { // Undo High Math
+            document.getElementById('mathHigh').style.opacity = 0;
+            App.state.modStep = 2;
+            UI.update("Step 2", "Lower Fence calc shown. **Click Canvas** for High Fence.");
+            return;
+        }
+        if (step === 2) { // Undo Low Math
+            document.getElementById('mathLow').style.opacity = 0;
+            App.state.modStep = 1;
+            UI.update("Step 1", "IQR Calc shown. **Click Canvas** for Lower Fence.");
+            return;
+        }
+        if (step === 1) { // Undo IQR Math
+            document.getElementById('mathIQR').style.opacity = 0;
+            document.getElementById('modMainBtn').disabled = false;
+            document.getElementById('modMainBtn').classList.remove('mod-active');
+            App.state.modStep = 0;
+            UI.update("Standard Plot", "Ready for outliers.");
+            return;
+        }
+    }
 };
 
 const plotManager = {
@@ -777,33 +929,35 @@ const plotManager = {
         App.state.axisRange = { min: axisMin, max: axisMax };
         const y = App.config.plotY;
         const width = document.getElementById('canvas').clientWidth;
-        
-        const startX = 37; 
-        const endX = 37 + (width * 0.72);
+        const startX = 37; const endX = 37 + (width * 0.72);
         
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
         line.setAttribute("x1", startX); line.setAttribute("x2", endX);
         line.setAttribute("y1", y); line.setAttribute("y2", y);
-        line.setAttribute("class", "axis-line");
-        svg.appendChild(line);
+        line.setAttribute("class", "axis-line"); svg.appendChild(line);
 
         for (let v = axisMin; v <= axisMax; v += 5) {
             const x = this.getPx(v, startX, endX, axisMin, axisMax);
             const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
             tick.setAttribute("x1", x); tick.setAttribute("x2", x);
             tick.setAttribute("y1", y - 5); tick.setAttribute("y2", y + 5);
-            tick.setAttribute("class", "axis-tick");
-            svg.appendChild(tick);
+            tick.setAttribute("class", "axis-tick"); svg.appendChild(tick);
             if (v % 10 === 0) {
                 const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 txt.setAttribute("x", x); txt.setAttribute("y", y + 20);
-                txt.textContent = v; txt.setAttribute("class", "axis-label");
-                svg.appendChild(txt);
+                txt.textContent = v; txt.setAttribute("class", "axis-label"); svg.appendChild(txt);
             }
         }
     },
 
-    getPx: function(val, startX, endX, min, max) {
+    getPx: function(val) {
+        const range = App.state.axisRange;
+        const width = document.getElementById('canvas').clientWidth;
+        const startX = 37; const endX = 37 + (width * 0.72);
+        return startX + ((val - range.min) / (range.max - range.min)) * (endX - startX);
+    },
+    
+    getPxInternal: function(val, startX, endX, min, max) {
         return startX + ((val - min) / (max - min)) * (endX - startX);
     },
 
@@ -812,30 +966,35 @@ const plotManager = {
         const s = App.state.stats; const range = App.state.axisRange;
         const width = document.getElementById('canvas').clientWidth;
         
-        const startX = 37; 
-        const endX = 37 + (width * 0.72);
-        const getX = (v) => this.getPx(v, startX, endX, range.min, range.max);
+        const startX = 37; const endX = 37 + (width * 0.72);
+        const getX = (v) => this.getPxInternal(v, startX, endX, range.min, range.max);
         const y = App.config.plotY - 50;
         
         const btn = document.getElementById('btn-'+type);
         if(btn) { btn.disabled = true; btn.style.background = '#004d40'; btn.style.borderColor = '#00f260'; }
 
-        const label = (x, txt) => {
+        const label = (x, txt, id, pos) => {
             const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            t.setAttribute("x", x); t.setAttribute("y", y - 30);
-            t.textContent = txt; t.setAttribute("class", "val-label"); svg.appendChild(t);
+            t.setAttribute("x", x);
+            // UPDATED: Shift Min/Max/Median even lower (y+35)
+            const yPos = (pos === 'below') ? y + 35 : y - 25;
+            t.setAttribute("y", yPos);
+            t.textContent = txt; t.setAttribute("class", "val-label");
+            if(id) t.setAttribute("id", id);
+            svg.appendChild(t);
         };
-        const tick = (x, cls) => {
+        const tick = (x, cls, id) => {
             const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
             l.setAttribute("x1", x); l.setAttribute("x2", x); l.setAttribute("y1", y - 15); l.setAttribute("y2", y + 15);
-            l.setAttribute("class", cls); svg.appendChild(l);
+            l.setAttribute("class", cls); if(id) l.setAttribute("id", id);
+            svg.appendChild(l);
         };
 
-        if (type === 'min') { tick(getX(s.min), 'marker-minmax'); label(getX(s.min), s.min); }
-        if (type === 'max') { tick(getX(s.max), 'marker-minmax'); label(getX(s.max), s.max); }
-        if (type === 'med') { tick(getX(s.med), 'marker-med'); label(getX(s.med), s.med); }
-        if (type === 'q1') { tick(getX(s.q1), 'marker-q'); label(getX(s.q1), s.q1); }
-        if (type === 'q3') { tick(getX(s.q3), 'marker-q'); label(getX(s.q3), s.q3); }
+        if (type === 'min') { tick(getX(s.min), 'marker-minmax', 'tick-min'); label(getX(s.min), s.min, 'lbl-min', 'below'); }
+        if (type === 'max') { tick(getX(s.max), 'marker-minmax', 'tick-max'); label(getX(s.max), s.max, 'lbl-max', 'below'); }
+        if (type === 'med') { tick(getX(s.med), 'marker-med'); label(getX(s.med), s.med, null, 'below'); }
+        if (type === 'q1') { tick(getX(s.q1), 'marker-q'); label(getX(s.q1), s.q1, null, 'above'); }
+        if (type === 'q3') { tick(getX(s.q3), 'marker-q'); label(getX(s.q3), s.q3, null, 'above'); }
         if (type === 'box') {
             const xQ1 = getX(s.q1); const xQ3 = getX(s.q3); const xMed = getX(s.med); const xMin = getX(s.min); const xMax = getX(s.max);
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -845,18 +1004,17 @@ const plotManager = {
             const medL = document.createElementNS("http://www.w3.org/2000/svg", "line");
             medL.setAttribute("x1", xMed); medL.setAttribute("x2", xMed); medL.setAttribute("y1", y - 15); medL.setAttribute("y2", y + 15);
             medL.setAttribute("class", "median-line"); svg.appendChild(medL);
-            const whisker = (x1, x2) => {
+            const whisker = (x1, x2, id) => {
                 const w = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 w.setAttribute("x1", x1); w.setAttribute("x2", x2); w.setAttribute("y1", y); w.setAttribute("y2", y);
-                w.setAttribute("class", "marker-minmax"); w.setAttribute("stroke-width", "2"); svg.insertBefore(w, rect); 
+                w.setAttribute("class", "marker-minmax whisker-line"); w.setAttribute("id", id);
+                svg.insertBefore(w, rect); 
             };
-            whisker(xMin, xQ1); whisker(xQ3, xMax);
+            whisker(xMin, xQ1, 'w-left'); whisker(xQ3, xMax, 'w-right');
         }
     },
 
-    toggleScale: function(isVisible) {
-        document.getElementById('axisGroup').style.opacity = isVisible ? 1 : 0;
-    },
+    toggleScale: function(isVisible) { document.getElementById('axisGroup').style.opacity = isVisible ? 1 : 0; },
 
     showSortedData: function() {
         App.state.lowerGroup.forEach(c => c.el.style.opacity = 0);
@@ -872,139 +1030,61 @@ const plotManager = {
 
 const CompManager = {
     renderDataView: function() {
-        const c = document.getElementById('compareContainer');
-        c.innerHTML = ''; 
-        c.style.display = 'flex'; 
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = 'compare-col-container';
-        c.appendChild(wrapper);
-
+        const c = document.getElementById('compareContainer'); c.innerHTML = ''; c.style.display = 'flex'; 
+        const wrapper = document.createElement('div'); wrapper.className = 'compare-col-container'; c.appendChild(wrapper);
         ['case1', 'case2', 'case3'].forEach((key, idx) => {
             const data = [...App.compareDatasets[key]].sort((a,b)=>a-b);
-            const col = document.createElement('div');
-            col.className = 'compare-col';
+            const col = document.createElement('div'); col.className = 'compare-col';
             col.innerHTML = `<div class="col-header">Case ${idx+1}</div>`;
-            
             data.forEach(val => {
-                const card = document.createElement('div');
-                card.className = 'mini-card';
-                card.textContent = val;
-                col.appendChild(card);
+                const card = document.createElement('div'); card.className = 'mini-card';
+                card.textContent = val; col.appendChild(card);
             });
             wrapper.appendChild(col);
         });
     },
 
     renderPlotView: function() {
-        const svg = document.getElementById('svgLayer');
-        const axisG = document.getElementById('axisGroup');
-        const plotG = document.getElementById('plotGroup');
-        axisG.innerHTML = ''; plotG.innerHTML = '';
-        svg.style.display = 'block';
-
-        const h = document.getElementById('canvas').clientHeight;
+        const svg = document.getElementById('svgLayer'); const axisG = document.getElementById('axisGroup');
+        const plotG = document.getElementById('plotGroup'); axisG.innerHTML = ''; plotG.innerHTML = '';
+        svg.style.display = 'block'; const h = document.getElementById('canvas').clientHeight;
         const width = document.getElementById('canvas').clientWidth;
-
-        const startY = h - 300; 
-        const endY = 40; 
-        
-        const xOffset = width / 2;
-        const availableW = width / 2;
-        const axisX = xOffset + 60; 
-
-        let allVals = [
-            ...App.compareDatasets.case1, 
-            ...App.compareDatasets.case2, 
-            ...App.compareDatasets.case3
-        ];
-        
+        const startY = h - 300; const endY = 40; const xOffset = width / 2; const axisX = xOffset + 60; 
+        let allVals = [...App.compareDatasets.case1, ...App.compareDatasets.case2, ...App.compareDatasets.case3];
         const minVal = Math.min(...allVals); const maxVal = Math.max(...allVals);
-        const axisMin = Math.floor((minVal - 5) / 10) * 10;
-        const axisMax = Math.ceil((maxVal + 5) / 10) * 10;
-
+        const axisMin = Math.floor((minVal - 5) / 10) * 10; const axisMax = Math.ceil((maxVal + 5) / 10) * 10;
         const getY = (v) => startY - ((v - axisMin) / (axisMax - axisMin)) * (startY - endY);
-
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", axisX); line.setAttribute("x2", axisX);
-        line.setAttribute("y1", startY); line.setAttribute("y2", endY);
+        line.setAttribute("x1", axisX); line.setAttribute("x2", axisX); line.setAttribute("y1", startY); line.setAttribute("y2", endY);
         line.setAttribute("class", "axis-line"); axisG.appendChild(line);
-
         for (let v = axisMin; v <= axisMax; v += 5) {
-            const y = getY(v);
-            const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            tick.setAttribute("x1", axisX - 5); tick.setAttribute("x2", axisX + 5);
-            tick.setAttribute("y1", y); tick.setAttribute("y2", y);
+            const y = getY(v); const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            tick.setAttribute("x1", axisX - 5); tick.setAttribute("x2", axisX + 5); tick.setAttribute("y1", y); tick.setAttribute("y2", y);
             tick.setAttribute("class", "axis-tick"); axisG.appendChild(tick);
             if(v % 10 === 0) {
                 const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                txt.setAttribute("x", axisX - 10); txt.setAttribute("y", y);
-                txt.textContent = v; txt.setAttribute("class", "axis-label-vert"); axisG.appendChild(txt);
+                txt.setAttribute("x", axisX - 10); txt.setAttribute("y", y); txt.textContent = v; txt.setAttribute("class", "axis-label-vert"); axisG.appendChild(txt);
             }
         }
-
-        const sectionW = (availableW - 100) / 3;
-        
+        const sectionW = (width/2 - 100) / 3;
         ['case1', 'case2', 'case3'].forEach((key, idx) => {
             const stats = App.calcStats(App.compareDatasets[key]);
-            
-            const centerX = xOffset + 100 + (sectionW * idx) + (sectionW/2) - 30;
-            const boxW = 30;
-            
-            const yMin = getY(stats.min);
-            const yMax = getY(stats.max);
-            const yMed = getY(stats.med);
-            const yQ1 = getY(stats.q1);
-            const yQ3 = getY(stats.q3);
-
+            const centerX = xOffset + 100 + (sectionW * idx) + (sectionW/2) - 30; const boxW = 30;
+            const yMin = getY(stats.min); const yMax = getY(stats.max); const yMed = getY(stats.med); const yQ1 = getY(stats.q1); const yQ3 = getY(stats.q3);
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            rect.setAttribute("x", centerX - boxW/2); rect.setAttribute("y", yQ3);
-            rect.setAttribute("width", boxW); rect.setAttribute("height", Math.abs(yQ1 - yQ3));
+            rect.setAttribute("x", centerX - boxW/2); rect.setAttribute("y", yQ3); rect.setAttribute("width", boxW); rect.setAttribute("height", Math.abs(yQ1 - yQ3));
             rect.setAttribute("class", "plot-box"); plotG.appendChild(rect);
-
             const medL = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            medL.setAttribute("x1", centerX - boxW/2); medL.setAttribute("x2", centerX + boxW/2);
-            medL.setAttribute("y1", yMed); medL.setAttribute("y2", yMed);
+            medL.setAttribute("x1", centerX - boxW/2); medL.setAttribute("x2", centerX + boxW/2); medL.setAttribute("y1", yMed); medL.setAttribute("y2", yMed);
             medL.setAttribute("class", "median-line"); plotG.appendChild(medL);
-
-            const drawW = (yA, yB) => {
-                const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                l.setAttribute("x1", centerX); l.setAttribute("x2", centerX);
-                l.setAttribute("y1", yA); l.setAttribute("y2", yB);
-                l.setAttribute("class", "marker-minmax"); l.setAttribute("stroke-width", 2); plotG.appendChild(l);
-            };
+            const drawW = (yA, yB) => { const l = document.createElementNS("http://www.w3.org/2000/svg", "line"); l.setAttribute("x1", centerX); l.setAttribute("x2", centerX); l.setAttribute("y1", yA); l.setAttribute("y2", yB); l.setAttribute("class", "marker-minmax"); l.setAttribute("stroke-width", 2); plotG.appendChild(l); };
             drawW(yMin, yQ1); drawW(yQ3, yMax);
-            
-            const drawCap = (y) => {
-                const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                l.setAttribute("x1", centerX - 10); l.setAttribute("x2", centerX + 10);
-                l.setAttribute("y1", y); l.setAttribute("y2", y);
-                l.setAttribute("class", "marker-minmax"); plotG.appendChild(l);
-            };
+            const drawCap = (y) => { const l = document.createElementNS("http://www.w3.org/2000/svg", "line"); l.setAttribute("x1", centerX - 10); l.setAttribute("x2", centerX + 10); l.setAttribute("y1", y); l.setAttribute("y2", y); l.setAttribute("class", "marker-minmax"); plotG.appendChild(l); };
             drawCap(yMin); drawCap(yMax);
-            
             const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            txt.setAttribute("x", centerX); txt.setAttribute("y", startY + 20); 
-            txt.textContent = `Case ${idx+1}`; txt.setAttribute("class", "val-label");
-            plotG.appendChild(txt);
-
-            const drawLabel = (y, val, side) => {
-                const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                const xOffset = (side === 'left') ? -25 : 25;
-                const anchor = (side === 'left') ? 'end' : 'start';
-                
-                t.setAttribute("x", centerX + xOffset); 
-                t.setAttribute("y", y + 4); 
-                t.textContent = val; 
-                t.setAttribute("class", "val-label-small"); 
-                t.setAttribute("text-anchor", anchor);
-                plotG.appendChild(t);
-            };
-            drawLabel(yMin, stats.min, 'left');
-            drawLabel(yQ1, stats.q1, 'right');
-            drawLabel(yMed, stats.med, 'left');
-            drawLabel(yQ3, stats.q3, 'right');
-            drawLabel(yMax, stats.max, 'left');
+            txt.setAttribute("x", centerX); txt.setAttribute("y", startY + 20); txt.textContent = `Case ${idx+1}`; txt.setAttribute("class", "val-label"); plotG.appendChild(txt);
+            const drawLabel = (y, val, side) => { const t = document.createElementNS("http://www.w3.org/2000/svg", "text"); const xOffset = (side === 'left') ? -25 : 25; const anchor = (side === 'left') ? 'end' : 'start'; t.setAttribute("x", centerX + xOffset); t.setAttribute("y", y + 4); t.textContent = val; t.setAttribute("class", "val-label-small"); t.setAttribute("text-anchor", anchor); plotG.appendChild(t); };
+            drawLabel(yMin, stats.min, 'left'); drawLabel(yQ1, stats.q1, 'right'); drawLabel(yMed, stats.med, 'left'); drawLabel(yQ3, stats.q3, 'right'); drawLabel(yMax, stats.max, 'left');
         });
     }
 };
@@ -1017,54 +1097,28 @@ const UI = {
 };
 
 function handleComparisonState() {
-    const showData = document.getElementById('compDataCheck').checked;
-    const showPlot = document.getElementById('compPlotCheck').checked;
-
-    if (!showData && !showPlot) {
-        App.init(); 
-        return;
-    }
-
-    document.getElementById('cardContainer').style.display = 'none';
-    document.getElementById('buildArea').style.display = 'none';
-    document.getElementById('navRow').style.display = 'none';
-    document.getElementById('svgLayer').style.display = 'none'; 
-    document.getElementById('compareContainer').style.display = 'none';
-
-    if (showData) {
-        CompManager.renderDataView();
-        UI.update("Data View", showPlot ? "Comparing Data (Left) & Plots (Right)" : "Comparing Data (Left Only)");
-    }
-
-    if (showPlot) {
-        CompManager.renderPlotView();
-        UI.update("Plot View", showData ? "Comparing Data (Left) & Plots (Right)" : "Comparing Plots (Right Only)");
-    }
+    const showData = document.getElementById('compDataCheck').checked; const showPlot = document.getElementById('compPlotCheck').checked;
+    if (!showData && !showPlot) { App.init(); return; }
+    document.getElementById('cardContainer').style.display = 'none'; document.getElementById('buildArea').style.display = 'none';
+    document.getElementById('navRow').style.display = 'none'; document.getElementById('svgLayer').style.display = 'none'; 
+    document.getElementById('compareContainer').style.display = 'none'; document.getElementById('mathLayer').style.display = 'none';
+    if (showData) { CompManager.renderDataView(); UI.update("Data View", showPlot ? "Comparing Data (Left) & Plots (Right)" : "Comparing Data (Left Only)"); }
+    if (showPlot) { CompManager.renderPlotView(); UI.update("Plot View", showData ? "Comparing Data (Left) & Plots (Right)" : "Comparing Plots (Right Only)"); }
 }
 
 function resetComparison() {
-    document.getElementById('compDataCheck').checked = false;
-    document.getElementById('compPlotCheck').checked = false;
-    handleComparisonState();
+    document.getElementById('compDataCheck').checked = false; document.getElementById('compPlotCheck').checked = false;
+    document.getElementById('mathLayer').style.display = 'flex'; handleComparisonState();
 }
 
 document.querySelectorAll('input[name="case"]').forEach(r => {
-    r.addEventListener('change', () => {
-        document.getElementById('compDataCheck').checked = false;
-        document.getElementById('compPlotCheck').checked = false;
-        App.init();
-    });
+    r.addEventListener('change', () => { document.getElementById('compDataCheck').checked = false; document.getElementById('compPlotCheck').checked = false; App.init(); });
 });
-
 document.getElementById('compDataCheck').addEventListener('change', handleComparisonState);
 document.getElementById('compPlotCheck').addEventListener('change', handleComparisonState);
-
 document.getElementById('mainBtn').addEventListener('click', (e) => { e.stopPropagation(); App.advance(); });
 document.getElementById('backBtn').addEventListener('click', (e) => { e.stopPropagation(); App.undo(); });
-document.getElementById('canvas').addEventListener('click', (e) => {
-    if(document.getElementById('compDataCheck').checked || document.getElementById('compPlotCheck').checked) return;
-    if (e.target.id === 'canvas' || e.target.nodeName === 'svg') App.advance();
-});
+document.getElementById('canvas').addEventListener('click', (e) => { if(document.getElementById('compDataCheck').checked || document.getElementById('compPlotCheck').checked) return; if (e.target.id === 'canvas' || e.target.nodeName === 'svg') App.advance(); });
 document.getElementById('scaleCheck').addEventListener('change', (e) => { plotManager.toggleScale(e.target.checked); });
 document.getElementById('controlsPanel').addEventListener('click', (e) => e.stopPropagation());
 
