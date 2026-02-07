@@ -58,7 +58,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.9);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.9);
             z-index: 100;
             cursor: default;
             overflow-y: auto;
@@ -80,31 +80,37 @@
             color: white;
             z-index: 10;
             transition: left 1s ease-in-out, top 1s ease-in-out, transform 0.4s ease, background-color 0.3s, color 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
             pointer-events: none;
         }
 
-        .num-card.interactive { pointer-events: auto; cursor: pointer; }
-        .num-card.interactive:hover { border-color: white; }
+        .num-card.interactive {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .num-card.interactive:hover {
+            border-color: white;
+        }
 
         .pulse-sync {
             animation: pulse-anim 1s infinite;
             border-color: white !important;
-            box-shadow: 0 0 15px rgba(255,255,255,0.8) !important;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8) !important;
             transform: scale(1.1);
         }
 
         @keyframes pulse-anim {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-            50% { transform: scale(1.15); box-shadow: 0 0 20px rgba(255,255,255,0.9); }
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+            50% { transform: scale(1.15); box-shadow: 0 0 20px rgba(255, 255, 255, 0.9); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
         }
 
         .move-up { transform: translateY(-40px); }
         .move-down { transform: translateY(40px); }
-        
+
         .eliminated {
-            background-color: #222 !important; 
+            background-color: #222 !important;
             color: var(--highlight-yellow) !important;
             border-color: #333 !important;
             opacity: 0.6;
@@ -126,27 +132,47 @@
             transform: scale(1.15);
             z-index: 50;
         }
-        
+
         /* Floating Average Numbers */
         .floating-avg {
-            transition: top 1s ease-in-out, left 1s ease-in-out, opacity 0.5s; 
+            transition: top 1s ease-in-out, left 1s ease-in-out, opacity 0.5s;
             font-weight: bold;
             font-size: 20px;
             text-shadow: 0 0 10px black;
             z-index: 60;
         }
 
+        /* Split Line for even medians */
+        .split-line {
+            position: absolute;
+            width: 4px;
+            height: 70px;
+            background-color: var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-cyan);
+            z-index: 55;
+            border-radius: 2px;
+            transform: translate(-50%, -10px);
+            transition: top 1s ease-in-out, left 1s ease-in-out, opacity 0.5s;
+        }
+        .quartile-line {
+            background-color: var(--highlight-yellow) !important;
+            box-shadow: 0 0 15px var(--highlight-yellow) !important;
+        }
+
         /* --- SVG Layer --- */
         .svg-layer {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 5;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
             transition: opacity 1s;
         }
-        
+
         .axis-group { transition: opacity 0.5s; }
-        
-        /* UPDATED: White Scale Colors */
+
         .axis-line { stroke: #ffffff; stroke-width: 2; }
         .axis-tick { stroke: #ffffff; stroke-width: 1; }
         .axis-label { fill: #ffffff; font-size: 14px; text-anchor: middle; }
@@ -158,7 +184,7 @@
         .marker-med { stroke: var(--neon-cyan); stroke-width: 3; }
         .plot-box { fill: rgba(0, 242, 96, 0.1); stroke: var(--accent-green); stroke-width: 2; }
         .val-label { fill: white; font-size: 16px; font-weight: bold; text-anchor: middle; }
-        .val-label-small { fill: #cccccc; font-size: 11px; alignment-baseline: middle; } /* text-anchor set in JS now */
+        .val-label-small { fill: #cccccc; font-size: 11px; alignment-baseline: middle; }
         .median-line { stroke: var(--neon-cyan); stroke-width: 3; }
 
         /* --- Controls --- */
@@ -173,6 +199,7 @@
             flex-direction: column;
             gap: 8px;
         }
+
         .radio-label, .check-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; }
         input[type="checkbox"], input[type="radio"] { accent-color: var(--accent-blue); width: 16px; height: 16px; }
 
@@ -203,7 +230,7 @@
         .build-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
         .step-btn { background: #333; border: 1px solid #444; color: white; padding: 8px; cursor: pointer; border-radius: 4px; font-size: 0.85rem; }
         .step-btn:disabled { opacity: 0.4; cursor: default; border-color: transparent; }
-        
+
         .final-btn { grid-column: span 2; background: #222; border: 1px solid var(--highlight-yellow); color: var(--highlight-yellow); }
 
         /* Comparison View Styles */
@@ -216,7 +243,7 @@
             top: 0;
             overflow-y: auto;
             padding-top: 20px;
-            border-right: 1px solid #333; 
+            border-right: 1px solid #333;
         }
         .compare-col-container {
             display: flex;
@@ -236,7 +263,6 @@
             width: 40px; height: 35px; display: flex; justify-content: center; align-items: center;
             border-radius: 4px; font-size: 14px;
         }
-
     </style>
 </head>
 <body>
@@ -382,7 +408,7 @@ const App = {
 
         this.state.cards = [];
         const container = document.getElementById('cardContainer');
-        const startX = 57; // UPDATED: 57px offset
+        const startX = 57; 
         const slots = Array.from({length: sorted.length}, (_, i) => i).sort(() => Math.random() - 0.5);
         
         sorted.forEach((val, i) => {
@@ -445,7 +471,7 @@ const App = {
             case 2: 
                 this.state.step = 1;
                 this.state.cards.forEach(c => { c.el.className = 'num-card'; c.el.onclick = null; });
-                document.querySelectorAll('.floating-avg').forEach(e => e.remove());
+                document.querySelectorAll('.floating-avg, .split-line').forEach(e => e.remove());
                 UI.update("Sorted!", "Median search reset.");
                 this.startMedianGame(); 
                 break;
@@ -458,17 +484,16 @@ const App = {
                 break;
             case 4:
                 this.state.lowerGroup.forEach(c => { c.el.className = 'num-card'; c.el.onclick = null; });
-                document.querySelectorAll('.floating-avg').forEach(e => {
-                     // Removing only Q1 indicators technically, but simplified to reset Q1
-                     if(e.classList.contains('avg-q1')) e.remove();
+                document.querySelectorAll('.floating-avg, .split-line').forEach(e => {
+                     if(e.classList.contains('avg-q1') || e.classList.contains('line-q1')) e.remove();
                 });
                 this.state.step = 3; UI.update("Halves Dropped", "Q1 search reset."); 
                 this.startQ1Game(); 
                 break;
             case 5:
                 this.state.upperGroup.forEach(c => { c.el.className = 'num-card'; c.el.onclick = null; });
-                document.querySelectorAll('.floating-avg').forEach(e => {
-                    if(e.classList.contains('avg-q3')) e.remove();
+                document.querySelectorAll('.floating-avg, .split-line').forEach(e => {
+                    if(e.classList.contains('avg-q3') || e.classList.contains('line-q3')) e.remove();
                 });
                 this.state.step = 4; UI.update("Q1 Found", "Q3 search reset."); 
                 this.startQ3Game(); 
@@ -494,7 +519,7 @@ const App = {
             if (i % 2 === 0) c.el.classList.add('move-up'); else c.el.classList.add('move-down');
         });
         this.addTimer(() => {
-            const startX = 57; // UPDATED: 57px offset
+            const startX = 57; 
             this.state.cards.forEach((c, i) => { c.el.style.left = (startX + i * (this.config.cardW + this.config.gap)) + 'px'; });
         }, 800);
         this.addTimer(() => {
@@ -520,6 +545,9 @@ const App = {
 
     animateSplit: function() {
         this.state.isAnimating = true; UI.btn("Splitting...", true); UI.backBtn(false);
+        
+        // Removed logic that moved median line down. It now stays at top.
+
         const createClone = (original) => {
             const clone = original.el.cloneNode(true);
             clone.className = 'num-card'; clone.style.left = original.el.style.left; clone.style.top = original.el.style.top;
@@ -589,21 +617,16 @@ const App = {
             }
         });
 
-        // Move Floating Numbers Horizontally to center them
-        document.querySelectorAll('.floating-avg').forEach(e => {
+        // Move Floating Numbers & Split Lines
+        document.querySelectorAll('.floating-avg, .split-line').forEach(e => {
             const currentTop = parseFloat(e.style.top) || 0;
             const currentLeft = parseFloat(e.style.left) || 0;
             
-            // Only move those in the dropped area (approx > 200px)
             if(currentTop > 200) {
                  e.style.top = (currentTop - this.config.dropY) + 'px';
-                 
-                 // Centering Logic
-                 if (e.classList.contains('avg-q1')) {
-                     // Q1 belongs to Lower Group (moved +15px Right)
+                 if (e.classList.contains('avg-q1') || e.classList.contains('line-q1')) {
                      e.style.left = (currentLeft + 15) + 'px';
-                 } else if (e.classList.contains('avg-q3')) {
-                     // Q3 belongs to Upper Group (moved -15px Left)
+                 } else if (e.classList.contains('avg-q3') || e.classList.contains('line-q3')) {
                      e.style.left = (currentLeft - 15) + 'px';
                  }
             }
@@ -620,21 +643,22 @@ const App = {
     undoMerge: function() {
         const y = this.config.topY + this.config.dropY;
         
-        // Move cards back down
         this.state.lowerGroup.forEach(c => { c.el.style.top = y + 'px'; c.el.style.left = (parseFloat(c.el.style.left) - 15) + 'px'; });
         this.state.upperGroup.forEach(c => { c.el.style.top = y + 'px'; c.el.style.left = (parseFloat(c.el.style.left) + 15) + 'px'; });
         
-        // Move floaters back down and out
-        document.querySelectorAll('.floating-avg').forEach(e => {
+        // Restore lines & nums
+        document.querySelectorAll('.floating-avg, .split-line').forEach(e => {
+            // Exclude Median items from being moved down (they stay at top)
+            if (e.classList.contains('avg-med') || e.classList.contains('line-med')) return;
+
             const currentTop = parseFloat(e.style.top) || 0;
             const currentLeft = parseFloat(e.style.left) || 0;
 
             if(currentTop < 200) {
                 e.style.top = (currentTop + this.config.dropY) + 'px';
-                
-                if (e.classList.contains('avg-q1')) {
+                if (e.classList.contains('avg-q1') || e.classList.contains('line-q1')) {
                      e.style.left = (currentLeft - 15) + 'px';
-                 } else if (e.classList.contains('avg-q3')) {
+                 } else if (e.classList.contains('avg-q3') || e.classList.contains('line-q3')) {
                      e.style.left = (currentLeft + 15) + 'px';
                  }
             }
@@ -676,13 +700,16 @@ const App = {
                 elLeft.classList.remove('interactive', 'pulse-sync'); elRight.classList.remove('pulse-sync');
                 elLeft.onmouseenter = null; elLeft.onmouseleave = null; elLeft.onclick = null;
                 elLeft.classList.add('eliminated'); elRight.classList.add('eliminated');
+                
+                // Case: Even Number Median (Two numbers remaining)
                 if (l === r - 1) { 
-                    elLeft.classList.remove('eliminated'); elRight.classList.remove('eliminated');
-                    const cls = (type === 'med') ? 'median-found' : 'quartile-found';
-                    elLeft.classList.add(cls); elRight.classList.add(cls);
-                    this.showFloatingAvg(elLeft, elRight, (arr[l].val + arr[r].val)/2, type);
+                    // KEPT AS ELIMINATED COLOR (US Fade Yellow)
+                    // Draw Line
+                    this.showSplitLine(elLeft, elRight, (arr[l].val + arr[r].val)/2, type);
                     onComplete(); return;
                 }
+                
+                // Case: Odd Number Median (One number remaining)
                 l++; r--;
                 if (l === r) {
                     const cls = (type === 'med') ? 'median-found' : 'quartile-found';
@@ -693,9 +720,30 @@ const App = {
         bindInteractive();
     },
 
-    showFloatingAvg: function(el1, el2, val, type) {
+    showSplitLine: function(el1, el2, val, type) {
         const x = (parseFloat(el1.style.left) + parseFloat(el2.style.left) + this.config.cardW)/2;
-        const y = parseFloat(el1.style.top) - 30;
+        const y = parseFloat(el1.style.top);
+
+        const line = document.createElement('div');
+        line.className = 'split-line';
+        if (type === 'q1' || type === 'q3') {
+            line.classList.add('quartile-line');
+            line.classList.add('line-' + type); // line-q1 or line-q3
+        } else {
+            line.classList.add('line-med');
+        }
+        
+        line.style.left = x + 'px';
+        line.style.top = y + 'px';
+        document.getElementById('cardContainer').appendChild(line);
+
+        // Show value above the line
+        this.showFloatingAvg(el1, el2, val, type, true);
+    },
+
+    showFloatingAvg: function(el1, el2, val, type, isOverLine = false) {
+        const x = (parseFloat(el1.style.left) + parseFloat(el2.style.left) + this.config.cardW)/2;
+        const y = parseFloat(el1.style.top) - (isOverLine ? 45 : 30); // Shift higher if over line
         const div = document.createElement('div');
         div.className = 'floating-avg'; 
         div.textContent = val;
@@ -707,7 +755,7 @@ const App = {
         // Color Logic
         if (type === 'q1' || type === 'q3') {
             div.style.color = 'var(--highlight-yellow)';
-            div.classList.add(`avg-${type}`); // Add identifier class
+            div.classList.add(`avg-${type}`); 
         } else {
             div.style.color = 'var(--neon-cyan)';
             div.classList.add('avg-med');
@@ -730,7 +778,6 @@ const plotManager = {
         const y = App.config.plotY;
         const width = document.getElementById('canvas').clientWidth;
         
-        // UPDATED: Start at 37, Span 72%
         const startX = 37; 
         const endX = 37 + (width * 0.72);
         
@@ -765,7 +812,6 @@ const plotManager = {
         const s = App.state.stats; const range = App.state.axisRange;
         const width = document.getElementById('canvas').clientWidth;
         
-        // UPDATED: Start at 37, Span 72%
         const startX = 37; 
         const endX = 37 + (width * 0.72);
         const getX = (v) => this.getPx(v, startX, endX, range.min, range.max);
@@ -815,7 +861,7 @@ const plotManager = {
     showSortedData: function() {
         App.state.lowerGroup.forEach(c => c.el.style.opacity = 0);
         App.state.upperGroup.forEach(c => c.el.style.opacity = 0);
-        document.querySelectorAll('.floating-avg').forEach(e => e.style.opacity = 0);
+        document.querySelectorAll('.floating-avg, .split-line').forEach(e => e.style.opacity = 0);
         App.state.cards.forEach(c => {
             c.el.className = 'num-card'; c.el.style.top = (App.config.topY) + 'px';
             c.el.style.borderColor = '#444'; c.el.style.color = 'white'; c.el.style.background = '#222';
@@ -942,7 +988,6 @@ const CompManager = {
             txt.textContent = `Case ${idx+1}`; txt.setAttribute("class", "val-label");
             plotG.appendChild(txt);
 
-            // UPDATED: Show all 5 values (Left for Min/Med/Max, Right for Q1/Q3)
             const drawLabel = (y, val, side) => {
                 const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 const xOffset = (side === 'left') ? -25 : 25;
@@ -1005,10 +1050,8 @@ function resetComparison() {
 
 document.querySelectorAll('input[name="case"]').forEach(r => {
     r.addEventListener('change', () => {
-        // Ensure comparison mode is reset
         document.getElementById('compDataCheck').checked = false;
         document.getElementById('compPlotCheck').checked = false;
-        // Re-initialize fresh
         App.init();
     });
 });
