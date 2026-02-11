@@ -417,8 +417,8 @@
     <section id="roster-section" class="card" style="display:none;">
       <div class="card-header">
         <div>
-          <h2 class="section-title" contenteditable="true" spellcheck="false">Roster</h2>
-          <p class="card-subtitle">Maintain the list of students, import from XLS, and manage contact details.</p>
+          <h2 class="section-title" contenteditable="true" spellcheck="false">Data</h2>
+          <!-- <p class="card-subtitle">Maintain the list of students, import from XLS, and manage contact details.</p> -->
         </div>
         <div class="table-actions">
           <button id="roster-select-all-btn" class="btn btn-sm btn-outline" type="button">Select All</button>
@@ -701,11 +701,11 @@
     ];
 
     const CLASS_CONFIG = [
-      { key: "Section A", label: "BEE", classCode: "EE10002", sapKey: "0900" },
-      { key: "Section B", label: "Ind 4.0", classCode: "EX20001", sapKey: "1100" },
+      { key: "Section A", label: "A23 BEE", classCode: "EE10002", sapKey: "0900" },
+      { key: "Section B", label: "4EL2 Ind 4.0", classCode: "EX20001", sapKey: "1100" },
       { key: "Section C", label: "SDT", classCode: "EE30021", sapKey: "" },
-      { key: "Section D", label: "Drives Lab", classCode: "EE39004", sapKey: "0900" },
-      { key: "Section E", label: "MP lab", classCode: "EE39006", sapKey: "1200" },
+      { key: "Section D", label: "6EL1 Drives Lab", classCode: "EE39004", sapKey: "0900" },
+      { key: "Section E", label: "6EL1 MP lab", classCode: "EE39006", sapKey: "1200" },
       { key: "Section F", label: "Vocational Lab", classCode: "EE28017", sapKey: "1200" }
     ];
 
@@ -2457,14 +2457,14 @@
       const className = meta ? meta.label : currentClassKey;
       const type = getSelectedMentorType();
 
-      let header = "Mentor Report - " + className + "\n";
+      let header = className + " - Mentor Report\n";
 
       if (type === "consecutive") {
         const x = parseInt(mentorConsecutiveInput.value, 10) || 1;
         if (x === 1) {
-          header += "*Today's Absent list\n\n(" + getMentorSortLabel() + ")";
+          header += "Today's Absent list\n\n(" + getMentorSortLabel() + ")";
         } else {
-          header += "*Criteria:* Absent at least " + x + " consecutive classes\n\n(" + getMentorSortLabel() + ")";
+          header += "Absent at least " + x + " consecutively\n\n(" + getMentorSortLabel() + ")";
         }
       } else {
         const thr = parseInt(mentorPercentInput.value, 10) || 0;
@@ -2478,16 +2478,17 @@
         const total = item.total || 0;
         const p = item.p || 0;
         const percent = item.percent || 0;
-        const firstWord = (st.name || "").trim().split(/\s+/)[0] || "";
+        const firstWord = ((st.name || "").trim().split(/\s+/)[0] || "").slice(0, 4);
         return (
           (idx + 1) + ". " +
-          st.roll + " (" + firstWord + ")  " +
-          p + "/" + total + " (" + percent + "%)"
+          st.roll + " ```" + firstWord + "```..  " +
+          p + " (" + percent + "%)"
         );
       });
 
       const body = lines.join("\n");
-      const footer = "\n\n_*Format:* Present/Total (% Attendance)_";
+      const total = (lastMentorReport[0]?.total) || 0;
+      const footer = "\n\n*Format:* _Present/" + total + " Total (% Att..)_";
 
       return header + body + footer;
     }
