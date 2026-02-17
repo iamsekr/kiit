@@ -2473,22 +2473,37 @@
 
       header += "\n";
 
+
+
+      const NAME_LENGTH = 10; // Change this number to adjust name width
+
       const lines = lastMentorReport.map((item, idx) => {
         const st = item.student;
         const total = item.total || 0;
         const p = item.p || 0;
         const percent = item.percent || 0;
-        const firstWord = ((st.name || "").trim().split(/\s+/)[0] || "").slice(0, 4);
+
+
+        // 1. Get the first word
+        let rawName = ((st.name || "").trim().split(/\s+/)[0] || "");
+
+        // 2. Apply Length Logic using the variable
+        // Cut if too long, add spaces if too short
+        const firstWord = rawName.slice(0, NAME_LENGTH).padEnd(NAME_LENGTH, " "); 
+
+
+        const formattedP = String(p).padStart(2, '0');
+
         return (
           (idx + 1) + ". " +
-          st.roll + " ```" + firstWord + "```..  " +
-          p + " (" + percent + "%)"
+          st.roll + " ```" + firstWord + "  ```" +
+          formattedP + " (" + percent + "%)"
         );
       });
 
       const body = lines.join("\n");
       const total = (lastMentorReport[0]?.total) || 0;
-      const footer = "\n\n*Format:* _Present/" + total + " Total (% Att..)_";
+      const footer = "\n\n_Total Classes: " + total +"_ (100%)";
 
       return header + body + footer;
     }
