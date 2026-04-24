@@ -25,12 +25,31 @@
       "sessionsByDate": []
     }
   },
-  "currentClassKey": "Section C",
+  "currentClassKey": "Section A",
   "appSettings": {
     "whatsappStudentTemplate": "Dear {name} ({roll}), \n\nYour current attendance is {percent}%.",
     "whatsappParentTemplate": "Dear Parent of {name} ({roll}), your ward's current attendance is {percent}%. Remarks: {remarks}",
     "studentEmailTemplate": "Dear {name},\nYour attendance is {percent}%. Remarks: {remarks}",
     "parentEmailTemplate": "Dear Parent of {name} ({roll}),\nYour ward's attendance is {percent}%. Remarks: {remarks}"
   },
-  "savedAt": "2026-04-24T08:22:16.584Z"
+  "classConfig": [
+    {
+      "key": "Section A",
+      "label": "A23 BEE",
+      "classCode": "EE10002",
+      "sapKey": "0900"
+    },
+    {
+      "key": "Section B",
+      "label": "4EL2 Ind 4.0",
+      "classCode": "EX20001",
+      "sapKey": "1100"
+    }
+  ],
+  "whatsappConfig": {
+    "apiBase": "https://cloud.wazbulk.in/api/send",
+    "instanceId": "xyzxyzxyz",
+    "accessToken": "abccabcabcabcabc"
+  },
+  "savedAt": "2026-04-24T09:22:26.624Z"
 }
