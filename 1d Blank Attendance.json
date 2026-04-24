@@ -1,0 +1,36 @@
+{
+  "classes": {
+    "Section A": {
+      "students": [],
+      "sessionsByDate": []
+    },
+    "Section C": {
+      "students": [],
+      "sessionsByDate": []
+    },
+    "Section B": {
+      "students": [],
+      "sessionsByDate": []
+    },
+    "Section D": {
+      "students": [],
+      "sessionsByDate": []
+    },
+    "Section E": {
+      "students": [],
+      "sessionsByDate": []
+    },
+    "Section F": {
+      "students": [],
+      "sessionsByDate": []
+    }
+  },
+  "currentClassKey": "Section C",
+  "appSettings": {
+    "whatsappStudentTemplate": "Dear {name} ({roll}), \n\nYour current attendance is {percent}%.",
+    "whatsappParentTemplate": "Dear Parent of {name} ({roll}), your ward's current attendance is {percent}%. Remarks: {remarks}",
+    "studentEmailTemplate": "Dear {name},\nYour attendance is {percent}%. Remarks: {remarks}",
+    "parentEmailTemplate": "Dear Parent of {name} ({roll}),\nYour ward's attendance is {percent}%. Remarks: {remarks}"
+  },
+  "savedAt": "2026-04-24T08:22:16.584Z"
+}
