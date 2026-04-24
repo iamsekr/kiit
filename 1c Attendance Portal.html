@@ -208,7 +208,8 @@
 
     .table-container {
       width: 100%;
-      overflow-x: auto;
+      overflow: auto;
+      max-height: 70vh;
       border-radius: var(--radius-medium);
       border: 1px solid #e5e7eb;
       background: #fff;
@@ -236,15 +237,36 @@
     th.sortable, th.sortable-roster, #mentor-table thead th.sortable-mentor { cursor: pointer; }
     tbody tr { transition: background-color var(--transition-fast); }
 
-    /* Keep ONLY Msgs header sticky while scrolling page */
+    /* Sticky header and frozen columns for Reports (Msgs) table */
     #reports-table thead th {
       position: sticky;
       top: 0;
-      z-index: 5;
+      z-index: 25;
       background: #f3f4f6;
     }
 
-    /* Msgs table banding + hover */
+    #reports-table th:nth-child(1),
+    #reports-table td:nth-child(1) {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background: inherit;
+    }
+    #reports-table th:nth-child(2),
+    #reports-table td:nth-child(2) {
+      position: sticky;
+      left: 50px; /* Width of S.No column */
+      z-index: 10;
+      background: inherit;
+      box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+    }
+
+    /* Intersection of sticky header and frozen columns */
+    #reports-table thead th:nth-child(1) { z-index: 31; left: 0; }
+    #reports-table thead th:nth-child(2) { z-index: 31; left: 50px; }
+
+    /* Ensure row background color for sticky transparency fix */
+    #reports-table tbody tr { background: #fff; }
     #reports-table tbody tr:nth-child(even) { background: #f9fafb; }
     #reports-table tbody tr:hover { background: #fde68a !important; }
 
@@ -556,16 +578,20 @@
     <section id="reports-section" class="card" style="display:block;">
       <div id="reports-classes-summary" style="font-size:0.8rem;color:#4b5563;margin-bottom:0.5rem;"></div>
 
-      <!-- Action selector (no apply button) -->
-      <div class="form-row" style="align-items:center;margin-bottom:0.5rem;">
-        <div class="form-group" style="flex:0 0 auto;">
+      <!-- Action selector and view toggles -->
+      <div class="form-row" style="align-items:center;margin-bottom:0.5rem;justify-content:space-between;">
+        <div class="form-group" style="flex:0 0 auto; display:flex; gap:0.5rem; align-items:center;">
           <label for="reports-action-select">Row action</label>
-          <select id="reports-action-select" style="padding:0.25rem 0.5rem;font-size:0.8rem;">
+          <select id="reports-action-select" style="padding:0.25rem 0.5rem;font-size:0.8rem;width:auto;">
             <option value="wa-student">WhatsApp Student</option>
             <option value="wa-parent">WhatsApp Parent</option>
             <option value="email-student">Email Student</option>
             <option value="email-parent-cc-student">Email Parent (cc Student)</option>
           </select>
+        </div>
+        <div class="form-group" style="flex:0 0 auto; display:flex; gap:0.4rem;">
+          <button id="toggle-phones-btn" class="btn btn-sm btn-outline" type="button">Show Phone Numbers</button>
+          <button id="toggle-dates-btn" class="btn btn-sm btn-outline" type="button">Hide Days</button>
         </div>
       </div>
 
@@ -594,7 +620,7 @@
             <label style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
               <input type="radio" name="mentor-report-type" value="percentage" />
               <span>Below attendance % threshold</span>
-              <input id="mentor-percent-input" class="mentor-inline-num" type="number" min="0" max="100" value="75" disabled />
+              <input id="mentor-percent-input" class="mentor-inline-num" type="number" min="0" max="100" value="75" step="5" disabled />
             </label>
           </div>
         </div>
@@ -834,7 +860,9 @@
       }
 
       historyPairs.sort((a, b) => a.date.localeCompare(b.date));
-      return historyPairs.slice(-3).map(p => p.val);
+      const cutoff = (currentSession && currentSession.date) ? currentSession.date : "9999-12-31";
+      const filtered = historyPairs.filter(p => p.date <= cutoff);
+      return filtered.slice(-3).map(p => p.val);
     }
 
     function updateHistoryCellForStudent(st) {
@@ -1620,13 +1648,12 @@
       const marksSource = savedSession ? savedSession.marks : currentSession.marks;
 
       const rows = [];
-      rows.push(["Roll No.", "First Name", "Last Name", "Attendance"]);
+      rows.push(["Roll No.", "Name", "Student Phone", "Parent Phone", "Attendance"]);
 
       students.forEach(st => {
         const m = marksSource[st.id] || { present: true };
         const att = (!st.disabled && m.present) ? "P" : "A";
-        const { first, last } = splitName(st.name || "");
-        rows.push([st.roll, first, last, att]);
+        rows.push([st.roll, st.name || "", st.studentPhone || "", st.parentPhone || "", att]);
       });
 
       const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -1737,6 +1764,23 @@
     const reportsTbody = document.getElementById("reports-tbody");
     const reportsHeaderRow = document.getElementById("reports-header-row");
     const reportsActionSelect = document.getElementById("reports-action-select");
+    const togglePhonesBtn = document.getElementById("toggle-phones-btn");
+    const toggleDatesBtn = document.getElementById("toggle-dates-btn");
+
+    let showPhonesInReport = false;
+    let showDatesInReport = true;
+
+    togglePhonesBtn.onclick = () => {
+      showPhonesInReport = !showPhonesInReport;
+      togglePhonesBtn.textContent = showPhonesInReport ? "Hide Phone Numbers" : "Show Phone Numbers";
+      renderReportsTable();
+    };
+
+    toggleDatesBtn.onclick = () => {
+      showDatesInReport = !showDatesInReport;
+      toggleDatesBtn.textContent = showDatesInReport ? "Hide Days" : "Expand View";
+      renderReportsTable();
+    };
 
     function makeAttBadge(type, text) {
       const span = document.createElement("span");
@@ -1768,12 +1812,19 @@
       reportsHeaderRow.appendChild(mkTh("%", "percent", "70px"));
       reportsHeaderRow.appendChild(mkTh("Name", "name"));
 
-      dates.forEach(d => {
-        const th = document.createElement("th");
-        th.textContent = formatDateDisplay(d);
-        th.title = "Attendance on " + formatDateDisplay(d) + " (Absence count / Present count)";
-        reportsHeaderRow.appendChild(th);
-      });
+      if (showPhonesInReport) {
+        reportsHeaderRow.appendChild(mkTh("Student Phone"));
+        reportsHeaderRow.appendChild(mkTh("Parent Phone"));
+      }
+
+      if (showDatesInReport) {
+        dates.forEach(d => {
+          const th = document.createElement("th");
+          th.textContent = formatDateDisplay(d);
+          th.title = "Attendance on " + formatDateDisplay(d) + " (Absence count / Present count)";
+          reportsHeaderRow.appendChild(th);
+        });
+      }
 
       reportsHeaderRow.appendChild(mkTh("Total P", null, "60px"));
       reportsHeaderRow.appendChild(mkTh("Total A", null, "60px"));
@@ -1857,12 +1908,19 @@
 
         tr.append(tdSno, tdRoll, tdActions, tdPercent, tdName);
 
+        if (showPhonesInReport) {
+          const tdSP = document.createElement("td"); tdSP.textContent = st.studentPhone || "-";
+          const tdPP = document.createElement("td"); tdPP.textContent = st.parentPhone || "-";
+          tr.append(tdSP, tdPP);
+        }
+
         // Per-student running counters:
         // - Present => green badge with runningP (1..N)
         // - Absent  => red badge with runningA (1..N)   (as requested)
         let runningP = 0;
         let runningA = 0;
 
+      if (showDatesInReport) {
         dates.forEach(d => {
           const sess = sessionsByDate[d];
           const mark = sess && sess.marks && sess.marks[st.id];
@@ -1883,6 +1941,7 @@
 
           tr.appendChild(td);
         });
+      }
 
         const tdTotP = document.createElement("td"); tdTotP.textContent = totalP;
         const tdTotA = document.createElement("td"); tdTotA.textContent = totalA;
@@ -2210,7 +2269,7 @@
       if (sessionDates.length === 0) { alert("No saved attendance sessions for this class."); return; }
 
       const rows = [];
-      const header = ["Roll", "Name"];
+      const header = ["Roll", "Name", "Student Phone", "Parent Phone"];
       sessionDates.forEach(d => header.push(formatDateDisplay(d)));
       header.push("Total P", "Total A", "%");
       rows.push(header);
@@ -2218,7 +2277,7 @@
       students.forEach(st => {
         let totalSessions = 0;
         let presents = 0;
-        const row = [st.roll, st.name];
+        const row = [st.roll, st.name, st.studentPhone || "", st.parentPhone || ""];
 
         sessionDates.forEach(d => {
           const sess = sessionsByDate[d];
@@ -2407,7 +2466,7 @@
       const classCode = meta ? meta.classCode : currentClassKey.replace(/\s+/g, "_");
       const className = meta ? meta.label : currentClassKey;
 
-      const rows = [["Roll", "Name", "Attendance", "Details"]];
+      const rows = [["Roll", "Name", "Student Phone", "Parent Phone", "Attendance", "Details"]];
       lastMentorReport.forEach(item => {
         const attendanceText = item.total
           ? (item.p + "/" + item.total + " (" + item.percent + "%)")
@@ -2415,6 +2474,8 @@
         rows.push([
           item.student.roll,
           item.student.name,
+          item.student.studentPhone || "",
+          item.student.parentPhone || "",
           attendanceText,
           stripBracketPart(item.detail)
         ]);
