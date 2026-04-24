@@ -270,6 +270,16 @@
     #reports-table tbody tr:nth-child(even) { background: #f9fafb; }
     #reports-table tbody tr:hover { background: #fde68a !important; }
 
+    /* Drag and drop for config rows */
+    tr.dragging-row { 
+      opacity: 0.4; 
+      background: #f3f4f6 !important; 
+      outline: 2px dashed var(--color-primary);
+      outline-offset: -2px;
+    }
+    .drag-handle { cursor: grab; }
+    .drag-handle:active { cursor: grabbing; }
+
     tbody tr.absent { background: #ffe5e5; }
 
     .table-actions { display: inline-flex; gap: 0.25rem; }
@@ -413,6 +423,7 @@
 
         <div class="header-actions">
           <button id="settings-btn" class="btn btn-sm btn-outline" type="button">Settings</button>
+          <button id="config-btn" class="btn btn-sm btn-outline" type="button" title="Double-click to open configuration">Config</button>
           <button id="backup-btn" class="btn btn-sm btn-outline" type="button">Backup</button>
           <input id="restore-file-input" type="file" accept=".json" style="display:none;" />
           <button id="restore-btn" class="btn btn-sm btn-outline" type="button">Restore</button>
@@ -605,10 +616,9 @@
 
     <!-- MENTOR -->
     <section id="mentor-section" class="card" style="display:none;">
-      <div class="form-row" style="align-items:flex-start;">
+      <div class="form-row" style="align-items:flex-end; gap:1.5rem; margin-bottom:1rem;">
         <div class="form-group" style="flex:1;">
           <label>Report Type</label>
-
           <div class="mentor-inline">
             <label style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
               <input type="radio" name="mentor-report-type" value="consecutive" checked />
@@ -623,6 +633,10 @@
               <input id="mentor-percent-input" class="mentor-inline-num" type="number" min="0" max="100" value="75" step="5" disabled />
             </label>
           </div>
+        </div>
+        <div class="form-group" style="flex:0 0 auto;">
+          <label for="mentor-date-input">As of Date</label>
+          <input id="mentor-date-input" type="date" style="padding: 0.25rem 0.5rem; font-size: 0.85rem; border: 1px solid var(--color-border-soft); border-radius: 4px;" />
         </div>
       </div>
 
@@ -713,6 +727,61 @@
     </div>
   </div>
 
+  <!-- Config Modal -->
+  <div id="config-modal-backdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="config-modal-title" style="max-width:700px;">
+      <div class="modal-header">
+        <h3 id="config-modal-title" class="modal-title">Sections Configuration</h3>
+        <button type="button" class="btn btn-sm" id="close-config-modal-btn">Close</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-top:0;margin-bottom:0.75rem;font-size:0.8rem;color:#6b7280;">
+          Add or remove sections. <strong>Key</strong> must be unique and is used to store data.
+        </p>
+        <div class="table-container" style="max-height: 250px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:60px;">Order</th>
+                <th>Key (Unique)</th>
+                <th>Label (Display)</th>
+                <th>Class Code</th>
+                <th>SAP Key</th>
+                <th style="width:40px;"></th>
+              </tr>
+            </thead>
+            <tbody id="config-table-tbody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:0.75rem; margin-bottom:1.5rem;">
+          <button id="config-add-row-btn" class="btn btn-sm btn-outline">+ Add Section</button>
+        </div>
+
+        <h4 style="margin: 1.5rem 0 0.75rem; font-size: 0.9rem; border-top: 1px solid #eee; padding-top: 1rem;">WhatsApp API Settings</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="config-wa-apibase">API Base URL</label>
+            <input id="config-wa-apibase" type="text" placeholder="https://..." />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="config-wa-instanceid">Instance ID</label>
+            <input id="config-wa-instanceid" type="text" />
+          </div>
+          <div class="form-group">
+            <label for="config-wa-accesstoken">Access Token</label>
+            <input id="config-wa-accesstoken" type="text" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" id="config-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="config-save-btn">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
@@ -726,7 +795,7 @@
       { id: "mentor-section", label: "Mentor" }
     ];
 
-    const CLASS_CONFIG = [
+    let classConfig = [
       { key: "Section A", label: "A23 BEE", classCode: "EE10002", sapKey: "0900" },
       { key: "Section B", label: "4EL2 Ind 4.0", classCode: "EX20001", sapKey: "1100" },
       { key: "Section C", label: "SDT", classCode: "EE30021", sapKey: "" },
@@ -734,6 +803,8 @@
       { key: "Section E", label: "6EL1 MP lab", classCode: "EE39006", sapKey: "1200" },
       { key: "Section F", label: "Vocational Lab", classCode: "EE28017", sapKey: "1200" }
     ];
+
+    const CLASS_CONFIG_DEFAULTS = JSON.parse(JSON.stringify(classConfig));
 
     const TEMPLATE_CONFIG_DEFAULTS = {
       whatsappStudentTemplate:
@@ -746,12 +817,13 @@
         "Dear Parent of {name} ({roll}),\nYour ward is in class {class name}.\nTheir attendance is {percent}% with presence in {Classes you are present} out of {total number of classes} classes.\nRemarks: {remarks}"
     };
 
-    const WHATSAPP_CONFIG = {
-      buttonLabel: "WhatsApp",
+    let whatsappConfig = {
       apiBase: "https://cloud.wazbulk.in/api/send",
       instanceId: "xyzxyzxyz",
       accessToken: "abccabcabcabcabc"
     };
+
+    const WHATSAPP_CONFIG_DEFAULTS = JSON.parse(JSON.stringify(whatsappConfig));
 
     const STORAGE_KEY = "kiitAttendanceData_2026_1";
 
@@ -773,7 +845,7 @@
     // DATA MODEL
     // =========================
     const classes = {};
-    let currentClassKey = CLASS_CONFIG[0].key;
+    let currentClassKey = classConfig[0].key;
     let currentSession = { date: "", notes: "", marks: {} };
 
     const appSettings = {
@@ -804,7 +876,7 @@
     }
     function findStudentById(id) { return getStudents().find(s => s.id === id) || null; }
     function findStudentByRoll(roll) { return getStudents().find(s => s.roll === roll) || null; }
-    function getCurrentClassMeta() { return CLASS_CONFIG.find(c => c.key === currentClassKey) || null; }
+    function getCurrentClassMeta() { return classConfig.find(c => c.key === currentClassKey) || null; }
 
     // =========================
     // COMPUTATIONS
@@ -887,7 +959,7 @@
     // STORAGE (Local + Server)
     // =========================
     function buildAppDataObject() {
-      return { classes, currentClassKey, appSettings, savedAt: new Date().toISOString() };
+      return { classes, currentClassKey, appSettings, classConfig, whatsappConfig, savedAt: new Date().toISOString() };
     }
 
     function saveToLocalStorage() {
@@ -899,16 +971,28 @@
       Object.keys(classes).forEach(k => delete classes[k]);
       Object.assign(classes, parsed.classes || {});
 
-      const keysFromConfig = CLASS_CONFIG.map(c => c.key);
-      currentClassKey = (parsed.currentClassKey && keysFromConfig.includes(parsed.currentClassKey))
-        ? parsed.currentClassKey
-        : keysFromConfig[0];
-
       const s = parsed.appSettings || {};
       appSettings.whatsappStudentTemplate = s.whatsappStudentTemplate || TEMPLATE_CONFIG_DEFAULTS.whatsappStudentTemplate;
       appSettings.whatsappParentTemplate  = s.whatsappParentTemplate  || TEMPLATE_CONFIG_DEFAULTS.whatsappParentTemplate;
       appSettings.studentEmailTemplate    = s.studentEmailTemplate    || TEMPLATE_CONFIG_DEFAULTS.studentEmailTemplate;
       appSettings.parentEmailTemplate     = s.parentEmailTemplate     || TEMPLATE_CONFIG_DEFAULTS.parentEmailTemplate;
+
+      if (parsed.classConfig && Array.isArray(parsed.classConfig) && parsed.classConfig.length > 0) {
+        classConfig = parsed.classConfig;
+      } else {
+        classConfig = JSON.parse(JSON.stringify(CLASS_CONFIG_DEFAULTS));
+      }
+
+      if (parsed.whatsappConfig) {
+        whatsappConfig = parsed.whatsappConfig;
+      } else {
+        whatsappConfig = JSON.parse(JSON.stringify(WHATSAPP_CONFIG_DEFAULTS));
+      }
+
+      const keysFromConfig = classConfig.map(c => c.key);
+      currentClassKey = (parsed.currentClassKey && keysFromConfig.includes(parsed.currentClassKey))
+        ? parsed.currentClassKey
+        : keysFromConfig[0];
     }
 
     function loadFromLocalStorage() {
@@ -1049,7 +1133,7 @@
     const classRadiosContainer = document.getElementById("class-radios");
     function initClassRadios() {
       classRadiosContainer.innerHTML = "";
-      CLASS_CONFIG.forEach(cfg => {
+      classConfig.forEach(cfg => {
         const id = "cls-" + cfg.key.replace(/\s+/g, "-");
         const label = document.createElement("label");
         label.className = "class-radio-label";
@@ -2014,12 +2098,12 @@
         .replace("{total number of classes}", totalSessions)
         .replace("{Classes you are present}", presents);
 
-      const url = WHATSAPP_CONFIG.apiBase
+      const url = whatsappConfig.apiBase
         + "?number=" + encodeURIComponent(phone)
         + "&type=text"
         + "&message=" + encodeURIComponent(message)
-        + "&instance_id=" + encodeURIComponent(WHATSAPP_CONFIG.instanceId)
-        + "&access_token=" + encodeURIComponent(WHATSAPP_CONFIG.accessToken);
+        + "&instance_id=" + encodeURIComponent(whatsappConfig.instanceId)
+        + "&access_token=" + encodeURIComponent(whatsappConfig.accessToken);
 
       window.open(url, "_blank");
     }
@@ -2192,6 +2276,142 @@
     };
 
     // =========================
+    // Config modal
+    // =========================
+    const configBtn = document.getElementById("config-btn");
+    const configModalBackdrop = document.getElementById("config-modal-backdrop");
+    const closeConfigModalBtn = document.getElementById("close-config-modal-btn");
+    const configCancelBtn = document.getElementById("config-cancel-btn");
+    const configSaveBtn = document.getElementById("config-save-btn");
+    const configAddRowBtn = document.getElementById("config-add-row-btn");
+    const configTableTbody = document.getElementById("config-table-tbody");
+    const configWaApiBase = document.getElementById("config-wa-apibase");
+    const configWaInstanceId = document.getElementById("config-wa-instanceid");
+    const configWaAccessToken = document.getElementById("config-wa-accesstoken");
+
+    let tempConfig = [];
+    let tempWaConfig = {};
+    let draggedIdx = null;
+
+    function openConfigModal() {
+      tempConfig = JSON.parse(JSON.stringify(classConfig));
+      tempWaConfig = JSON.parse(JSON.stringify(whatsappConfig));
+      
+      configWaApiBase.value = tempWaConfig.apiBase || "";
+      configWaInstanceId.value = tempWaConfig.instanceId || "";
+      configWaAccessToken.value = tempWaConfig.accessToken || "";
+
+      renderConfigTable();
+      configModalBackdrop.style.display = "flex";
+      configModalBackdrop.setAttribute("aria-hidden", "false");
+    }
+
+    function closeConfigModal() {
+      configModalBackdrop.style.display = "none";
+      configModalBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    function renderConfigTable() {
+      configTableTbody.innerHTML = "";
+      tempConfig.forEach((cfg, idx) => {
+        const tr = document.createElement("tr");
+        tr.draggable = true;
+        if (idx === draggedIdx) tr.classList.add("dragging-row");
+
+        tr.innerHTML = `
+          <td class="drag-handle" style="text-align:center; color:#9ca3af; font-size:1.2rem; user-select:none;" title="Drag to reorder">☰</td>
+          <td><input type="text" value="${cfg.key}" data-idx="${idx}" data-field="key" style="padding:4px; font-size:0.75rem;"></td>
+          <td><input type="text" value="${cfg.label}" data-idx="${idx}" data-field="label" style="padding:4px; font-size:0.75rem;"></td>
+          <td><input type="text" value="${cfg.classCode}" data-idx="${idx}" data-field="classCode" style="padding:4px; font-size:0.75rem;"></td>
+          <td><input type="text" value="${cfg.sapKey}" data-idx="${idx}" data-field="sapKey" style="padding:4px; font-size:0.75rem;"></td>
+          <td><button class="btn btn-sm btn-danger-soft config-del-row" data-idx="${idx}">×</button></td>
+        `;
+
+        tr.ondragstart = e => {
+          draggedIdx = idx;
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", idx);
+          // Small delay to allow the browser to capture the ghost image before hiding the source
+          setTimeout(() => tr.classList.add("dragging-row"), 0);
+        };
+
+        tr.ondragover = e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          const targetIdx = idx;
+          if (targetIdx !== draggedIdx && draggedIdx !== null) {
+            const movedItem = tempConfig.splice(draggedIdx, 1)[0];
+            tempConfig.splice(targetIdx, 0, movedItem);
+            draggedIdx = targetIdx;
+            renderConfigTable();
+          }
+        };
+
+        tr.ondragend = () => {
+          draggedIdx = null;
+          renderConfigTable();
+        };
+
+        configTableTbody.appendChild(tr);
+      });
+
+      configTableTbody.querySelectorAll("input").forEach(inp => {
+        inp.oninput = () => {
+          const idx = inp.dataset.idx;
+          const field = inp.dataset.field;
+          tempConfig[idx][field] = inp.value;
+        };
+      });
+
+      configTableTbody.querySelectorAll(".config-del-row").forEach(btn => {
+        btn.onclick = () => {
+          const idx = btn.dataset.idx;
+          tempConfig.splice(idx, 1);
+          renderConfigTable();
+        };
+      });
+    }
+
+    configAddRowBtn.onclick = () => {
+      tempConfig.push({ key: "New Section", label: "New Label", classCode: "", sapKey: "" });
+      renderConfigTable();
+    };
+
+    configBtn.onclick = null; // Remove single click
+    configBtn.ondblclick = openConfigModal;
+    closeConfigModalBtn.onclick = closeConfigModal;
+    configCancelBtn.onclick = closeConfigModal;
+    configModalBackdrop.onclick = e => { if (e.target === configModalBackdrop) closeConfigModal(); };
+
+    configSaveBtn.onclick = () => {
+      if (tempConfig.length === 0) { alert("At least one section must exist."); return; }
+      
+      const keys = tempConfig.map(c => c.key.trim()).filter(Boolean);
+      if (new Set(keys).size !== keys.length) { alert("Each section must have a unique Key."); return; }
+      if (keys.length !== tempConfig.length) { alert("Key cannot be empty."); return; }
+
+      classConfig = JSON.parse(JSON.stringify(tempConfig));
+      whatsappConfig = {
+        apiBase: configWaApiBase.value.trim(),
+        instanceId: configWaInstanceId.value.trim(),
+        accessToken: configWaAccessToken.value.trim()
+      };
+      
+      const keysFromConfig = classConfig.map(c => c.key);
+      if (!keysFromConfig.includes(currentClassKey)) {
+        currentClassKey = keysFromConfig[0];
+      }
+
+      initClassRadios();
+      loadSessionForDate(currentSession.date);
+      renderRosterTable(); renderAttendanceTable(); renderReportsTable(); generateMentorReport();
+      refreshAllPercents(); refreshAllHistoryCells(); updateReportsClassesSummary();
+      
+      saveAll();
+      closeConfigModal();
+    };
+
+    // =========================
     // Backup/Restore/Export
     // =========================
     const backupBtn = document.getElementById("backup-btn");
@@ -2322,6 +2542,7 @@
 
     const mentorConsecutiveInput = document.getElementById("mentor-consecutive-input");
     const mentorPercentInput = document.getElementById("mentor-percent-input");
+    const mentorDateInput = document.getElementById("mentor-date-input");
 
     function getSelectedMentorType() {
       for (let i = 0; i < mentorTypeRadios.length; i++) if (mentorTypeRadios[i].checked) return mentorTypeRadios[i].value;
@@ -2345,9 +2566,9 @@
     }));
     mentorConsecutiveInput.addEventListener("input", () => { if (!mentorConsecutiveInput.disabled) generateMentorReport(); });
     mentorPercentInput.addEventListener("input", () => { if (!mentorPercentInput.disabled) generateMentorReport(); });
+    mentorDateInput.addEventListener("change", generateMentorReport);
 
-    function computeConsecutiveAbsencesFromEnd(student, sessionsByDate) {
-      const dates = Object.keys(sessionsByDate).sort();
+    function computeConsecutiveAbsencesFromEnd(student, dates, sessionsByDate) {
       let count = 0;
       for (let i = dates.length - 1; i >= 0; i--) {
         const d = dates[i];
@@ -2385,7 +2606,8 @@
       const cls = getCurrentClass();
       const students = cls.students || [];
       const sessionsByDate = cls.sessionsByDate || {};
-      const sessionDates = Object.keys(sessionsByDate).sort();
+      const mentorCutoffDate = document.getElementById("mentor-date-input").value;
+      const sessionDates = Object.keys(sessionsByDate).filter(d => d <= mentorCutoffDate).sort();
 
       if (students.length === 0) { mentorSummaryEl.textContent = "No students in roster."; mentorTableContainer.style.display = "none"; lastMentorReport = []; return; }
       if (sessionDates.length === 0) { mentorSummaryEl.textContent = "No saved attendance sessions available."; mentorTableContainer.style.display = "none"; lastMentorReport = []; return; }
@@ -2396,10 +2618,18 @@
       if (type === "consecutive") {
         const x = parseInt(mentorConsecutiveInput.value, 10) || 1;
         students.forEach(st => {
-          const consecA = computeConsecutiveAbsencesFromEnd(st, sessionsByDate);
+          const consecA = computeConsecutiveAbsencesFromEnd(st, sessionDates, sessionsByDate);
           if (consecA >= x) {
-            const total = st.totalSessions || 0;
-            const p = st.disabled ? 0 : (st.presents || 0);
+            let total = 0;
+            let p = 0;
+            sessionDates.forEach(d => {
+              const sess = sessionsByDate[d];
+              const mark = sess && sess.marks && sess.marks[st.id];
+              if (mark) {
+                total++;
+                if (!st.disabled && mark.present) p++;
+              }
+            });
             const a = total - p;
             const percent = total === 0 ? 0 : Math.round(100 * p / total);
             filtered.push({ student: st, total, p, a, percent, detail: "Absent " + consecA + " classes consecutively" });
@@ -2411,8 +2641,16 @@
       } else {
         const thr = parseInt(mentorPercentInput.value, 10) || 0;
         students.forEach(st => {
-          const total = st.totalSessions || 0;
-          const p = st.disabled ? 0 : (st.presents || 0);
+          let total = 0;
+          let p = 0;
+          sessionDates.forEach(d => {
+            const sess = sessionsByDate[d];
+            const mark = sess && sess.marks && sess.marks[st.id];
+            if (mark) {
+              total++;
+              if (!st.disabled && mark.present) p++;
+            }
+          });
           const a = total - p;
           const percent = total === 0 ? 0 : Math.round(100 * p / total);
           if (percent < thr) filtered.push({ student: st, total, p, a, percent, detail: "Attendance " + percent + "% < " + thr + "%" });
@@ -2591,12 +2829,11 @@
     // INIT
     // =========================
     (async function init() {
-      await runServerDiagnostics();
+      // 1. Initial diagnostic
+      runServerDiagnostics();
 
-      let hadStored = await loadFromServer();
-      if (!hadStored) hadStored = loadFromLocalStorage();
-      if (!hadStored) ensureClass(currentClassKey);
-
+      // 2. Load from LocalStorage first for instant UI
+      loadFromLocalStorage();
       initClassRadios();
 
       const today = new Date().toISOString().slice(0, 10);
@@ -2604,20 +2841,51 @@
       attendanceDateInput.value = currentSession.date;
       loadSessionForDate(currentSession.date);
 
+      document.getElementById("mentor-date-input").value = today;
       syncMentorInlineInputs();
 
-      renderRosterTable();
+      // Initial light renders for the default view
       renderAttendanceTable();
-      renderReportsTable();
-      generateMentorReport();
-      refreshAllPercents();
-      refreshAllHistoryCells();
-      updateClassSummary();
-      updateClassCountLabel();
       updatePresentToday();
-      updateReportsClassesSummary();
+      showSectionSectionId("attendance-section");
 
-      showSectionSectionId("reports-section");
+      // 3. Deferred heavy renders to keep the UI responsive
+      setTimeout(() => {
+        renderRosterTable();
+        renderAttendanceTable();
+        generateMentorReport();
+        refreshAllPercents();
+        refreshAllHistoryCells();
+        updateClassSummary();
+        updateClassCountLabel();
+        updatePresentToday();
+      }, 100);
+
+      // 4. Background server sync
+      fetchDataFromServer().then(data => {
+        if (data) {
+          console.log("Background sync: data received from server.");
+          applyLoadedData(data);
+          
+          // Refresh UI with fresh server data
+          initClassRadios();
+          loadSessionForDate(attendanceDateInput.value);
+          
+          renderReportsTable();
+          updateReportsClassesSummary();
+          
+          setTimeout(() => {
+            renderRosterTable();
+            renderAttendanceTable();
+            generateMentorReport();
+            refreshAllPercents();
+            refreshAllHistoryCells();
+            updatePresentToday();
+          }, 50);
+        }
+      }).catch(err => {
+        console.warn("Background sync failed or skipped:", err);
+      });
     })();
   </script>
 </body>
