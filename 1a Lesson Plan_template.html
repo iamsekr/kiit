@@ -48,6 +48,7 @@
       padding: 16px 18px 14px;
       margin-bottom: 14px;
       border-top: 5px solid var(--primary);
+      position: relative;
     }
 
     .institution {
@@ -541,6 +542,117 @@
       .lesson-meta { font-size: 0.64rem; }
       .course-meta { gap: 4px 6px; }
     }
+
+    /* ===== PRINT BUTTON ===== */
+    .print-btn-wrapper {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      z-index: 10;
+    }
+    .print-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      padding: 0;
+    }
+    .print-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0,82,204,0.28);
+    }
+    .print-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .print-panel {
+      display: none;
+      position: absolute;
+      top: 42px;
+      right: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(15,23,42,0.14);
+      padding: 6px;
+      min-width: 270px;
+      z-index: 100;
+    }
+    .print-panel.open { display: block; }
+    .print-panel-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 4px 8px 6px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .print-panel-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 0.83rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      font-family: inherit;
+    }
+    .print-panel-item:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .print-panel-item .pi-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.55; }
+
+    .print-panel-all {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      text-align: left;
+      padding: 9px 12px;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+      margin-bottom: 6px;
+      box-shadow: 0 2px 8px rgba(0,82,204,0.22);
+    }
+    .print-panel-all:hover {
+      background: #0041a8;
+      box-shadow: 0 4px 14px rgba(0,82,204,0.32);
+    }
+    .print-panel-all svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .print-panel-sep {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 4px 8px 4px;
+      border-top: 1px solid var(--border);
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
   </style>
 </head>
 <body>
@@ -558,10 +670,49 @@
         <span class="badge" id="faculty"></span><br>
 
         <!-- TABS -->
-        <span class="pill pill-active" id="tabLessonPlan">Lesson Plan</span>
+        
         <span class="pill pill-outline" id="tabSyllabus">Syllabus</span>
         <span class="pill pill-outline" id="tabOutcomes">Outcomes</span>
+        <span class="pill pill-active" id="tabLessonPlan">Lesson Plan</span>
         <span class="pill pill-outline" id="tabEvaluation">Evaluation</span>
+      </div>
+
+      <!-- PRINT BUTTON -->
+      <div class="print-btn-wrapper">
+        <button class="print-btn" id="printBtn" title="Save sections as PDF">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+        </button>
+        <div class="print-panel" id="printPanel">
+          <button class="print-panel-all" onclick="doPrintAll()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Print All Sections (One PDF)
+          </button>
+          <div class="print-panel-sep">Or save individually</div>
+          <button class="print-panel-item" onclick="doPrint('syllabus')">
+            <svg class="pi-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Course Content (Syllabus)
+          </button>
+          <button class="print-panel-item" onclick="doPrint('outcomes')">
+            <svg class="pi-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Course Outcomes, CO and PO
+          </button>
+          <button class="print-panel-item" onclick="doPrint('lessonplan')">
+            <svg class="pi-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Lesson Plan
+          </button>
+          <button class="print-panel-item" onclick="doPrint('evaluation')">
+            <svg class="pi-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Activity Plan, Evaluation Scheme
+          </button>
+        </div>
       </div>
     </header>
 
@@ -674,6 +825,9 @@
     /* ========== 1. CONFIG – EDIT THIS BLOCK ONLY ========== */
 
     const config = {
+
+      showPrintButton: true,  // ← set to false to hide the PDF/print button
+
       // ===== ACTIVITY CALENDAR (generic, reusable) =====
       activityCalendar: {
         title: "Activity Calendar",
@@ -740,10 +894,10 @@
       faculty: "Prof.Thotakura NSC Sekhar",
 
       courseTitle: "Industry 4.0 Technologies",
-      courseCode: "EX20001",
+      courseCode: "EX20001xdf",
 
 
-      facultylink: "https://my.e-kard.in/sekhar",
+      facultylink: "https://my.e-kard.in/tnsc",
       courselink: "https://classroom.google.com/c/ODMyMzU2MTkxNDQ5?cjc=jk43prgp",
 
       // Course meta
@@ -769,7 +923,14 @@
       // Holidays, dates, etc.
       holidays: [
         "25-12-2025",
-        "01-04-2026"
+        "23-01-2026",
+        "26-01-2026",
+        "04-03-2026",
+        "21-03-2026",
+        "27-03-2026",
+        "01-04-2026",
+        "03-04-2026",
+        "14-04-2026"
       ],
 
       startDate: "03-12-2025",
@@ -800,31 +961,31 @@
         modules: [
           {
             id: "M1",
-            tag: "M1 – Introduction",
+            tag: "M1 – Foundations of Industry 4.0",
             description:
               "The Fourth Industrial Revolution, Difference between conventional automation and Industry 4.0, Case Studies: Health, Agriculture, Manufacturing."
           },
           {
             id: "M2",
-            tag: "M2 – Industry 4.0 and its components",
+            tag: "M2 – Industry 4.0 Technologies",
             description:
-              "Internet of Things (IoT) & Industrial Internet of Things (IIoT), Internet of Services, Value chains in manufacturing companies, Digital Twins."
+              "Internet of Things (IoT) & Industrial Internet of Things (IIoT); Internet of Services (IoS); Value chains in manufacturing companies; Digital Twins."
           },
           {
             id: "M3",
-            tag: "M3 – Digital Manufacturing and Design",
+            tag: "M3 – The Digital-Physical Interface of Industry 4.0",
             description:
               "Cyber Physical Systems and Next Generation sensors, Collaborative Platform and Product Life-cycle Management, Robotics and Automation."
           },
           {
             id: "M4",
-            tag: "M4 – Industrial IoT",
+            tag: "M4 – The Human-Digital Frontier: Collaboration and Workspace Evolution",
             description:
               "Cloud Computing, Big Data Analytics, AI & ML, Virtual and Augmented Reality, Block-chain."
           },
           {
             id: "M5",
-            tag: "M5 – Challenges & Opportunities in Industry 4.0",
+            tag: "M5 – Case Studies of Industry 4.0",
             description:
               "A Digital Strategy alongside Resource Scarcity, Standards and Data security, Financing conditions, availability of skilled workers, Comprehensive broadband infra- structure, Legal framework, protection of corporate data, liability, handling personal data."
           }
@@ -846,47 +1007,45 @@
       lessons: [
         { type: "special", label: "Introduction to Course" },
 
-        { type: "class", module: "M1", notes: "Evolution of Industrial Revolutions, The Fourth Industrial Revolution" },
-        { type: "class", module: "M1", notes: "Difference between conventional automation and Industry 4.0" },
-        { type: "class", module: "M1", notes: "Case Studies: Health, Agriculture, Manufacturing" },
+        { type: "class", module: "M1", notes: "Evolution of Industrial Revolutions (1.0 to 5.0), Ind 3.0 vs Ind 4.0 & Ind 4.0 vs Ind 5.0" },
+        { type: "class", module: "M1", notes: "Conventional Automation vs Industry 4.0;  Ind 4.0 vs Ind 5.0" },
+        { type: "class", module: "M1", notes: "Sensors, Computing and Actuators" },
+        { type: "class", module: "M1", notes: "Industry 4.0 Environment and its Design Principles" },
 
-        { type: "class", module: "M2", notes: "Internet of Things (IoT)" },
-        { type: "class", module: "M2", notes: "Industrial Internet of Things (IIoT)" },        
-        { type: "class", module: "M2", notes: "Internet of Services, Value chains in manufacturing companies" },
-        { type: "class", module: "M2", notes: "Digital Twins" },
 
-        { type: "special", label: "Doubt Clearing Session" },
+        { type: "class", module: "M2", notes: "Introduction to Ind 4.0 key technologies/ Components" },        
+        { type: "class", module: "M2", notes: "IIoT and its Architecture" },
+        { type: "class", module: "M2", notes: "Big Data, Big Data Analytics & Data Visualization" },
+        { type: "class", module: "M2", notes: "Ai & ML" },
+        { type: "class", module: "M2", notes: "Computing Techniques (Cloud/Fog/Edge/Mobile/Quantum etc)" },
+        { type: "special", label: "Quick Recap & Doubt Clearing Session" },
+        { type: "class", module: "M2", notes: "Digital Twins" },        
+        { type: "class", module: "M2", notes: "Block Chain and Cyber security" },
+        { type: "class", module: "M2", notes: "Additive Technology (CAD, 3D Printing)" },
+        { type: "class", module: "M2", notes: "Augmented Reality and Virtual reality" },
+        { type: "class", module: "M2", notes: "Robotics and Automation" },
 
-        { type: "class", module: "M3", notes: "Cyber Physical Systems and Next Generation sensors" },
-        { type: "class", module: "M3", notes: "Cyber Physical Systems and Next Generation sensors" },
-        { type: "class", module: "M3", notes: "Collaborative Platform and Product Life-cycle Management" },
-        { type: "class", module: "M3", notes: "Robotics and Automation." },
-        { type: "class", module: "M3", notes: "Robotics and Automation." },
-
-        { type: "special", label: "Doubt Clearing Session" },
         { type: "special", label: "Discussion of previous year mid-sem questions" },
-
         { type: "exam_mid" },
 
-        { type: "class", module: "M4", notes: "Cloud Computing" },
-        { type: "class", module: "M4", notes: "Big Data Analytics" },
-        { type: "class", module: "M4", notes: "AI & ML," },
-        { type: "class", module: "M4", notes: "Virtual and Augmented Reality" },
-        { type: "class", module: "M4", notes: "Block-chain" },
-        { type: "class", module: "M4", notes: "Block-chain" },
+        { type: "class", module: "M3", notes: "Industrial Internet System, Internet of Services" },
+        { type: "class", module: "M3", notes: "Cyber Physical Systems, Next Generation Sensors" },
+
+
+        { type: "class", module: "M4", notes: "Introduction to Smart Factory" },
+        { type: "class", module: "M4", notes: "Digital and human workspace, Collaborative Platform and Product Life-Cycle Management" },
+        { type: "class", module: "M4", notes: "Adaptation Challenges, Implementation Framework Challenges" },        
+        { type: "class", module: "M4", notes: "Futuristic Opportunity, Economic Impact" },
 
         { type: "special", label: "Doubt Session & Revision" },
-        
+        { type: "class", module: "M5", notes: "Case Study: Health 4.0 & Agriculture" },
+        { type: "class", module: "M5", notes: "Case Study: Oil and Petroleum, Energy and Smart Grid" },
+        { type: "class", module: "M5", notes: "Case Study: Textile Industry/ Real Estate/ Maritime/ Tourism/ Forestry" },
+        { type: "class", module: "M5", notes: "Case Study: Infrastructure/ Food & Beverage/ Insurance/Legal/ HR/ Customer" },
 
-        { type: "class", module: "M5", notes: "A Digital Strategy alongside Resource Scarcity, Standards and Data security, Financing conditions" },
-        { type: "class", module: "M5", notes: "A Digital Strategy alongside Resource Scarcity, Standards and Data security, Financing conditions" },
-        { type: "class", module: "M5", notes: "availability of skilled workers, Comprehensive broadband infra- structure, " },
-        { type: "class", module: "M5", notes: "Legal framework, protection of corporate data, liability" },
-        { type: "class", module: "M5", notes: "Legal framework, protection of corporate data, liability" },
-        { type: "class", module: "M5", notes: "handling personal data" },
 
-        { type: "special", label: "Final Doubt Session & Revision" },
-
+        { type: "special", label: "Doubt Session & Revision" },
+        { type: "special", label: "Discussion of previous year end-sem questions" },     
         { type: "exam_end" }
       ],
 
@@ -1477,13 +1636,182 @@
       activateTab(tabLessonPlan, lessonPlanView, true);
     }
 
-    /* ========== 8. INIT ========== */
+    /* ========== 8. PRINT / PDF ========== */
+
+    function getPrintStyles() {
+      const el = document.querySelector('style');
+      return el ? el.textContent : '';
+    }
+
+    function buildHeaderHTML() {
+      return `
+        <div style="padding-bottom:10px;margin-bottom:14px;border-bottom:3px solid #0052cc;">
+          <div style="font-size:0.73rem;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">${config.instituteName}</div>
+          <div style="font-size:0.73rem;color:#6b7280;">${config.schoolLine}</div>
+          <div style="font-size:1rem;font-weight:700;margin-top:4px;">${config.courseTitle}</div>
+          <div style="font-size:0.8rem;color:#6b7280;">${config.courseCode} &nbsp;&bull;&nbsp; ${config.semester} &nbsp;&bull;&nbsp; ${config.faculty}</div>
+        </div>
+      `;
+    }
+
+    function openPrintWindow(filename, bodyContent) {
+      const styles = getPrintStyles();
+      const header = buildHeaderHTML();
+      const win = window.open('', '_blank', 'width=960,height=700');
+      if (!win) {
+        alert('Popup blocked! Please allow popups for this page and try again.');
+        return;
+      }
+      win.document.write(`<!DOCTYPE html><html lang="en"><head>
+        <meta charset="UTF-8">
+        <title>${filename}</title>
+        <style>
+          ${styles}
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: system-ui,-apple-system,sans-serif; background:#fff; color:#111827; padding:20px; }
+          .outcomes-view,.syllabus-view,.evaluation-view { display:block !important; }
+          .print-btn-wrapper { display:none !important; }
+          @media print {
+            body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+            @page { margin:15mm; size:A4; }
+          }
+        </style>
+      </head><body>
+        <div class="page"><div class="card" style="padding:16px;">
+          ${header}${bodyContent}
+        </div></div>
+        <script>window.onload=function(){setTimeout(function(){window.print();},450);};<\/script>
+      </body></html>`);
+      win.document.close();
+    }
+
+    function doPrint(section) {
+      const code = config.courseCode;
+      document.getElementById('printPanel').classList.remove('open');
+      if (section === 'syllabus') {
+        openPrintWindow(
+          `1b. ${code} Course Content`,
+          document.getElementById('syllabusView').innerHTML
+        );
+      } else if (section === 'outcomes') {
+        openPrintWindow(
+          `1b. ${code} Course Outcomes, CO and PO`,
+          document.getElementById('outcomesView').innerHTML
+        );
+      } else if (section === 'lessonplan') {
+        const summary = `<div class="summary-bar" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">${document.getElementById('summaryBar').innerHTML}</div>`;
+        openPrintWindow(
+          `1c. ${code} Lesson Plan`,
+          summary + document.getElementById('lessonPlanView').innerHTML
+        );
+      } else if (section === 'evaluation') {
+        openPrintWindow(
+          `1d. ${code} Activity Plan, Evaluation Scheme`,
+          document.getElementById('evaluationView').innerHTML
+        );
+      }
+    }
+
+    function doPrintAll() {
+      const code = config.courseCode;
+      document.getElementById('printPanel').classList.remove('open');
+
+      const styles = getPrintStyles();
+      const header = buildHeaderHTML();
+
+      const syllabus  = document.getElementById('syllabusView').innerHTML;
+      const outcomes  = document.getElementById('outcomesView').innerHTML;
+      const summary   = `<div class="summary-bar" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">${document.getElementById('summaryBar').innerHTML}</div>`;
+      const lessonPlan = summary + document.getElementById('lessonPlanView').innerHTML;
+      const evaluation = document.getElementById('evaluationView').innerHTML;
+
+      const win = window.open('', '_blank', 'width=960,height=700');
+      if (!win) {
+        alert('Popup blocked! Please allow popups for this page and try again.');
+        return;
+      }
+
+      win.document.write(`<!DOCTYPE html><html lang="en"><head>
+        <meta charset="UTF-8">
+        <title>${code} – Complete Course Document</title>
+        <style>
+          ${styles}
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: system-ui,-apple-system,sans-serif; background:#fff; color:#111827; padding:20px; }
+          .outcomes-view,.syllabus-view,.evaluation-view { display:block !important; }
+          .print-btn-wrapper { display:none !important; }
+          .section-block { }
+          .section-break { page-break-before: always; break-before: page; padding-top: 8px; }
+          .section-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: #0052cc;
+            border-bottom: 2px solid #0052cc;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+          }
+          @media print {
+            body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+            @page { margin: 15mm; size: A4; }
+          }
+        </style>
+      </head><body>
+        <div class="page">
+          <div class="card" style="padding:16px;">
+            ${header}
+            <div class="section-label">Syllabus &amp; Course Content</div>
+            ${syllabus}
+          </div>
+          <div class="card section-break" style="padding:16px;">
+            ${header}
+            <div class="section-label">Course Outcomes, CO &amp; PO</div>
+            ${outcomes}
+          </div>
+          <div class="card section-break" style="padding:16px;">
+            ${header}
+            <div class="section-label">Detailed Lesson Plan</div>
+            ${lessonPlan}
+          </div>
+          <div class="card section-break" style="padding:16px;">
+            ${header}
+            <div class="section-label">Evaluation &amp; Activity Plan</div>
+            ${evaluation}
+          </div>
+        </div>
+        <script>window.onload=function(){setTimeout(function(){window.print();},450);};<\/script>
+      </body></html>`);
+      win.document.close();
+    }
+
+    /* ========== 9. INIT ========== */
 
     renderLessonPlan(config);
     renderSyllabus(config);
     renderOutcomes(config);
     renderActivityCalendar(config);
     initTabs();
+
+    // Print button visibility + toggle
+    (function() {
+      const wrapper = document.querySelector('.print-btn-wrapper');
+      if (!wrapper) return;
+      if (!config.showPrintButton) {
+        wrapper.style.display = 'none';
+        return;
+      }
+      const btn = document.getElementById('printBtn');
+      const panel = document.getElementById('printPanel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function() {
+        panel.classList.remove('open');
+      });
+      panel.addEventListener('click', function(e) { e.stopPropagation(); });
+    }());
   </script>
 </body>
 </html>
