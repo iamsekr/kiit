@@ -63,6 +63,8 @@
     }
     input[type="text"],
     input[type="email"],
+    input[type="date"],
+    select,
     textarea {
       border: 1px solid #d1d5db;
       border-radius: 6px;
@@ -71,14 +73,19 @@
       font-family: Arial, sans-serif;
       box-sizing: border-box;
       background-color: #f9fafb;
+      color: #111827;
+      caret-color: #111827;
     }
     input[type="text"]:focus,
     input[type="email"]:focus,
+    input[type="date"]:focus,
+    select:focus,
     textarea:focus {
       outline: none;
       border-color: #6366f1;
       box-shadow: 0 0 0 1px #6366f1;
       background-color: #ffffff;
+      caret-color: #111827;
     }
     textarea {
       width: 100%;
@@ -100,6 +107,16 @@
       background-size: 200% 200%;
       color: #ffffff;
       animation: gradientMove 6s ease infinite;
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #ffffff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+      font-weight: 600;
     }
     .actions {
       margin-top: 14px;
@@ -197,20 +214,69 @@
         </div>
 
         <div class="field">
+          <label for="semesterTerm">Semester term</label>
+          <select id="semesterTerm">
+            <option>Autumn Semester</option>
+            <option>Spring Semester</option>
+            <option>Other</option>
+          </select>
+          <small>Select Autumn or Spring, or choose Other to enter a custom semester name.</small>
+        </div>
+
+        <div class="field">
+          <label for="semesterYear">Starting year</label>
+          <select id="semesterYear"></select>
+          <small>Default is the current year; the next year is added automatically.</small>
+        </div>
+
+        <div class="field" id="semesterCustomField" style="display:none;">
+          <label for="semesterCustom">Custom semester name</label>
+          <input id="semesterCustom" type="text" placeholder="e.g. Winter Semester 2026–27" />
+          <small>Enter a custom semester title if you selected Other.</small>
+        </div>
+
+        <div class="field">
           <label for="semesterName">Semester name</label>
-          <input id="semesterName" type="text" value="Spring Semester 2025–26" />
+          <input id="semesterName" type="text" readonly />
+        </div>
+
+        <div class="field">
+          <label for="emailSubject">Email subject</label>
+          <div style="display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap;">
+            <input id="emailSubject" type="text" readonly style="flex:1; min-width:220px;" />
+            <button id="copySubjectBtn" type="button" class="btn-secondary">Copy Subject</button>
+          </div>
+          <small>Generated subject line for Gmail compose.</small>
         </div>
 
         <div class="field">
           <label for="classStartDate">Class start date</label>
-          <input id="classStartDate" type="text" value="03.12.2025" />
-          <small>e.g., 03.12.2025 or 03 December 2025</small>
+          <input id="classStartDate" type="date" />
+          <small>Default is today; change it if needed.</small>
         </div>
 
         <div class="field">
           <label for="courseInfoUrl">Course information URL</label>
           <input id="courseInfoUrl" type="text" placeholder="https://..." />
           <small>Lesson plan / activity calendar link</small>
+        </div>
+
+        <div class="field">
+          <label for="buttonColor">Button color</label>
+          <input id="buttonColor" type="color" value="#4caf50" />
+          <small>Choose the button color for course details, WhatsApp, and classroom links.</small>
+        </div>
+
+        <div class="field">
+          <label for="buttonTextColor">Button text color</label>
+          <input id="buttonTextColor" type="color" value="#ffffff" />
+          <small>Keep the button text white by default or choose another contrast color.</small>
+        </div>
+
+        <div class="field">
+          <label for="whatsappUrl">WhatsApp group URL</label>
+          <input id="whatsappUrl" type="text" placeholder="https://chat.whatsapp.com/..." />
+          <small>Share the group link for quick announcements and study support.</small>
         </div>
 
         <div class="field">
@@ -262,9 +328,19 @@
       var INSTITUTION_NAME = document.getElementById('institutionName').value || '';
       var COURSE_NAME = document.getElementById('courseName').value || '';
       var COURSE_CODE = document.getElementById('courseCode').value || '';
-      var SEMESTER_NAME = document.getElementById('semesterName').value || '';
-      var CLASS_START_DATE = document.getElementById('classStartDate').value || '';
+      var SEMESTER_NAME = document.getElementById('semesterName').value || document.getElementById('semesterCustom').value || '';
+      var CLASS_START_DATE_RAW = document.getElementById('classStartDate').value || '';
+      var CLASS_START_DATE = '';
+      if (CLASS_START_DATE_RAW) {
+        var d = new Date(CLASS_START_DATE_RAW);
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        CLASS_START_DATE = ('0' + d.getDate()).slice(-2) + '-' + months[d.getMonth()] + '-' + d.getFullYear();
+      }
+      var BUTTON_COLOR = document.getElementById('buttonColor').value || '#4caf50';
+      var BUTTON_TEXT_COLOR = document.getElementById('buttonTextColor').value || '#ffffff';
+      var BTN_STYLE = 'display:inline-block; padding:10px 22px; border-radius:999px; font-size:14px; font-weight:bold; color:' + BUTTON_TEXT_COLOR + '; text-decoration:none; font-family:Arial, sans-serif; background-color:' + BUTTON_COLOR + '; border:1px solid ' + BUTTON_COLOR + '; box-shadow:0 4px 12px rgba(15,23,42,0.15);';
       var COURSE_INFO_URL = document.getElementById('courseInfoUrl').value || '#';
+      var WHATSAPP_URL = document.getElementById('whatsappUrl').value || '#';
       var CLASSROOM_URL = document.getElementById('classroomUrl').value || '#';
       var FACULTY_NAME = document.getElementById('facultyName').value || '';
       var FACULTY_EMAIL = document.getElementById('facultyEmail').value || 'thotakurafel@kiit.ac.in';
@@ -298,16 +374,11 @@
 '      color:#ffffff;\n' +
 '      text-decoration:none;\n' +
 '      font-family:Arial, sans-serif;\n' +
-'      background-image:linear-gradient(90deg,#6366f1,#22c55e,#f97316,#ec4899,#6366f1);\n' +
-'      background-size:250% 250%;\n' +
-'      animation:btnGradient 6s ease infinite;\n' +
-'      box-shadow:0 4px 12px rgba(15,23,42,0.25);\n' +
+'      background-color:' + BUTTON_COLOR + ';\n' +
+'      border:1px solid ' + BUTTON_COLOR + ';\n' +
+'      box-shadow:0 4px 12px rgba(15,23,42,0.15);\n' +
 '    }\n' +
-'    @keyframes btnGradient {\n' +
-'      0%{background-position:0% 50%;}\n' +
-'      50%{background-position:100% 50%;}\n' +
-'      100%{background-position:0% 50%;}\n' +
-'    }\n' +
+
 '    @media only screen and (max-width:600px){\n' +
 '      .wrapper{padding:12px !important;}\n' +
 '      .content{padding:12px !important;}\n' +
@@ -352,11 +423,22 @@
 '      </p>\n' +
 '\n' +
 '      <p style="margin:0 0 8px 0;font-size:14px;color:#374151;">\n' +
-'        The detailed syllabus and <strong>Course Lesson Plan</strong> and <strong>Evalution Scheme</strong> are available for your reference.\n' +
+'        The detailed syllabus and <strong>Course Lesson Plan</strong> and <strong>Evaluation Scheme</strong> are available for your reference.\n' +
 '      <!-- Course info button -->\n' +
 '      <div class="btn-row" style="margin:8px 0 14px 0;text-align:left;">\n' +
-'        <a href="' + COURSE_INFO_URL + '" class="btn-fancy">View Course Information</a>\n' +
+'        <a href="' + COURSE_INFO_URL + '" class="btn-fancy" style="' + BTN_STYLE + '">Click for Complete Course Details</a>\n' +
 '      </div>\n' +
+'\n' +
+'      <p style="margin:0 0 10px 0;font-size:14px;color:#374151;">\n' +
+'        Students are requested to join the WhatsApp group for any future communication, announcements, and quick clarifications.\n' +
+'      </p>\n' +
+'      <div class="btn-row" style="margin:8px 0 14px 0;text-align:left;">\n' +
+'        <a href="' + WHATSAPP_URL + '" class="btn-fancy" style="' + BTN_STYLE + '">Join WhatsApp Group</a>\n' +
+'      </div>\n' +
+'\n' +
+'      <p style="margin:0 0 14px 0;font-size:14px;color:#374151;">\n' +
+'        Google Classroom is also available for course materials and assignment updates: <a href="' + CLASSROOM_URL + '" style="color:#2563eb;text-decoration:none;">' + CLASSROOM_URL + '</a>\n' +
+'      </p>\n' +
 '\n' +
 '      <p style="margin:0 0 10px 0;font-size:14px;color:#374151;">\n' +
 '        As your course faculty, I assure you of my <strong>full support</strong> throughout your learning journey.\n' +
@@ -371,7 +453,7 @@
 '\n' +
 '      <!-- Google Classroom button -->\n' +
 '      <div class="btn-row" style="margin:6px 0 14px 0;text-align:left;">\n' +
-'        <a href="' + CLASSROOM_URL + '" class="btn-fancy">Join Google Classroom</a>\n' +
+'        <a href="' + CLASSROOM_URL + '" class="btn-fancy" style="' + BTN_STYLE + '">Join Google Classroom</a>\n' +
 '      </div>\n' +
 '\n' +
 '      <p style="margin:0 0 10px 0;font-size:14px;color:#374151;">\n' +
@@ -406,6 +488,11 @@
       var output = document.getElementById('output');
       output.value = html;
 
+      var emailSubject = document.getElementById('emailSubject');
+      var subjectSem = SEMESTER_NAME.replace(/Semester/gi, '').trim();
+      var EMAIL_SUBJECT = 'Welcome to ' + subjectSem + ': ' + COURSE_NAME + ' Classes {#TNSCS}';
+      emailSubject.value = EMAIL_SUBJECT;
+
       // Update live preview (iframe)
       var iframe = document.getElementById('previewFrame');
       var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -423,10 +510,72 @@
       }
     }
 
+    async function copySubjectToClipboard() {
+      var emailSubject = document.getElementById('emailSubject').value || '';
+      if (!emailSubject) return;
+      try {
+        await navigator.clipboard.writeText(emailSubject);
+        alert('Subject copied to clipboard');
+      } catch (e) {
+        var temp = document.createElement('textarea');
+        temp.value = emailSubject;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        alert('Subject copied to clipboard');
+      }
+    }
+
+    function formatSemesterName() {
+      var term = document.getElementById('semesterTerm').value;
+      var custom = document.getElementById('semesterCustom').value.trim();
+      var year = document.getElementById('semesterYear').value;
+      var semesterNameInput = document.getElementById('semesterName');
+      var customField = document.getElementById('semesterCustomField');
+
+      if (term === 'Other') {
+        customField.style.display = 'block';
+        semesterNameInput.value = custom || '';
+      } else {
+        customField.style.display = 'none';
+        var nextYear = parseInt(year, 10) + 1;
+        var nextYearShort = String(nextYear).slice(-2);
+        semesterNameInput.value = term + ' ' + year + '–' + nextYearShort;
+      }
+    }
+
+    function populateSemesterYear() {
+      var yearSelect = document.getElementById('semesterYear');
+      var now = new Date();
+      var currentYear = now.getFullYear();
+      yearSelect.innerHTML = '';
+      for (var i = 0; i < 3; i++) {
+        var y = currentYear - i;
+        var option = document.createElement('option');
+        option.value = y;
+        option.text = y;
+        yearSelect.appendChild(option);
+      }
+    }
+
+    document.getElementById('semesterTerm').addEventListener('change', formatSemesterName);
+    document.getElementById('semesterYear').addEventListener('change', formatSemesterName);
+    document.getElementById('semesterCustom').addEventListener('input', formatSemesterName);
+    document.getElementById('copySubjectBtn').addEventListener('click', copySubjectToClipboard);
+
     document.getElementById('generateBtn').addEventListener('click', generateHtmlAndCopy);
 
     // Generate once on load so you see preview with defaults
-    window.addEventListener('load', generateHtmlAndCopy);
+    window.addEventListener('load', function() {
+      populateSemesterYear();
+      var classStartDate = document.getElementById('classStartDate');
+      if (!classStartDate.value) {
+        classStartDate.value = new Date().toISOString().slice(0, 10);
+      }
+      formatSemesterName();
+      generateHtmlAndCopy();
+    });
   </script>
 </body>
 </html>
