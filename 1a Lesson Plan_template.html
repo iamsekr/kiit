@@ -89,7 +89,8 @@
       color: var(--muted);
     }
 
-    .pill {
+    .pill,
+    .optional-link {
       display: inline-flex;
       align-items: center;
       padding: 3px 9px;
@@ -100,6 +101,9 @@
       font-weight: 600;
       cursor: pointer;
       user-select: none;
+      border: 1px solid transparent;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+      text-decoration: none;
     }
 
     .pill-outline {
@@ -111,10 +115,25 @@
     .pill-active {
       background: var(--primary);
       color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 82, 204, 0.18);
     }
 
-    .pill + .pill {
+    .pill + .pill,
+    .optional-link + .pill,
+    .pill + .optional-link,
+    .optional-link + .optional-link {
       margin-left: 6px;
+    }
+
+    .pill:hover,
+    .pill-outline:hover,
+    .optional-link:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.16);
+      transform: translateY(-1px);
+      text-decoration: none;
     }
 
     /* Links in header badges */
@@ -123,6 +142,11 @@
       color: inherit;
       text-decoration: none;
       display: inline-block;
+    }
+
+    .faculty-link {
+      color: var(--primary);
+      text-decoration: underline;
     }
 
     .faculty-link:hover,
@@ -675,6 +699,9 @@
         <span class="pill pill-outline" id="tabOutcomes">Outcomes</span>
         <span class="pill pill-active" id="tabLessonPlan">Lesson Plan</span>
         <span class="pill pill-outline" id="tabEvaluation">Evaluation</span>
+      <a class="pill pill-outline optional-link" id="whatsappLink" href="https://chat.whatsapp.com/LbaDaqj7UeZHNzDqdwQs4k?s=cl&p=a&ilr=4" target="_blank" rel="noopener noreferrer" style="display:block;">WhatsApp Group</a>
+      <a class="pill pill-outline optional-link" id="classroomLink" href="#" target="_blank" rel="noopener noreferrer" style="display:block">Google Classroom</a>
+      <a class="pill pill-outline optional-link" id="meetingLink" href="#" target="_blank" rel="noopener noreferrer" style="display:block">Online Class Meeting Link</a>
       </div>
 
       <!-- PRINT BUTTON -->
@@ -790,20 +817,20 @@
               <tr>
                 <td>1</td>
                 <td>Activity Based Learning<br>(30 Marks)</td>
-                <td>M1 to M5</td>
-                <td>1 to 26</td>
+                <td>M1 to M4</td>
+                <td>1 to 36</td>
               </tr>
               <tr>
                 <td>2</td>
                 <td>Mid Sem Examination<br>(20 Marks)</td>
                 <td>M1 to M2</td>
-                <td>1 to 14</td>
+                <td>1 to 18</td>
               </tr>
               <tr>
                 <td>3</td>
                 <td>End Sem Examination<br>(50 Marks)</td>
-                <td>M1 to M5</td>
-                <td>1 to 26</td>
+                <td>M1 to M4</td>
+                <td>1 to 36</td>
               </tr>
             </tbody>
           </table>
@@ -839,8 +866,8 @@
             mode: "Online quiz test",
             details: "Pre-midsem first quiz test",
             courseOutcomes: ["CO1 - CO3"],
-            assignedFrom: "09.01.26",
-            assignedTo: "16.01.26",
+            assignedFrom: "20.07.26",
+            assignedTo: "30.07.26",
             marks: 5
           },
           {
@@ -849,8 +876,8 @@
             details:
               "Pre-midsem first assignment",
             courseOutcomes: ["CO1 - CO3"],
-            assignedFrom: "31.01.26",
-            assignedTo: "31.01.26",
+            assignedFrom: "20.08.26",
+            assignedTo: "30.08.26",
             marks: 5
           },
           {
@@ -858,8 +885,8 @@
             mode: "Online quiz test",
             details: "Post-midsem second quiz test",
             courseOutcomes: ["CO4 - CO6"],
-            assignedFrom: "27.02.26",
-            assignedTo: "06.03.26",
+            assignedFrom: "20.09.26",
+            assignedTo: "30.09.26",
             marks: 5
           },
           {
@@ -867,15 +894,15 @@
             mode: "Assignment",
             details: "Post-midsem second assignment",
             courseOutcomes: ["CO4 - CO6"],
-            assignedFrom: "20.03.26",
-            assignedTo: "27.03.26",
+            assignedFrom: "20.10.26",
+            assignedTo: "30.10.26",
             marks: 5
           },
           {
-            activityLabel: "Activity 5",
+            activityLabel: "Regular Activities",
             mode: null,
             details:
-              "Report submission on Case study by Poster Presentation and ppt presentation deposite in google classroom",
+              "Regular Class Activities and Class Performance",
             courseOutcomes: ["CO1 - CO6"],
             assignedFrom: null,
             assignedTo: null,
@@ -888,52 +915,65 @@
       // ===== BASIC COURSE DETAILS =====
       instituteName: "Kalinga Institute of Industrial Technology, Bhubaneswar",
       schoolLine: "(Deemed to be University)",
-      planLabel: "Lesson Plan",
-      semester: "Spring Sem 2025–2026",
+      planLabel: "Lesson Plan for WILP",
+      semester: "Autumn Sem 2026–2027",
 
       faculty: "Prof.Thotakura NSC Sekhar",
 
-      courseTitle: "Industry 4.0 Technologies",
-      courseCode: "EX20001xdf",
+      courseTitle: "Electrical Machine 1",
+      courseCode: "EE20003",
 
 
       facultylink: "https://my.e-kard.in/tnsc",
       courselink: "https://classroom.google.com/c/ODMyMzU2MTkxNDQ5?cjc=jk43prgp",
+      whatsappLink: "",
+      classroomLink: "",
+      meetingLink: "",
 
       // Course meta
       courseMeta: {
-        credits: 2,
-        ltp: "2-0-0",
-        prereq: "Nil"
+        credits: 3,
+        ltp: "3-0-0",
+        prereq: "Electric Circuit Analysis (EE21001)"
       },
 
       // Course objective & outcomes
       courseObjective:
-        "The current manufacturing industries and businesses are moving from the third industrial revolution of computers and automation to the fourth where automation becomes even smarter fueled by data analytic and artificial intelligence. This course is designed to offer learners an introduction to the use of the Internet and Digital technology for better manufacturing and business. Learners will gain deep insights into how smartness is being harnessed from data and appreciate what needs to be done to overcome some of the challenges.",
+        "To understand construction, working principles, testing and connections of different transformers and induction motors and their industrial and domestic applications.",
 
       courseOutcomes: [
-        { id: "CO1", text: "Understand the key components and enablers of Industry 4.0 Technology." },
-        { id: "CO2", text: "Appreciate the  AI core technologies  in Smart Industries, smart products and smart Services." },
-        { id: "CO3", text: "Outline Smart Factory technologies and their role in an Industry 4.0 world." },
-        { id: "CO4", text: "Outline IoT& IIOT technology and scope of implementing IoT in Industries and businesses." },
-        { id: "CO5", text: "Comprehend distributed cyber-physical and digital manufacturing system." },
-        { id: "CO6", text: "Demonstrate the opportunities, challenges brought about by Industry 4.0 and how organizations and individuals should prepare to reap the benefits.Economic growth ,Legal aspects etc." }
+        { id: "CO1", text: "Evaluate the different losses, efficiency, regulation and different testing of a single phase transformer." },
+        { id: "CO2", text: "Develop the equivalent circuit and the phasor diagram of a single phase transformer and an auto transformer." },
+        { id: "CO3", text: "Understanding the different connections and conversions of three phase transformers and parallel operation of single phase and three phase transformers." },
+        { id: "CO4", text: "Apply the principle to find the torque, losses, efficiency and different testing of three phase induction motor." },
+        { id: "CO5", text: "Analyse the performance characteristics, different methods of starting and speed control of three phase induction motor." },
+        { id: "CO6", text: "Understanding the construction and principle of operation of different single phase induction motors." }
       ],
 
-      // Holidays, dates, etc.
+      /*
+        Holidays may be single dates or ranges.
+        Examples:
+          "16-07-2026"
+          "20-10-2026..25-10-2026"
+          "20-10-2026 - 25-10-2026"
+      */
+
+      startDate: "02-07-2026",
+
       holidays: [
-        "25-12-2025",
-        "23-01-2026",
-        "26-01-2026",
-        "04-03-2026",
-        "21-03-2026",
-        "27-03-2026",
-        "01-04-2026",
-        "03-04-2026",
-        "14-04-2026"
+        "16-07-2026",
+        "15-08-2026",
+        "26-08-2026",
+        "04-09-2026",
+        "14-09-2026 - 15-09-2026",
+        "02-10-2026",
+        "17-10-2026 - 25-10-2026",
+
+        "07-11-2026",
+        "24-11-2026",
+        "25-12-2026"
       ],
 
-      startDate: "03-12-2025",
 
       /*
         classDaysWithTime
@@ -941,19 +981,23 @@
         Day abbreviation must be first token (Mon/Tue/Wed/Thu/Fri/Sat/Sun).
       */
       classDaysWithTime: [
-        "Wed 9–10am",
-        "Fri 11–12pm"
+        "Wed 5:30–6:30pm",
+        "Sat 4:30-6pm"
       ],
 
+
+      specialClassHolidays: [
+        { weekday: "Sat", occurrences: [1, 3] }
+      ],
       midSem: {
         title: "Mid Semester Examination",
-        start: "02-02-2026",
-        end:   "07-02-2026"
+        start: "07-09-2026",
+        end:   "12-09-2026"
       },
       endSem: {
         title: "End Semester Examination",
-        start: "13-04-2026",
-        end:   "20-04-2026"
+        start: "16-11-2026",
+        end:   "25-11-2026"
       },
 
       // ===== SYLLABUS (single source for modules) =====
@@ -961,45 +1005,41 @@
         modules: [
           {
             id: "M1",
-            tag: "M1 – Foundations of Industry 4.0",
+            tag: "M1 – Single Phase Transformer",
             description:
-              "The Fourth Industrial Revolution, Difference between conventional automation and Industry 4.0, Case Studies: Health, Agriculture, Manufacturing."
+              "<strong>2-Winding Transformer:</strong> Principle of operation, Construction, Types, emf equation and Phasor diagrams of transformer at no load and load condition, Development of Equivalent Circuit, No Load Test, Short Circuit Test and Sumpner’s Test. Voltage Regulation, Losses, Efficiency and all day Efficiency. Parallel operation of Transformer and applications.<br><br><strong>Auto Transformer:</strong> Principle, Performance (Copper Saving, Phasor Diagram and equivalent circuit) and Applications"
           },
           {
             id: "M2",
-            tag: "M2 – Industry 4.0 Technologies",
+            tag: "M2 – Three Phase Transformer",
             description:
-              "Internet of Things (IoT) & Industrial Internet of Things (IIoT); Internet of Services (IoS); Value chains in manufacturing companies; Digital Twins."
+              "Three Phase Transformer Connections and vector Group, open delta connection, Phase Transformation: 3 phase to 2 Phase, 3 phase to 6 phase and 3 phase to 12 phase, Parallel operation of three phase transformer."
           },
           {
             id: "M3",
-            tag: "M3 – The Digital-Physical Interface of Industry 4.0",
+            tag: "M3 – Three Phase Induction Motor",
             description:
-              "Cyber Physical Systems and Next Generation sensors, Collaborative Platform and Product Life-cycle Management, Robotics and Automation."
+              "Rotating Magnetic Field, Principle of operation and concept of slip, Comparison between transformer and induction motor, Types and Applications, Equivalent Circuit and Phasor Diagram, Torque, maximum torque, Torque-slip characteristics, Effects of variation of rotor resistance, Power stages of an induction motor, No load and Blocked rotor test, Circle Diagram, Methods of starting for squirrel cage and slip ring induction motor, Speed control of squirrel cage and slip ring induction motor."
           },
           {
             id: "M4",
-            tag: "M4 – The Human-Digital Frontier: Collaboration and Workspace Evolution",
+            tag: "M4 – Single Phase Induction Motor",
             description:
-              "Cloud Computing, Big Data Analytics, AI & ML, Virtual and Augmented Reality, Block-chain."
-          },
-          {
-            id: "M5",
-            tag: "M5 – Case Studies of Industry 4.0",
-            description:
-              "A Digital Strategy alongside Resource Scarcity, Standards and Data security, Financing conditions, availability of skilled workers, Comprehensive broadband infra- structure, Legal framework, protection of corporate data, liability, handling personal data."
+              "Types, Double field Revolving Theory, capacitor start motor, capacitor start and run motor."
           }
         ],
 
 
         textBooks: [
-          "Tech Trends of the 4th Industrial Revolution,by D. Pyo, , J. Hwang, , and Y. Yoon, PUBLISHER: Mercury Learning & Information.",
-          "Understanding Industry 4. 0 : AI, the Internet of Things, and the Future of Work, by Bruno S. Sergi, Elena G. Popkova, Aleksei V. Bogoviz, and Tatiana N. Litvinova, Emerald Publishing Limited."
+          "Electrical Machinery, P. S Bimbhra, 7th Edition, Khanna Publishers, 2008.",
+          "Electric Machines, by Kothari. D P and I J Nagrath, 3rd Edition, Tata McGraw-Hill, New Delhi. 2004.",
+          "Electric Machinery, by E. Fitzagerald, C. M. Kingsley (Jr) and S. D. Umans, Tata McGraw Hill, 6th Edition 2003."
         ],
         referenceBooks: [
-          "Introduction to IoT. Cambridge University Press, by S. Misra, A. Mukherjee, and A. Roy, 2020",
-          "Emerging Technologies for Health and Medicine: Virtual Reality, Augmented Reality, Artificial Intelligence, Internet of Things, Robotics, Industry 4.0, Dac-Nhuong Le, Chung Van Le, Jolanda G.Tromp , Gia Nhu Nguyen, Wiley, ISBN: 978-1-119-50987-5, 2018",
-          "Industry 4.0: The Industrial Internet of Things 1st ed. Edition by Alasdair Gilchrist"
+          "Electrical Machines, Ashfaq Hussain, Dhanpat Rai, Delhi, 2nd Edition, 2008.",
+          "Electrical Machines, by P. K. Mukherjee and S. Chakravorti, Dhanpat Rai Publication, 18th reprint 2013.",
+          "Industry 4.0: The Industrial Internet of Things 1st ed. Edition by Alasdair Gilchrist",
+          "Electrical Machines, by P. Purkait and I. Bandyopadhyay, Oxford University Press. 1st Edition, 2017."
         ]
       },
 
@@ -1007,45 +1047,51 @@
       lessons: [
         { type: "special", label: "Introduction to Course" },
 
-        { type: "class", module: "M1", notes: "Evolution of Industrial Revolutions (1.0 to 5.0), Ind 3.0 vs Ind 4.0 & Ind 4.0 vs Ind 5.0" },
-        { type: "class", module: "M1", notes: "Conventional Automation vs Industry 4.0;  Ind 4.0 vs Ind 5.0" },
-        { type: "class", module: "M1", notes: "Sensors, Computing and Actuators" },
-        { type: "class", module: "M1", notes: "Industry 4.0 Environment and its Design Principles" },
+        { type: "class", module: "M1", notes: "Features of Two Winding Transformer, its principle, construction, operation" },
+        { type: "class", module: "M1", notes: "EMF Equation," },
+        { type: "class", module: "M1", notes: "MMF Balancing concept in Transformer, Phasor diagram at No-load" },
+        { type: "class", module: "M1", notes: "Numericals" },
+        { type: "class", module: "M1", notes: "Phasor Diagram at full load and Equivalent Circuit of a Transformer" }, 
+        { type: "class", module: "M1", notes: "Need of Testing of a Transformer" },
+        { type: "class", module: "M1", notes: "Sumpner's Test, Numericals on Testing" },
 
 
-        { type: "class", module: "M2", notes: "Introduction to Ind 4.0 key technologies/ Components" },        
-        { type: "class", module: "M2", notes: "IIoT and its Architecture" },
-        { type: "class", module: "M2", notes: "Big Data, Big Data Analytics & Data Visualization" },
-        { type: "class", module: "M2", notes: "Ai & ML" },
-        { type: "class", module: "M2", notes: "Computing Techniques (Cloud/Fog/Edge/Mobile/Quantum etc)" },
-        { type: "special", label: "Quick Recap & Doubt Clearing Session" },
-        { type: "class", module: "M2", notes: "Digital Twins" },        
-        { type: "class", module: "M2", notes: "Block Chain and Cyber security" },
-        { type: "class", module: "M2", notes: "Additive Technology (CAD, 3D Printing)" },
-        { type: "class", module: "M2", notes: "Augmented Reality and Virtual reality" },
-        { type: "class", module: "M2", notes: "Robotics and Automation" },
+        { type: "class", module: "M1", notes: "Voltage Regulation" },
+        { type: "class", module: "M1", notes: "Losses, Efficiency in a Transformer" },
+        { type: "class", module: "M1", notes: "Parallel operation of a transformers" },
+        { type: "class", module: "M1", notes: "Types of Transformers and its Applications" },
 
-        { type: "special", label: "Discussion of previous year mid-sem questions" },
+
+        { type: "class", module: "M2", notes: "Introduction to 3-Ph Transformers" },        
+        { type: "class", module: "M2", notes: "3-Ph TF connections and vector grouping" },
+        { type: "class", module: "M2", notes: "Vector Grouping of a 3-ph Transformers" },
+        { type: "class", module: "M2", notes: "Phase Transformation:3 to 2; 3 to 6; 3 to 12-ph" },
+        { type: "class", module: "M2", notes: "Parallel Operation of a 3-ph transformer" },
+
+
         { type: "exam_mid" },
 
-        { type: "class", module: "M3", notes: "Industrial Internet System, Internet of Services" },
-        { type: "class", module: "M3", notes: "Cyber Physical Systems, Next Generation Sensors" },
+        { type: "class", module: "M3", notes: "Introduction to 3-ph induction motor, its principle, working, operation" },
+        { type: "class", module: "M3", notes: "Concept of rotating magnetic field theory" },
+        { type: "class", module: "M3", notes: "concept of slip, comparison between transformer and induction motor" },
+        { type: "class", module: "M3", notes: "Types and applications" },
+        { type: "class", module: "M3", notes: "Equivalent Circuit Diagram, Phasor Diagram" },
+        { type: "class", module: "M3", notes: "Power Equations in an induction motor, Torque-Slip characteristics" },
+        { type: "class", module: "M3", notes: "Family of Torque-Slip characteristics" },
 
 
-        { type: "class", module: "M4", notes: "Introduction to Smart Factory" },
-        { type: "class", module: "M4", notes: "Digital and human workspace, Collaborative Platform and Product Life-Cycle Management" },
-        { type: "class", module: "M4", notes: "Adaptation Challenges, Implementation Framework Challenges" },        
-        { type: "class", module: "M4", notes: "Futuristic Opportunity, Economic Impact" },
-
-        { type: "special", label: "Doubt Session & Revision" },
-        { type: "class", module: "M5", notes: "Case Study: Health 4.0 & Agriculture" },
-        { type: "class", module: "M5", notes: "Case Study: Oil and Petroleum, Energy and Smart Grid" },
-        { type: "class", module: "M5", notes: "Case Study: Textile Industry/ Real Estate/ Maritime/ Tourism/ Forestry" },
-        { type: "class", module: "M5", notes: "Case Study: Infrastructure/ Food & Beverage/ Insurance/Legal/ HR/ Customer" },
+        { type: "class", module: "M3", notes: "Power stages of an induction motor, testing of induction motor" },
+        { type: "class", module: "M3", notes: "Circle Diagram" },
+        { type: "class", module: "M3", notes: "Starting methods of IM" },
+        { type: "class", module: "M3", notes: "Speed control methods of IM" },
 
 
-        { type: "special", label: "Doubt Session & Revision" },
-        { type: "special", label: "Discussion of previous year end-sem questions" },     
+        { type: "class", module: "M4", notes: "Introduction to 1-Ph IM, Types" },
+        { type: "class", module: "M4", notes: "Double field Revolving Theory" },
+        { type: "class", module: "M4", notes: "Capacitor start motor, capacitor start and run motor." },
+
+    //    { type: "special", label: "Doubt Session & Revision" },
+
         { type: "exam_end" }
       ],
 
@@ -1134,13 +1180,76 @@
       return d.getTime() >= start.getTime() && d.getTime() <= end.getTime();
     }
 
+    function isValidDateString(str) {
+      return /^\d{2}-\d{2}-\d{4}$/.test(str);
+    }
+
+    function addDateToSet(set, dateString) {
+      if (!isValidDateString(dateString)) return;
+      const d = parseDDMMYYYY(dateString);
+      if (!Number.isNaN(d.getTime())) {
+        set.add(d.toISOString().slice(0, 10));
+      }
+    }
+
+    function addDateRangeToSet(set, startDateString, endDateString) {
+      if (!isValidDateString(startDateString) || !isValidDateString(endDateString)) return;
+      let start = parseDDMMYYYY(startDateString);
+      const end = parseDDMMYYYY(endDateString);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
+      while (start.getTime() <= end.getTime()) {
+        set.add(start.toISOString().slice(0, 10));
+        start.setDate(start.getDate() + 1);
+      }
+    }
+
     function makeHolidaySet(holidays) {
       const set = new Set();
-      holidays.forEach(h => {
-        const d = parseDDMMYYYY(h);
-        set.add(d.toISOString().slice(0, 10));
+      holidays.forEach(entry => {
+        if (typeof entry === "string") {
+          const rangeMatch = entry.match(/^(\d{2}-\d{2}-\d{4})\s*(?:\.\.|–|—|\s-\s|to)\s*(\d{2}-\d{2}-\d{4})$/i);
+          if (rangeMatch) {
+            addDateRangeToSet(set, rangeMatch[1], rangeMatch[2]);
+            return;
+          }
+          addDateToSet(set, entry);
+        } else if (entry && typeof entry === "object") {
+          if (entry.start && entry.end) {
+            addDateRangeToSet(set, entry.start, entry.end);
+          } else if (entry.date) {
+            addDateToSet(set, entry.date);
+          }
+        }
       });
       return set;
+    }
+
+    function getWeekdayOccurrenceInMonth(date) {
+      const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+      const targetWeekday = date.getDay();
+      const firstTarget = 1 + ((7 + targetWeekday - firstOfMonth.getDay()) % 7);
+      return Math.floor((date.getDate() - firstTarget) / 7) + 1;
+    }
+
+    function isSpecialClassHoliday(date, rules) {
+      if (!Array.isArray(rules)) return false;
+      return rules.some(rule => {
+        if (!rule || !rule.weekday || !Array.isArray(rule.occurrences)) return false;
+        const weekdayNum = dayMapShortToNum[rule.weekday];
+        if (weekdayNum == null || date.getDay() !== weekdayNum) return false;
+        if (rule.months && Array.isArray(rule.months)) {
+          const monthNumber = date.getMonth() + 1;
+          if (!rule.months.includes(monthNumber)) return false;
+        }
+        if (rule.start && rule.end) {
+          const start = parseDDMMYYYY(rule.start);
+          const end = parseDDMMYYYY(rule.end);
+          if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+          if (!inRange(date, start, end)) return false;
+        }
+        const occurrence = getWeekdayOccurrenceInMonth(date);
+        return rule.occurrences.includes(occurrence);
+      });
     }
 
     function buildModuleColorMap(modulesMap) {
@@ -1203,6 +1312,7 @@
       const endEnd   = cfg.endSem?.end   ? parseDDMMYYYY(cfg.endSem.end)   : null;
 
       const holidaysSet = makeHolidaySet(cfg.holidays || []);
+      const specialClassHolidays = cfg.specialClassHolidays || [];
 
       let currentDate = new Date(startDate);
       let idxLesson = 0;
@@ -1212,7 +1322,7 @@
 
       function isHoliday(date) {
         const iso = date.toISOString().slice(0, 10);
-        return holidaysSet.has(iso);
+        return holidaysSet.has(iso) || isSpecialClassHoliday(date, specialClassHolidays);
       }
 
       function nextValidClassDate(date) {
