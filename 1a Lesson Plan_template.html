@@ -700,7 +700,7 @@
         <span class="pill pill-active" id="tabLessonPlan">Lesson Plan</span>
         <span class="pill pill-outline" id="tabEvaluation">Evaluation</span>
       <a class="pill pill-outline optional-link" id="whatsappLink" href="https://chat.whatsapp.com/LbaDaqj7UeZHNzDqdwQs4k?s=cl&p=a&ilr=4" target="_blank" rel="noopener noreferrer" style="display:block;">WhatsApp Group</a>
-      <a class="pill pill-outline optional-link" id="classroomLink" href="#" target="_blank" rel="noopener noreferrer" style="display:block">Google Classroom</a>
+      <a class="pill pill-outline optional-link" id="classroomLink" href="https://classroom.google.com/c/ODU1MzE4NDEzODI2?cjc=5lpbk47v" target="_blank" rel="noopener noreferrer" style="display:block">Google Classroom</a>
       <a class="pill pill-outline optional-link" id="meetingLink" href="#" target="_blank" rel="noopener noreferrer" style="display:block">Online Class Meeting Link</a>
       </div>
 
@@ -1048,9 +1048,7 @@
         { type: "special", label: "Introduction to Course" },
 
         { type: "class", module: "M1", notes: "Features of Two Winding Transformer, its principle, construction, operation" },
-        { type: "class", module: "M1", notes: "EMF Equation," },
-        { type: "class", module: "M1", notes: "MMF Balancing concept in Transformer, Phasor diagram at No-load" },
-        { type: "class", module: "M1", notes: "Numericals" },
+        { type: "class", module: "M1", notes: "EMF Equation, MMF Balancing concept in Transformer, Phasor diagram at No-load" },
         { type: "class", module: "M1", notes: "Phasor Diagram at full load and Equivalent Circuit of a Transformer" }, 
         { type: "class", module: "M1", notes: "Need of Testing of a Transformer" },
         { type: "class", module: "M1", notes: "Sumpner's Test, Numericals on Testing" },
@@ -1058,12 +1056,10 @@
 
         { type: "class", module: "M1", notes: "Voltage Regulation" },
         { type: "class", module: "M1", notes: "Losses, Efficiency in a Transformer" },
-        { type: "class", module: "M1", notes: "Parallel operation of a transformers" },
-        { type: "class", module: "M1", notes: "Types of Transformers and its Applications" },
+        { type: "class", module: "M1", notes: "Parallel operation of a transformers, Types of Transformers and its Applications" },
 
 
-        { type: "class", module: "M2", notes: "Introduction to 3-Ph Transformers" },        
-        { type: "class", module: "M2", notes: "3-Ph TF connections and vector grouping" },
+        { type: "class", module: "M2", notes: "Introduction to 3-Ph Transformers, 3-Ph TF connections and vector grouping" },     
         { type: "class", module: "M2", notes: "Vector Grouping of a 3-ph Transformers" },
         { type: "class", module: "M2", notes: "Phase Transformation:3 to 2; 3 to 6; 3 to 12-ph" },
         { type: "class", module: "M2", notes: "Parallel Operation of a 3-ph transformer" },
@@ -1073,15 +1069,13 @@
 
         { type: "class", module: "M3", notes: "Introduction to 3-ph induction motor, its principle, working, operation" },
         { type: "class", module: "M3", notes: "Concept of rotating magnetic field theory" },
-        { type: "class", module: "M3", notes: "concept of slip, comparison between transformer and induction motor" },
-        { type: "class", module: "M3", notes: "Types and applications" },
+        { type: "class", module: "M3", notes: "Concept of slip, comparison between transformer and induction motor, Types and applications" },
         { type: "class", module: "M3", notes: "Equivalent Circuit Diagram, Phasor Diagram" },
         { type: "class", module: "M3", notes: "Power Equations in an induction motor, Torque-Slip characteristics" },
-        { type: "class", module: "M3", notes: "Family of Torque-Slip characteristics" },
+        { type: "class", module: "M3", notes: "Family of Torque-Slip characteristics, Power stages of an induction motor" },
 
 
-        { type: "class", module: "M3", notes: "Power stages of an induction motor, testing of induction motor" },
-        { type: "class", module: "M3", notes: "Circle Diagram" },
+        { type: "class", module: "M3", notes: "Testing of induction motor, Circle Diagram" },
         { type: "class", module: "M3", notes: "Starting methods of IM" },
         { type: "class", module: "M3", notes: "Speed control methods of IM" },
 
@@ -1487,11 +1481,9 @@
           // Index as em dash
           indexDiv.textContent = "—";
 
-          // Date range in meta-date, "EXAM" in meta-time
-          metaDate.textContent = `${formatDateDDMMMYYYY(item.start)} – ${formatDateDDMMMYYYY(item.end)}`;
+          // Only show "EXAM" label in meta-time, date is shown in description
           metaTime.textContent = "EXAM";
 
-          metaDiv.appendChild(metaDate);
           metaDiv.appendChild(metaTime);
 
           colIndexWrapper.appendChild(indexDiv);
